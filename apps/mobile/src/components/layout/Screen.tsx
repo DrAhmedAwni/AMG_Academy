@@ -7,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, layout, spacing } from '../../theme';
 
 export interface ScreenProps extends ScrollViewProps {
@@ -17,10 +17,15 @@ export interface ScreenProps extends ScrollViewProps {
 }
 
 export function Screen({ children, scroll = true, contentStyle, ...props }: ScreenProps) {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = layout.screenPadding + spacing.xxl + insets.bottom;
+
   if (!scroll) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View style={[styles.content, contentStyle]}>{children}</View>
+        <View style={[styles.content, { paddingBottom: bottomPadding }, contentStyle]}>
+          {children}
+        </View>
       </SafeAreaView>
     );
   }
@@ -30,7 +35,12 @@ export function Screen({ children, scroll = true, contentStyle, ...props }: Scre
       <ScrollView
         {...props}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.content, contentStyle, props.contentContainerStyle]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: bottomPadding },
+          contentStyle,
+          props.contentContainerStyle,
+        ]}
       >
         {children}
       </ScrollView>

@@ -7,8 +7,7 @@ import {
   View,
   type GestureResponderEvent,
 } from 'react-native';
-import { EnrollmentStatus, PaymentStatus } from '@amg/shared';
-import { GlassCard, StatusBadge } from '../ui';
+import { Badge, GlassCard, StatusBadge } from '../ui';
 import type { MobileCourse } from '../../features/courses/courses.api';
 import { colors, radius, spacing, textStyles, typography } from '../../theme';
 
@@ -18,11 +17,6 @@ export interface CourseCardProps {
 }
 
 export function CourseCard({ course, onPress }: CourseCardProps) {
-  const badgeDomain = course.isEnrolled ? 'enrollment' : 'course';
-  const badgeStatus = course.isEnrolled
-    ? (course.paymentStatus as string) ?? EnrollmentStatus.Active
-    : course.status;
-
   return (
     <Pressable
       accessibilityRole="button"
@@ -46,27 +40,41 @@ export function CourseCard({ course, onPress }: CourseCardProps) {
           <View style={styles.headerRow}>
             <View style={styles.titleGroup}>
               <Text style={styles.kicker}>{course.category.name}</Text>
-              <Text style={styles.title}>{course.title}</Text>
+              <Text numberOfLines={2} style={styles.title}>{course.title}</Text>
             </View>
-            <Text style={styles.price}>
+            <Text numberOfLines={2} style={styles.price}>
               {course.isFree ? 'Free' : `${course.price.toLocaleString()} ${course.currency}`}
             </Text>
           </View>
 
-          <Text style={styles.instructor}>By {course.instructor.name}</Text>
-          <Text numberOfLines={2} style={styles.description}>
+          <Text numberOfLines={1} style={styles.instructor}>By {course.instructor.name}</Text>
+          <Text numberOfLines={3} style={styles.description}>
             {course.description}
           </Text>
 
           <View style={styles.badges}>
-            <StatusBadge domain={badgeDomain as any} status={badgeStatus as any} />
+            <StatusBadge domain="course" status={course.status} />
+            <Badge
+              label={course.isFree ? 'Free' : 'Paid'}
+              foreground={course.isFree ? colors.status.success : colors.accent.primary}
+              background={course.isFree ? 'rgba(34, 197, 94, 0.14)' : 'rgba(84, 217, 232, 0.14)'}
+              border={course.isFree ? 'rgba(34, 197, 94, 0.34)' : 'rgba(84, 217, 232, 0.34)'}
+            />
+            {course.isEnrolled ? (
+              <Badge
+                label="Enrolled"
+                foreground={colors.accent.primary}
+                background="rgba(84, 217, 232, 0.14)"
+                border="rgba(84, 217, 232, 0.34)"
+              />
+            ) : null}
             {course.paymentStatus ? (
-              <StatusBadge domain="payment" status={course.paymentStatus as any} />
+              <StatusBadge domain="payment" status={course.paymentStatus} />
             ) : null}
           </View>
 
           <View style={styles.footerRow}>
-            <Text style={styles.lessons}>
+            <Text numberOfLines={1} style={styles.lessons}>
               {course.lessonCount} lessons · {Math.round(course.totalDuration / 60)}h
             </Text>
             {course.isEnrolled ? (
@@ -93,15 +101,17 @@ const styles = StyleSheet.create({
   },
   thumbnail: {
     width: '100%',
-    height: 120,
+    height: 136,
     backgroundColor: colors.surface.elevated,
   },
   placeholder: {
     width: '100%',
-    height: 120,
+    height: 136,
     backgroundColor: colors.surface.elevated,
     alignItems: 'center',
     justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.default,
   },
   placeholderText: {
     fontSize: typography.size.xxl,
@@ -120,6 +130,7 @@ const styles = StyleSheet.create({
   },
   titleGroup: {
     flex: 1,
+    minWidth: 0,
     gap: spacing.xxs,
   },
   kicker: {
@@ -134,7 +145,9 @@ const styles = StyleSheet.create({
   },
   price: {
     ...textStyles.label,
+    maxWidth: 96,
     color: colors.text.primary,
+    textAlign: 'right',
   },
   instructor: {
     ...textStyles.caption,
@@ -153,7 +166,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  lessons: textStyles.caption,
+  lessons: {
+    ...textStyles.caption,
+    flex: 1,
+  },
   enrolledBadge: {
     minHeight: 28,
     justifyContent: 'center',

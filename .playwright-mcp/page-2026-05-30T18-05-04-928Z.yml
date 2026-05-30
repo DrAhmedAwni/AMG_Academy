@@ -1,0 +1,25 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - paragraph [ref=e4]: AMG Academy Platform V1
+    - heading "Dental education operations, ready for launch." [level=1] [ref=e5]
+    - paragraph [ref=e6]: A premium web workspace for AMG Academy members, students, event attendees, and operations staff.
+    - generic [ref=e7]:
+      - link "Create account" [ref=e8] [cursor=pointer]:
+        - /url: /register
+      - link "Sign in" [ref=e9] [cursor=pointer]:
+        - /url: /login
+      - link "Open dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+    - generic [ref=e11]:
+      - generic [ref=e13]:
+        - heading "Event registration" [level=2] [ref=e14]
+        - paragraph [ref=e15]: Free and paid event workflows with approval-ready attendee records.
+      - generic [ref=e17]:
+        - heading "QR attendance" [level=2] [ref=e18]
+        - paragraph [ref=e19]: Scanner-friendly check-in with secure tickets and live attendance control.
+      - generic [ref=e21]:
+        - heading "Protected courses" [level=2] [ref=e22]
+        - paragraph [ref=e23]: Recorded learning paths with gated access and progress-aware delivery.
+      - generic [ref=e25]:
+        - heading "Admin operations" [level=2] [ref=e26]
+        - paragraph [ref=e27]: One operating surface for staff, instructors, and future reporting flows.

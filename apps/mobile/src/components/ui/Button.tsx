@@ -11,6 +11,7 @@ import {
 import { colors, radius, shadows, spacing, typography } from '../../theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonSize = 'md' | 'sm';
 
 export interface ButtonProps {
   label: string;
@@ -19,6 +20,7 @@ export interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   accessibilityLabel?: string;
+  size?: ButtonSize;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -29,10 +31,12 @@ export function Button({
   disabled = false,
   loading = false,
   accessibilityLabel,
+  size = 'md',
   style,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
   const selectedVariant = variantStyles[variant];
+  const selectedSize = sizeStyles[size];
 
   return (
     <Pressable
@@ -43,6 +47,7 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
+        selectedSize.container,
         selectedVariant.container,
         pressed && !isDisabled ? styles.pressed : null,
         isDisabled ? styles.disabled : null,
@@ -55,7 +60,14 @@ export function Button({
           size="small"
         />
       ) : (
-        <Text style={[styles.text, selectedVariant.text]}>{label}</Text>
+        <Text
+          adjustsFontSizeToFit
+          minimumFontScale={0.84}
+          numberOfLines={1}
+          style={[styles.text, selectedSize.text, selectedVariant.text]}
+        >
+          {label}
+        </Text>
       )}
     </Pressable>
   );
@@ -63,19 +75,33 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 48,
     minWidth: 48,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
     borderWidth: 1,
   },
+  md: {
+    minHeight: 48,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  sm: {
+    minHeight: 40,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
   text: {
+    fontWeight: typography.weight.bold,
+    textAlign: 'center',
+  },
+  mdText: {
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
-    fontWeight: typography.weight.bold,
+  },
+  smText: {
+    fontSize: typography.size.sm,
+    lineHeight: typography.lineHeight.sm,
   },
   primary: {
     backgroundColor: colors.accent.primary,
@@ -112,8 +138,21 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.48,
+    backgroundColor: colors.surface.muted,
+    borderColor: colors.border.default,
   },
 });
+
+const sizeStyles = {
+  md: {
+    container: styles.md,
+    text: styles.mdText,
+  },
+  sm: {
+    container: styles.sm,
+    text: styles.smText,
+  },
+} as const;
 
 const variantStyles = {
   primary: {

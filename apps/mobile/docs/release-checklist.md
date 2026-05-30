@@ -6,6 +6,8 @@ Date: 2026-05-30
 
 - Local API URL documented in `.env.example`.
 - Android emulator API URL documented as `http://10.0.2.2:4000/api/v1`.
+- Physical Android preview APK uses the machine LAN IP with the NestJS API port
+  `4000`, and the phone-browser `/api/v1/health` check is documented.
 - Staging API URL documented.
 - Production API URL documented.
 - Production mock payments disabled with `EXPO_PUBLIC_ENABLE_MOCK_PAYMENTS=false`.

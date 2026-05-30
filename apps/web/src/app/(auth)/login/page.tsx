@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { use, useMemo, useState } from 'react';
 import { isAxiosError } from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +41,7 @@ function getLoginError(error: unknown) {
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams?: { redirect?: string };
+  searchParams?: Promise<{ redirect?: string }>;
 }) {
   const { login, loginPending } = useAuth();
   const [verificationUrl, setVerificationUrl] = useState<string | null>(null);
@@ -52,7 +52,8 @@ export default function LoginPage({
       password: '',
     },
   });
-  const redirectTo = useMemo(() => searchParams?.redirect ?? null, [searchParams?.redirect]);
+  const resolvedSearchParams = searchParams ? use(searchParams) : undefined;
+  const redirectTo = useMemo(() => resolvedSearchParams?.redirect ?? null, [resolvedSearchParams?.redirect]);
 
   return (
     <AuthLayout

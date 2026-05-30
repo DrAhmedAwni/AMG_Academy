@@ -65,7 +65,7 @@ export default function EventDetailScreen() {
       <Header
         title="Event"
         subtitle="Registration and payment state are backend-derived."
-        action={<Button label="Back" variant="secondary" onPress={() => router.back()} />}
+        action={<Button label="Back" variant="secondary" size="sm" onPress={() => router.back()} />}
       />
       {registrationError ? (
         <GlassCard style={styles.errorCard}>

@@ -110,6 +110,8 @@ export const textStyles = {
 export const layout = {
   screenPadding: spacing.md,
   minTapTarget: 44,
+  bottomTabHeight: 72,
+  bottomTabContentPadding: 112,
   maxContentWidth: 720,
 } as const;
 

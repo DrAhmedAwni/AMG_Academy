@@ -75,6 +75,27 @@ Android emulator local API URL:
 EXPO_PUBLIC_API_URL=http://10.0.2.2:4000/api/v1
 ```
 
+Physical Android device local API URL:
+
+```bash
+EXPO_PUBLIC_API_URL=http://YOUR_COMPUTER_LAN_IP:4000/api/v1
+EXPO_PUBLIC_WEB_URL=http://YOUR_COMPUTER_LAN_IP:3000
+```
+
+For an installed APK, these values are baked into the build. The `preview`
+profile is the local-device APK profile and should point to the NestJS API on
+port `4000`, not the web app on port `3000`.
+
+Before rebuilding a local test APK:
+
+1. Confirm the Android phone and development machine are on the same network.
+2. Confirm the backend is running with `npm run dev:api`.
+3. Open `http://YOUR_COMPUTER_LAN_IP:4000/api/v1/health` in the phone browser.
+4. If the phone cannot open the health URL, fix the IP, Wi-Fi, VPN, or Windows
+   firewall before rebuilding.
+5. Update `apps/mobile/eas.json` `build.preview.env.EXPO_PUBLIC_API_URL` if the
+   computer IP changed.
+
 Staging:
 
 ```bash
@@ -132,6 +153,9 @@ npm run ios:dev -w @amg/mobile
 
 - App metadata and identifiers live in `app.json`.
 - EAS development, staging, preview, and production profiles live in `eas.json`.
+- Dynamic Expo build config lives in `app.config.js`; it exposes the active API
+  URL through `extra` and allows Android cleartext HTTP only for non-production
+  local/staging builds.
 - Placeholder SVG assets in `assets/` are for development. Replace them with
   final PNG app-store-ready assets before release.
 - Camera permission copy supports scanner mode.

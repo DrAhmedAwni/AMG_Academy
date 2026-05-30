@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CourseCard } from '../../src/components/cards/CourseCard';
 import { Header, Screen } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
@@ -8,7 +9,7 @@ import { Button, TextField } from '../../src/components/ui';
 import { useCoursesQuery } from '../../src/features/courses/courses.hooks';
 import type { CourseFilters, MobileCourse } from '../../src/features/courses/courses.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
-import { colors, spacing } from '../../src/theme';
+import { colors, layout, spacing } from '../../src/theme';
 
 type FreeFilter = 'all' | 'free' | 'paid';
 
@@ -16,6 +17,7 @@ const pageSize = 10;
 
 export default function CoursesTab() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [freeFilter, setFreeFilter] = useState<FreeFilter>('all');
@@ -62,6 +64,7 @@ export default function CoursesTab() {
           <Button
             label="My Courses"
             variant="secondary"
+            size="sm"
             onPress={() => router.push('/courses/my-courses' as never)}
           />
         }
@@ -82,6 +85,8 @@ export default function CoursesTab() {
             label={opt === 'all' ? 'All' : opt === 'free' ? 'Free' : 'Paid'}
             variant={freeFilter === opt ? 'primary' : 'secondary'}
             onPress={() => setFreeFilter(opt)}
+            size="sm"
+            style={styles.filterButton}
           />
         ))}
       </View>
@@ -101,7 +106,10 @@ export default function CoursesTab() {
           data={state.data.data}
           keyExtractor={(item) => item.id}
           renderItem={renderCourse}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[
+            styles.list,
+            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+          ]}
           refreshControl={
             <RefreshControl
               refreshing={state.isRefreshing}
@@ -123,15 +131,20 @@ export default function CoursesTab() {
 
 const styles = StyleSheet.create({
   screen: {
-    gap: spacing.md,
+    flex: 1,
+    gap: spacing.sm,
   },
   filters: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
+    paddingBottom: spacing.xs,
+  },
+  filterButton: {
+    flexGrow: 1,
+    minWidth: 84,
   },
   list: {
     gap: spacing.md,
-    paddingBottom: spacing.xl,
   },
 });

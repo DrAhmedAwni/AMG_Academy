@@ -52,7 +52,11 @@ export function EventDetailContent({
     <View style={styles.container}>
       {event.thumbnailUrl ? (
         <Image source={{ uri: event.thumbnailUrl }} resizeMode="cover" style={styles.hero} />
-      ) : null}
+      ) : (
+        <View style={styles.heroPlaceholder}>
+          <Text style={styles.heroPlaceholderText}>{event.title.slice(0, 1).toUpperCase()}</Text>
+        </View>
+      )}
 
       <GlassCard style={styles.summaryCard}>
         <View style={styles.headerRow}>
@@ -60,7 +64,7 @@ export function EventDetailContent({
             <Text style={styles.kicker}>{event.category.name}</Text>
             <Text style={styles.title}>{event.title}</Text>
           </View>
-          <Text style={styles.price}>
+          <Text numberOfLines={2} style={styles.price}>
             {event.isFree ? 'Free' : `${event.price.toLocaleString()} ${event.currency}`}
           </Text>
         </View>
@@ -109,6 +113,7 @@ export function EventDetailContent({
         <Text style={styles.actionHelper}>{action.helper}</Text>
         <Button
           label={action.label}
+          variant={action.disabled ? 'secondary' : 'primary'}
           disabled={action.disabled}
           loading={registering}
           onPress={primaryAction}
@@ -129,9 +134,24 @@ const styles = StyleSheet.create({
   },
   hero: {
     width: '100%',
-    height: 220,
+    height: 204,
     borderRadius: radius.lg,
     backgroundColor: colors.surface.elevated,
+  },
+  heroPlaceholder: {
+    width: '100%',
+    height: 204,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.elevated,
+  },
+  heroPlaceholderText: {
+    color: colors.accent.primary,
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
   },
   summaryCard: {
     gap: spacing.md,
@@ -144,6 +164,7 @@ const styles = StyleSheet.create({
   },
   titleGroup: {
     flex: 1,
+    minWidth: 0,
     gap: spacing.xxs,
   },
   kicker: {
@@ -154,7 +175,9 @@ const styles = StyleSheet.create({
   title: textStyles.title,
   price: {
     ...textStyles.label,
+    maxWidth: 104,
     color: colors.text.primary,
+    textAlign: 'right',
   },
   detailsGrid: {
     flexDirection: 'row',
@@ -183,6 +206,7 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     gap: spacing.sm,
+    borderColor: colors.border.strong,
   },
   actionTitle: {
     ...textStyles.heading,

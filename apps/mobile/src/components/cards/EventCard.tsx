@@ -43,18 +43,22 @@ export function EventCard({ event, onPress }: EventCardProps) {
       <GlassCard style={styles.card}>
         {event.thumbnailUrl ? (
           <Image source={{ uri: event.thumbnailUrl }} resizeMode="cover" style={styles.thumbnail} />
-        ) : null}
+        ) : (
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderText}>{event.title.slice(0, 1).toUpperCase()}</Text>
+          </View>
+        )}
         <View style={styles.content}>
           <View style={styles.headerRow}>
             <View style={styles.titleGroup}>
               <Text style={styles.kicker}>{formatEventDate(event.startDate)}</Text>
-              <Text style={styles.title}>{event.title}</Text>
+              <Text numberOfLines={2} style={styles.title}>{event.title}</Text>
             </View>
-            <Text style={styles.price}>{formatPrice(event)}</Text>
+            <Text numberOfLines={2} style={styles.price}>{formatPrice(event)}</Text>
           </View>
 
-          <Text style={styles.meta}>{event.location}</Text>
-          <Text numberOfLines={2} style={styles.description}>
+          <Text numberOfLines={2} style={styles.meta}>{event.location}</Text>
+          <Text numberOfLines={3} style={styles.description}>
             {event.description}
           </Text>
 
@@ -77,13 +81,18 @@ export function EventCard({ event, onPress }: EventCardProps) {
           </View>
 
           <View style={styles.footerRow}>
-            <Text style={styles.spots}>{event.remainingSpots} seats left</Text>
+            <Text numberOfLines={1} style={styles.spots}>{event.remainingSpots} seats left</Text>
             <View
               accessibilityRole="text"
               accessibilityLabel={action.label}
               style={[styles.cta, action.disabled ? styles.ctaDisabled : null]}
             >
-              <Text style={[styles.ctaText, action.disabled ? styles.ctaTextDisabled : null]}>
+              <Text
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
+                numberOfLines={1}
+                style={[styles.ctaText, action.disabled ? styles.ctaTextDisabled : null]}
+              >
                 {action.label}
               </Text>
             </View>
@@ -106,8 +115,22 @@ const styles = StyleSheet.create({
   },
   thumbnail: {
     width: '100%',
-    height: 132,
+    height: 136,
     backgroundColor: colors.surface.elevated,
+  },
+  placeholder: {
+    width: '100%',
+    height: 136,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.default,
+    backgroundColor: colors.surface.elevated,
+  },
+  placeholderText: {
+    color: colors.accent.primary,
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
   },
   content: {
     gap: spacing.sm,
@@ -121,6 +144,7 @@ const styles = StyleSheet.create({
   },
   titleGroup: {
     flex: 1,
+    minWidth: 0,
     gap: spacing.xxs,
   },
   kicker: {
@@ -135,7 +159,9 @@ const styles = StyleSheet.create({
   },
   price: {
     ...textStyles.label,
+    maxWidth: 96,
     color: colors.text.primary,
+    textAlign: 'right',
   },
   meta: {
     ...textStyles.label,
@@ -154,9 +180,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  spots: textStyles.caption,
+  spots: {
+    ...textStyles.caption,
+    flex: 1,
+  },
   cta: {
     minHeight: 36,
+    maxWidth: 168,
     justifyContent: 'center',
     borderRadius: radius.md,
     backgroundColor: colors.accent.primary,

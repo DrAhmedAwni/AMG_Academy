@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventCard } from '../../src/components/cards/EventCard';
 import { Header, Screen } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
@@ -10,7 +11,7 @@ import {
 } from '../../src/features/events/events.hooks';
 import type { EventFilters, MobileEvent } from '../../src/features/events/events.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
-import { colors, spacing } from '../../src/theme';
+import { colors, layout, spacing } from '../../src/theme';
 
 type FreeFilter = 'all' | 'free' | 'paid';
 
@@ -18,6 +19,7 @@ const pageSize = 10;
 
 export default function EventsTab() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [freeFilter, setFreeFilter] = useState<FreeFilter>('all');
@@ -66,6 +68,7 @@ export default function EventsTab() {
           <Button
             label="Reservations"
             variant="secondary"
+            size="sm"
             onPress={() => router.push('/events/reservations' as never)}
           />
         }
@@ -84,18 +87,21 @@ export default function EventsTab() {
           label="All"
           variant={freeFilter === 'all' ? 'primary' : 'secondary'}
           onPress={() => setFreeFilter('all')}
+          size="sm"
           style={styles.filterButton}
         />
         <Button
           label="Free"
           variant={freeFilter === 'free' ? 'primary' : 'secondary'}
           onPress={() => setFreeFilter('free')}
+          size="sm"
           style={styles.filterButton}
         />
         <Button
           label="Paid"
           variant={freeFilter === 'paid' ? 'primary' : 'secondary'}
           onPress={() => setFreeFilter('paid')}
+          size="sm"
           style={styles.filterButton}
         />
       </View>
@@ -129,7 +135,10 @@ export default function EventsTab() {
               }}
             />
           }
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+          ]}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListFooterComponent={
             meta && meta.totalPages > 1 ? (
@@ -160,17 +169,17 @@ export default function EventsTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    gap: spacing.sm,
   },
   filters: {
     flexDirection: 'row',
     gap: spacing.xs,
+    paddingBottom: spacing.xs,
   },
   filterButton: {
     flex: 1,
   },
-  listContent: {
-    paddingBottom: spacing.xl,
-  },
+  listContent: {},
   separator: {
     height: spacing.md,
   },
@@ -178,6 +187,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
     paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
   },
   pageButton: {
     flex: 1,

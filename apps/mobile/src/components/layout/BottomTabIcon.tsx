@@ -1,17 +1,30 @@
 import React, { type ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme';
+import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, radius, spacing } from '../../theme';
+
+export type BottomTabIconName = React.ComponentProps<typeof Ionicons>['name'];
 
 export interface BottomTabIconProps {
   icon?: ReactNode;
+  name?: BottomTabIconName;
   label: string;
   focused?: boolean;
 }
 
-export function BottomTabIcon({ icon, label, focused = false }: BottomTabIconProps) {
+export function BottomTabIcon({ icon, name, label, focused = false }: BottomTabIconProps) {
+  const color = focused ? colors.accent.primary : colors.text.muted;
+
   return (
     <View style={[styles.container, focused ? styles.focused : null]}>
-      {icon ?? <Text style={[styles.fallback, focused ? styles.fallbackFocused : null]}>{label[0]}</Text>}
+      {icon ?? (
+        <Ionicons
+          accessibilityLabel={`${label} tab`}
+          color={color}
+          name={name ?? 'ellipse-outline'}
+          size={22}
+        />
+      )}
     </View>
   );
 }
@@ -27,13 +40,5 @@ const styles = StyleSheet.create({
   },
   focused: {
     backgroundColor: colors.interactive.pressed,
-  },
-  fallback: {
-    color: colors.text.muted,
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.bold,
-  },
-  fallbackFocused: {
-    color: colors.accent.primary,
   },
 });

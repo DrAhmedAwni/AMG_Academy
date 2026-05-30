@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TicketCard } from '../../src/components/cards/TicketCard';
 import { Header, Screen } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
@@ -10,7 +11,7 @@ import {
 } from '../../src/features/tickets/tickets.hooks';
 import type { MobileTicket } from '../../src/features/tickets/tickets.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
-import { colors, spacing } from '../../src/theme';
+import { colors, layout, spacing } from '../../src/theme';
 
 type TicketFilter = 'all' | 'active' | 'attention' | 'history';
 
@@ -33,6 +34,7 @@ function matchesFilter(ticket: MobileTicket, filter: TicketFilter) {
 }
 
 export default function TicketsTab() {
+  const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<TicketFilter>('all');
   const ticketsQuery = useTicketsQuery({ page: 1, limit: 50 });
   const state = useQueryState(ticketsQuery, {
@@ -59,24 +61,28 @@ export default function TicketsTab() {
           label="All"
           variant={filter === 'all' ? 'primary' : 'secondary'}
           onPress={() => setFilter('all')}
+          size="sm"
           style={styles.filterButton}
         />
         <Button
           label="Active"
           variant={filter === 'active' ? 'primary' : 'secondary'}
           onPress={() => setFilter('active')}
+          size="sm"
           style={styles.filterButton}
         />
         <Button
           label="Needs"
           variant={filter === 'attention' ? 'primary' : 'secondary'}
           onPress={() => setFilter('attention')}
+          size="sm"
           style={styles.filterButton}
         />
         <Button
           label="History"
           variant={filter === 'history' ? 'primary' : 'secondary'}
           onPress={() => setFilter('history')}
+          size="sm"
           style={styles.filterButton}
         />
       </View>
@@ -115,7 +121,10 @@ export default function TicketsTab() {
               }}
             />
           }
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+          ]}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
@@ -126,18 +135,18 @@ export default function TicketsTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    gap: spacing.sm,
   },
   filters: {
     flexDirection: 'row',
     gap: spacing.xs,
+    paddingBottom: spacing.xs,
   },
   filterButton: {
     flex: 1,
     paddingHorizontal: spacing.xs,
   },
-  listContent: {
-    paddingBottom: spacing.xl,
-  },
+  listContent: {},
   separator: {
     height: spacing.md,
   },

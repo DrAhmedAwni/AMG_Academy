@@ -5,13 +5,8 @@
     "scheme": "amgacademy",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.svg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash.svg",
-      "resizeMode": "contain",
-      "backgroundColor": "#020617"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -26,12 +21,14 @@
     "android": {
       "package": "com.amgacademy.mobile",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.svg",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#020617"
       },
       "permissions": [
         "CAMERA",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "plugins": [
@@ -46,7 +43,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.svg",
+          "icon": "./assets/notification-icon.png",
           "color": "#54D9E8"
         }
       ]
@@ -57,7 +54,11 @@
     "extra": {
       "appEnv": "$EXPO_PUBLIC_APP_ENV",
       "apiUrl": "$EXPO_PUBLIC_API_URL",
-      "webUrl": "$EXPO_PUBLIC_WEB_URL"
+      "webUrl": "$EXPO_PUBLIC_WEB_URL",
+      "router": {},
+      "eas": {
+        "projectId": "7d5bed48-7356-4242-9c82-6221a11038d3"
+      }
     }
   }
 }
