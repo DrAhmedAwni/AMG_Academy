@@ -1,0 +1,8 @@
+<svg width="2048" height="2048" viewBox="0 0 2048 2048" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="2048" height="2048" fill="#020617"/>
+  <rect x="520" y="520" width="1008" height="1008" rx="220" fill="#0F172A" stroke="#1E293B" stroke-width="12"/>
+  <circle cx="1024" cy="952" r="238" fill="rgba(84,217,232,0.14)" stroke="#54D9E8" stroke-width="20"/>
+  <path d="M832 1116L962 798H1086L1216 1116H1110L1087 1052H961L938 1116H832ZM989 974H1059L1024 874L989 974Z" fill="#F8FAFC"/>
+  <path d="M766 1256H1282" stroke="#54D9E8" stroke-width="26" stroke-linecap="round"/>
+  <text x="1024" y="1362" text-anchor="middle" fill="#94A3B8" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="600">AMG Academy</text>
+</svg>

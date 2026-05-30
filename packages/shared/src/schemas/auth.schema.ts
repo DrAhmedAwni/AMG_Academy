@@ -1,0 +1,48 @@
+import { z } from 'zod';
+import { optionalTrimmedString } from './common.schema';
+
+export const passwordSchema = z
+  .string()
+  .min(8)
+  .regex(/[A-Z]/, 'Password must include an uppercase letter')
+  .regex(/[a-z]/, 'Password must include a lowercase letter')
+  .regex(/[0-9]/, 'Password must include a number');
+
+export const registerSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().email(),
+  password: passwordSchema,
+  phone: optionalTrimmedString(32),
+  specialty: optionalTrimmedString(100),
+  clinic: optionalTrimmedString(100),
+  city: optionalTrimmedString(100),
+});
+
+export const loginSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(1),
+  client: z.enum(['web', 'mobile']).optional(),
+});
+
+export const refreshSessionSchema = z.object({
+  refreshToken: z.string().min(10).optional(),
+  client: z.enum(['web', 'mobile']).optional(),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(10),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(10),
+  password: passwordSchema,
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: passwordSchema,
+});

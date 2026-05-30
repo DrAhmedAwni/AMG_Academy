@@ -1,0 +1,514 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  DELETED
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  NOT_REQUIRED
+  PENDING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+  MANUALLY_VERIFIED
+  CANCELLED
+}
+
+enum QRTicketStatus {
+  NOT_ISSUED
+  ACTIVE
+  USED
+  EXPIRED
+  REVOKED
+}
+
+enum AttendanceStatus {
+  VALIDATED
+  REJECTED
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentPageStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum NotificationType {
+  REGISTRATION_SUBMITTED
+  REGISTRATION_APPROVED
+  REGISTRATION_REJECTED
+  PAYMENT_SUCCESSFUL
+  PAYMENT_FAILED
+  QR_ISSUED
+  EVENT_REMINDER
+  EVENT_CANCELLED
+  NEW_ANNOUNCEMENT
+  NEW_COURSE_PUBLISHED
+}
+
+enum NotificationChannelType {
+  IN_APP
+  EMAIL
+  PUSH
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  PUBLISH
+  ARCHIVE
+  APPROVE
+  REJECT
+  VERIFY
+  SCAN
+  ASSIGN
+  REVOKE
+}
+
+enum PaymentItemType {
+  EVENT
+  COURSE
+}
+
+enum PaymentProvider {
+  MOCK
+  MANUAL
+  PAYMOB
+}
+
+model User {
+  id                String               @id @default(uuid()) @db.Uuid
+  email             String               @unique
+  password          String
+  name              String
+  phone             String?
+  specialty         String?
+  clinic            String?
+  city              String?
+  avatarUrl         String?
+  notificationPreferences Json?
+  emailVerified     Boolean              @default(false)
+  emailVerifiedAt   DateTime?
+  status            UserStatus           @default(ACTIVE)
+  tokenVersion      Int                  @default(0)
+  roleId            String               @db.Uuid
+  role              Role                 @relation(fields: [roleId], references: [id])
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  registrations     EventRegistration[]
+  enrollments       CourseEnrollment[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]           @relation("AuditActor")
+  qrTickets         QRTicket[]
+  scans             AttendanceCheckIn[]  @relation("AttendanceScanner")
+  instructedCourses Course[]             @relation("CourseInstructor")
+  verifiedPayments  Payment[]            @relation("PaymentVerifier")
+
+  @@index([roleId])
+  @@index([status])
+}
+
+model Role {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique
+  slug        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  users       User[]
+  permissions RolePermission[]
+
+  @@index([slug])
+}
+
+model Permission {
+  id          String           @id @default(uuid()) @db.Uuid
+  module      String
+  action      String
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       RolePermission[]
+
+  @@unique([module, action])
+  @@index([module, action])
+}
+
+model RolePermission {
+  id           String     @id @default(uuid()) @db.Uuid
+  roleId       String     @db.Uuid
+  permissionId String     @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model EventCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  events      Event[]
+
+  @@index([slug])
+}
+
+model Event {
+  id                   String              @id @default(uuid()) @db.Uuid
+  title                String
+  slug                 String              @unique
+  description          String
+  startDate            DateTime
+  endDate              DateTime
+  location             String
+  price                Decimal             @db.Decimal(10, 2)
+  capacity             Int
+  registrationDeadline DateTime?
+  status               String              @default("draft")
+  categoryId           String              @db.Uuid
+  category             EventCategory       @relation(fields: [categoryId], references: [id])
+  thumbnailUrl         String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  registrations        EventRegistration[]
+  qrTickets            QRTicket[]
+  attendanceRecords    AttendanceCheckIn[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([startDate])
+  @@index([slug])
+}
+
+model EventRegistration {
+  id         String             @id @default(uuid()) @db.Uuid
+  userId     String             @db.Uuid
+  eventId    String             @db.Uuid
+  status     RegistrationStatus @default(PENDING)
+  adminNotes String?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  user       User               @relation(fields: [userId], references: [id])
+  event      Event              @relation(fields: [eventId], references: [id])
+  payment    Payment?
+  qrTicket   QRTicket?
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+}
+
+model Payment {
+  id                String              @id @default(uuid()) @db.Uuid
+
+  registrationId    String?             @unique @db.Uuid
+  enrollmentId      String?             @unique @db.Uuid
+
+  itemType          PaymentItemType     @default(EVENT)
+
+  amount            Decimal             @db.Decimal(10, 2)
+  currency          String              @default("EGP")
+
+  status            PaymentStatus       @default(PENDING)
+  provider          String              @default("MOCK")
+
+  providerRef       String?
+  checkoutUrl       String?
+  receiptRef        String?
+
+  paidAt            DateTime?
+  failedAt          DateTime?
+  cancelledAt       DateTime?
+  refundedAt        DateTime?
+
+  failureReason     String?
+  adminNotes        String?
+
+  verifiedById      String?             @db.Uuid
+  verifiedAt        DateTime?
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  registration      EventRegistration?  @relation(fields: [registrationId], references: [id])
+  enrollment        CourseEnrollment?   @relation(fields: [enrollmentId], references: [id])
+  verifiedBy        User?               @relation("PaymentVerifier", fields: [verifiedById], references: [id])
+
+  attempts          PaymentAttempt[]
+
+  @@index([status])
+  @@index([provider])
+  @@index([providerRef])
+  @@index([itemType])
+  @@index([registrationId])
+  @@index([enrollmentId])
+  @@index([verifiedById])
+}
+
+model PaymentAttempt {
+  id                String          @id @default(uuid()) @db.Uuid
+
+  paymentId         String          @db.Uuid
+  payment           Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  status            PaymentStatus
+  provider          PaymentProvider
+  providerRef       String?
+
+  amount            Decimal         @db.Decimal(10, 2)
+  currency          String          @default("EGP")
+
+  responsePayload   Json?
+  failureReason     String?
+
+  createdAt         DateTime        @default(now())
+
+  @@index([paymentId])
+  @@index([status])
+  @@index([provider])
+  @@index([providerRef])
+}
+
+model QRTicket {
+  id             String         @id @default(uuid()) @db.Uuid
+  registrationId String         @unique @db.Uuid
+  userId         String         @db.Uuid
+  eventId        String         @db.Uuid
+  tokenHash      String         @unique
+  status         QRTicketStatus @default(NOT_ISSUED)
+  issuedAt       DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  registration   EventRegistration @relation(fields: [registrationId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+  event          Event          @relation(fields: [eventId], references: [id])
+  attendance     AttendanceCheckIn[]
+
+  @@index([tokenHash])
+  @@index([eventId])
+  @@index([status])
+}
+
+model AttendanceCheckIn {
+  id         String           @id @default(uuid()) @db.Uuid
+  qrTicketId String           @db.Uuid
+  eventId    String           @db.Uuid
+  scannerId  String           @db.Uuid
+  status     AttendanceStatus
+  scanTime   DateTime         @default(now())
+  notes      String?
+  qrTicket   QRTicket         @relation(fields: [qrTicketId], references: [id])
+  event      Event            @relation(fields: [eventId], references: [id])
+  scanner    User             @relation("AttendanceScanner", fields: [scannerId], references: [id])
+
+  @@index([eventId])
+  @@index([scannerId])
+  @@index([scanTime])
+}
+
+model CourseCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  courses     Course[]
+
+  @@index([slug])
+}
+
+model Course {
+  id               String            @id @default(uuid()) @db.Uuid
+  title            String
+  slug             String            @unique
+  description      String
+  instructorId     String            @db.Uuid
+  categoryId       String            @db.Uuid
+  thumbnailUrl     String?
+  price            Decimal           @db.Decimal(10, 2)
+  isFree           Boolean           @default(true)
+  status           CourseStatus      @default(DRAFT)
+  totalDuration    Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  instructor       User              @relation("CourseInstructor", fields: [instructorId], references: [id])
+  category         CourseCategory    @relation(fields: [categoryId], references: [id])
+  lessons          Lesson[]
+  enrollments      CourseEnrollment[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([instructorId])
+  @@index([slug])
+}
+
+model Lesson {
+  id          String           @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  courseId    String           @db.Uuid
+  orderIndex  Int
+  duration    Int              @default(0)
+  videoId     String?          @unique @db.Uuid
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  course      Course           @relation(fields: [courseId], references: [id])
+  video       Video?           @relation(fields: [videoId], references: [id])
+  progress    LessonProgress[]
+
+  @@index([courseId])
+  @@index([orderIndex])
+  @@unique([courseId, orderIndex])
+}
+
+model Video {
+  id              String   @id @default(uuid()) @db.Uuid
+  provider        String   @default("vps")
+  providerVideoId String?
+  originalName    String
+  filePath        String?
+  duration        Int      @default(0)
+  sizeBytes       Int      @default(0)
+  mimeType        String?
+  createdAt       DateTime @default(now())
+  lesson          Lesson?
+}
+
+model CourseEnrollment {
+  id          String           @id @default(uuid()) @db.Uuid
+  userId      String           @db.Uuid
+  courseId    String           @db.Uuid
+  status      EnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime?
+  user        User             @relation(fields: [userId], references: [id])
+  course      Course           @relation(fields: [courseId], references: [id])
+  payment     Payment?
+  progress    LessonProgress[]
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+}
+
+model LessonProgress {
+  id           String   @id @default(uuid()) @db.Uuid
+  enrollmentId String   @db.Uuid
+  lessonId     String   @db.Uuid
+  isCompleted  Boolean  @default(false)
+  completedAt  DateTime?
+  enrollment   CourseEnrollment @relation(fields: [enrollmentId], references: [id])
+  lesson       Lesson   @relation(fields: [lessonId], references: [id])
+
+  @@unique([enrollmentId, lessonId])
+  @@index([enrollmentId])
+  @@index([lessonId])
+}
+
+model Announcement {
+  id          String             @id @default(uuid()) @db.Uuid
+  title       String
+  body        String
+  targetRoles String[]
+  status      AnnouncementStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model Notification {
+  id        String                    @id @default(uuid()) @db.Uuid
+  userId    String                    @db.Uuid
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean                   @default(false)
+  readAt    DateTime?
+  entityType String?
+  entityId  String?
+  channels  NotificationChannelType[]
+  createdAt DateTime                  @default(now())
+  user      User                      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+model StaticContentPage {
+  id          String            @id @default(uuid()) @db.Uuid
+  title       String
+  slug        String            @unique
+  body        String
+  status      ContentPageStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([slug])
+  @@index([status])
+}
+
+model AuditLog {
+  id         String      @id @default(uuid()) @db.Uuid
+  actorId    String      @db.Uuid
+  action     AuditAction
+  entityType String
+  entityId   String
+  oldValue   String?
+  newValue   String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+  actor      User        @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([action])
+}

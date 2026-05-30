@@ -1,0 +1,22 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - paragraph [ref=e4]: AMG Academy
+      - heading "Sign in to AMG Academy" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Access your dashboard, event registrations, and course workspace.
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - generic [ref=e10]: Email
+          - textbox "Email" [ref=e12]: admin@amgacademy.local
+        - generic [ref=e13]:
+          - generic [ref=e14]: Password
+          - textbox "Password" [ref=e16]
+        - button "Sign in" [ref=e17] [cursor=pointer]
+        - generic [ref=e20]:
+          - link "Forgot password?" [ref=e21] [cursor=pointer]:
+            - /url: /forgot-password
+          - generic [ref=e22]:
+            - text: New here?
+            - link "Create account" [ref=e23] [cursor=pointer]:
+              - /url: /register
+  - alert [ref=e24]

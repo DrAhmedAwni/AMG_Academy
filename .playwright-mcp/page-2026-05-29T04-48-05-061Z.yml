@@ -1,0 +1,46 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - paragraph [ref=e7]: AMG Academy
+        - heading "Member Workspace" [level=1] [ref=e8]
+      - navigation [ref=e10]:
+        - link "Dashboard" [ref=e11] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e12]
+          - text: Dashboard
+        - link "Events" [ref=e17] [cursor=pointer]:
+          - /url: /events
+          - img [ref=e18]
+          - text: Events
+        - link "Courses" [ref=e20] [cursor=pointer]:
+          - /url: /courses
+          - img [ref=e21]
+          - text: Courses
+        - link "My Events" [ref=e23] [cursor=pointer]:
+          - /url: /my-reservations
+          - img [ref=e24]
+          - text: My Events
+        - link "My Courses" [ref=e26] [cursor=pointer]:
+          - /url: /my-courses
+          - img [ref=e27]
+          - text: My Courses
+        - link "Alerts" [ref=e30] [cursor=pointer]:
+          - /url: /notifications
+          - img [ref=e31]
+          - text: Alerts
+        - link "Profile" [ref=e34] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e35]
+          - text: Profile
+  - main [ref=e38]
+  - contentinfo [ref=e46]:
+    - generic [ref=e47]:
+      - generic [ref=e48]: AMG Academy. All rights reserved.
+      - generic [ref=e49]:
+        - link "Privacy" [ref=e50] [cursor=pointer]:
+          - /url: /content/privacy-policy
+        - link "Terms" [ref=e51] [cursor=pointer]:
+          - /url: /content/terms-of-service
+        - link "Support" [ref=e52] [cursor=pointer]:
+          - /url: /content/support

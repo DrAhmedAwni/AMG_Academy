@@ -1,0 +1,195 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e26]:
+    - complementary [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - paragraph [ref=e30]: AMG Academy
+          - heading "Admin Console" [level=1] [ref=e31]
+        - generic [ref=e32]: super_admin
+      - navigation [ref=e33]:
+        - link "Dashboard" [ref=e34] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e35]
+          - generic [ref=e40]: Dashboard
+          - img [ref=e41]
+        - link "Users" [ref=e43] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e44]
+          - generic [ref=e49]: Users
+        - link "Roles" [ref=e50] [cursor=pointer]:
+          - /url: /admin/roles
+          - img [ref=e51]
+          - generic [ref=e53]: Roles
+        - link "Announcements" [ref=e54] [cursor=pointer]:
+          - /url: /admin/announcements
+          - img [ref=e55]
+          - generic [ref=e58]: Announcements
+        - link "Audit Logs" [ref=e59] [cursor=pointer]:
+          - /url: /admin/audit-logs
+          - img [ref=e60]
+          - generic [ref=e63]: Audit Logs
+        - link "Events" [ref=e64] [cursor=pointer]:
+          - /url: /admin/events
+          - img [ref=e65]
+          - generic [ref=e67]: Events
+        - link "Registrations" [ref=e68] [cursor=pointer]:
+          - /url: /admin/registrations
+          - img [ref=e69]
+          - generic [ref=e72]: Registrations
+        - link "Payments" [ref=e73] [cursor=pointer]:
+          - /url: /admin/payments
+          - img [ref=e74]
+          - generic [ref=e76]: Payments
+        - link "Courses" [ref=e77] [cursor=pointer]:
+          - /url: /admin/courses
+          - img [ref=e78]
+          - generic [ref=e80]: Courses
+        - link "Lessons" [ref=e81] [cursor=pointer]:
+          - /url: /admin/lessons
+          - img [ref=e82]
+          - generic [ref=e85]: Lessons
+        - link "Reports" [ref=e86] [cursor=pointer]:
+          - /url: /admin/reports
+          - img [ref=e87]
+          - generic [ref=e89]: Reports
+        - link "Exports" [ref=e90] [cursor=pointer]:
+          - /url: /admin/exports
+          - img [ref=e91]
+          - generic [ref=e94]: Exports
+        - link "Content Pages" [ref=e95] [cursor=pointer]:
+          - /url: /admin/content-pages
+          - img [ref=e96]
+          - generic [ref=e99]: Content Pages
+        - link "Attendance" [ref=e100] [cursor=pointer]:
+          - /url: /admin/attendance
+          - img [ref=e101]
+          - generic [ref=e105]: Attendance
+        - link "QR Scanner" [ref=e106] [cursor=pointer]:
+          - /url: /admin/qr-scanner
+          - img [ref=e107]
+          - generic [ref=e113]: QR Scanner
+      - link "Back to App" [ref=e115] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e116]
+        - generic [ref=e119]: Back to App
+    - main [ref=e120]:
+      - generic [ref=e122]:
+        - generic [ref=e123]:
+          - heading "Admin Dashboard" [level=1] [ref=e124]
+          - paragraph [ref=e125]: Operational overview across all AMG Academy workflows
+        - generic [ref=e126]:
+          - link "Total Users 2 View details" [ref=e127] [cursor=pointer]:
+            - /url: /admin/users
+            - generic [ref=e128]:
+              - generic [ref=e129]:
+                - generic [ref=e130]:
+                  - paragraph [ref=e131]: Total Users
+                  - paragraph [ref=e132]: "2"
+                - img [ref=e134]
+              - generic [ref=e139]:
+                - text: View details
+                - img [ref=e140]
+          - link "Total Events 0 View details" [ref=e142] [cursor=pointer]:
+            - /url: /admin/events
+            - generic [ref=e143]:
+              - generic [ref=e144]:
+                - generic [ref=e145]:
+                  - paragraph [ref=e146]: Total Events
+                  - paragraph [ref=e147]: "0"
+                - img [ref=e149]
+              - generic [ref=e151]:
+                - text: View details
+                - img [ref=e152]
+          - link "Pending Registrations 0 View details" [ref=e154] [cursor=pointer]:
+            - /url: /admin/registrations
+            - generic [ref=e155]:
+              - generic [ref=e156]:
+                - generic [ref=e157]:
+                  - paragraph [ref=e158]: Pending Registrations
+                  - paragraph [ref=e159]: "0"
+                - img [ref=e161]
+              - generic [ref=e164]:
+                - text: View details
+                - img [ref=e165]
+          - link "Pending Payments 0 View details" [ref=e167] [cursor=pointer]:
+            - /url: /admin/payments
+            - generic [ref=e168]:
+              - generic [ref=e169]:
+                - generic [ref=e170]:
+                  - paragraph [ref=e171]: Pending Payments
+                  - paragraph [ref=e172]: "0"
+                - img [ref=e174]
+              - generic [ref=e176]:
+                - text: View details
+                - img [ref=e177]
+        - generic [ref=e179]:
+          - heading "Quick Actions" [level=2] [ref=e180]
+          - generic [ref=e181]:
+            - link "Create Event Set up a new event" [ref=e182] [cursor=pointer]:
+              - /url: /admin/events/new
+              - generic [ref=e183]:
+                - img [ref=e185]
+                - generic [ref=e187]:
+                  - paragraph [ref=e188]: Create Event
+                  - paragraph [ref=e189]: Set up a new event
+            - link "Announcements Post a new announcement" [ref=e190] [cursor=pointer]:
+              - /url: /admin/announcements
+              - generic [ref=e191]:
+                - img [ref=e193]
+                - generic [ref=e196]:
+                  - paragraph [ref=e197]: Announcements
+                  - paragraph [ref=e198]: Post a new announcement
+            - link "Manage Users View and manage accounts" [ref=e199] [cursor=pointer]:
+              - /url: /admin/users
+              - generic [ref=e200]:
+                - img [ref=e202]
+                - generic [ref=e207]:
+                  - paragraph [ref=e208]: Manage Users
+                  - paragraph [ref=e209]: View and manage accounts
+            - link "View Reports Analytics and exports" [ref=e210] [cursor=pointer]:
+              - /url: /admin/reports
+              - generic [ref=e211]:
+                - img [ref=e213]
+                - generic [ref=e215]:
+                  - paragraph [ref=e216]: View Reports
+                  - paragraph [ref=e217]: Analytics and exports
+        - generic [ref=e218]:
+          - generic [ref=e219]:
+            - heading "Recent Activity" [level=2] [ref=e220]
+            - link "View All" [ref=e221] [cursor=pointer]:
+              - /url: /admin/audit-logs
+              - button "View All" [ref=e222]:
+                - text: View All
+                - img [ref=e223]
+          - generic [ref=e225]:
+            - generic [ref=e226]:
+              - img [ref=e228]
+              - generic [ref=e230]:
+                - paragraph [ref=e231]: AMG Admin approve EventRegistration
+                - paragraph [ref=e232]: 29/05/2026, 04:14:30
+              - generic [ref=e233]: EventRegistration
+            - generic [ref=e234]:
+              - img [ref=e236]
+              - generic [ref=e238]:
+                - paragraph [ref=e239]: AMG Admin update Event
+                - paragraph [ref=e240]: 28/05/2026, 18:27:27
+              - generic [ref=e241]: Event
+            - generic [ref=e242]:
+              - img [ref=e244]
+              - generic [ref=e246]:
+                - paragraph [ref=e247]: AMG Admin verify Payment
+                - paragraph [ref=e248]: 28/05/2026, 18:05:46
+              - generic [ref=e249]: Payment
+            - generic [ref=e250]:
+              - img [ref=e252]
+              - generic [ref=e254]:
+                - paragraph [ref=e255]: AMG Admin approve EventRegistration
+                - paragraph [ref=e256]: 28/05/2026, 18:05:38
+              - generic [ref=e257]: EventRegistration
+            - generic [ref=e258]:
+              - img [ref=e260]
+              - generic [ref=e262]:
+                - paragraph [ref=e263]: AMG Admin approve EventRegistration
+                - paragraph [ref=e264]: 28/05/2026, 18:05:36
+              - generic [ref=e265]: EventRegistration
+  - alert [ref=e24]

@@ -1,0 +1,155 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - paragraph [ref=e7]: AMG Academy
+          - heading "Admin Console" [level=1] [ref=e8]
+        - generic [ref=e9]: super_admin
+      - navigation [ref=e10]:
+        - link "Dashboard" [ref=e11] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e12]
+          - generic [ref=e17]: Dashboard
+        - link "Users" [ref=e18] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e19]
+          - generic [ref=e24]: Users
+        - link "Roles" [ref=e25] [cursor=pointer]:
+          - /url: /admin/roles
+          - img [ref=e26]
+          - generic [ref=e28]: Roles
+        - link "Announcements" [ref=e29] [cursor=pointer]:
+          - /url: /admin/announcements
+          - img [ref=e30]
+          - generic [ref=e33]: Announcements
+        - link "Audit Logs" [ref=e34] [cursor=pointer]:
+          - /url: /admin/audit-logs
+          - img [ref=e35]
+          - generic [ref=e38]: Audit Logs
+        - link "Events" [ref=e39] [cursor=pointer]:
+          - /url: /admin/events
+          - img [ref=e40]
+          - generic [ref=e42]: Events
+        - link "Registrations" [ref=e43] [cursor=pointer]:
+          - /url: /admin/registrations
+          - img [ref=e44]
+          - generic [ref=e47]: Registrations
+        - link "Payments" [ref=e48] [cursor=pointer]:
+          - /url: /admin/payments
+          - img [ref=e49]
+          - generic [ref=e51]: Payments
+        - link "Courses" [ref=e52] [cursor=pointer]:
+          - /url: /admin/courses
+          - img [ref=e53]
+          - generic [ref=e55]: Courses
+          - img [ref=e56]
+        - link "Lessons" [ref=e58] [cursor=pointer]:
+          - /url: /admin/lessons
+          - img [ref=e59]
+          - generic [ref=e62]: Lessons
+        - link "Reports" [ref=e63] [cursor=pointer]:
+          - /url: /admin/reports
+          - img [ref=e64]
+          - generic [ref=e66]: Reports
+        - link "Exports" [ref=e67] [cursor=pointer]:
+          - /url: /admin/exports
+          - img [ref=e68]
+          - generic [ref=e71]: Exports
+        - link "Content Pages" [ref=e72] [cursor=pointer]:
+          - /url: /admin/content-pages
+          - img [ref=e73]
+          - generic [ref=e76]: Content Pages
+        - link "Attendance" [ref=e77] [cursor=pointer]:
+          - /url: /admin/attendance
+          - img [ref=e78]
+          - generic [ref=e82]: Attendance
+        - link "QR Scanner" [ref=e83] [cursor=pointer]:
+          - /url: /admin/qr-scanner
+          - img [ref=e84]
+          - generic [ref=e90]: QR Scanner
+      - link "Back to App" [ref=e92] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e93]
+        - generic [ref=e96]: Back to App
+    - main [ref=e97]:
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - heading "Courses Management" [level=1] [ref=e109]:
+              - text: Courses
+              - generic [ref=e110]: Management
+            - paragraph [ref=e111]: Manage courses, lessons, pricing, publication status, and enrollment visibility.
+          - generic [ref=e112]:
+            - button "Refresh" [ref=e113] [cursor=pointer]:
+              - img [ref=e114]
+              - text: Refresh
+            - button "Create Course" [ref=e119] [cursor=pointer]:
+              - img [ref=e120]
+              - text: Create Course
+        - generic [ref=e121]:
+          - button "All 0" [ref=e122] [cursor=pointer]:
+            - generic [ref=e123]: All
+            - generic [ref=e124]: "0"
+          - button "Draft 0" [ref=e125] [cursor=pointer]:
+            - generic [ref=e126]: Draft
+            - generic [ref=e127]: "0"
+          - button "Published 0" [ref=e128] [cursor=pointer]:
+            - generic [ref=e129]: Published
+            - generic [ref=e130]: "0"
+          - button "Free 0" [ref=e131] [cursor=pointer]:
+            - generic [ref=e132]: Free
+            - generic [ref=e133]: "0"
+          - button "Paid 0" [ref=e134] [cursor=pointer]:
+            - generic [ref=e135]: Paid
+            - generic [ref=e136]: "0"
+        - generic [ref=e137]:
+          - img
+          - textbox "Search courses..." [ref=e138]
+        - generic [ref=e139]:
+          - img [ref=e141]
+          - heading "No courses yet" [level=3] [ref=e144]
+          - paragraph [ref=e145]: Create your first course to get started.
+        - dialog "Create Course" [active] [ref=e148]:
+          - generic [ref=e149]:
+            - heading "Create Course" [level=2] [ref=e151]
+            - button "Close modal" [ref=e152] [cursor=pointer]:
+              - img [ref=e153]
+          - generic [ref=e157]:
+            - generic [ref=e158]:
+              - generic [ref=e159]: Title
+              - textbox "Title" [ref=e161]
+            - generic [ref=e162]:
+              - generic [ref=e163]: Slug
+              - textbox "Slug" [ref=e165]
+            - generic [ref=e166]:
+              - generic [ref=e167]: Description
+              - textbox "Description" [ref=e168]:
+                - /placeholder: Course description
+            - generic [ref=e169]:
+              - generic [ref=e170]: Instructor
+              - combobox "Instructor" [ref=e171]:
+                - option "Select instructor" [disabled]
+                - option "AMG Admin (super_admin)" [selected]
+                - option "Super Admin (super_admin)"
+            - generic [ref=e172]:
+              - generic [ref=e173]: Category
+              - combobox "Category" [ref=e174]:
+                - option "Select category" [disabled] [selected]
+            - generic [ref=e175]:
+              - paragraph [ref=e176]: No course categories are available.
+              - generic [ref=e177]:
+                - generic [ref=e178]:
+                  - generic [ref=e179]: New category
+                  - textbox "New category" [ref=e181]: General Dentistry
+                - button "Create category" [ref=e182] [cursor=pointer]
+            - generic [ref=e183]:
+              - generic [ref=e184]: Price (EGP)
+              - spinbutton "Price (EGP)" [ref=e186]: "0"
+            - generic [ref=e187]:
+              - generic [ref=e188]: Thumbnail URL
+              - textbox "Thumbnail URL" [ref=e190]
+            - generic [ref=e191]:
+              - button "Cancel" [ref=e192] [cursor=pointer]
+              - button "Save" [disabled] [ref=e193]
+  - alert [ref=e146]
