@@ -69,3 +69,47 @@ export enum CertificateSourceType {
   Event = 'event',
   Course = 'course',
 }
+
+export enum CasePostStatus {
+  PendingReview = 'pending_review',
+  Approved = 'approved',
+  Rejected = 'rejected',
+  Archived = 'archived',
+}
+
+export enum CaseCommentStatus {
+  Visible = 'visible',
+  Hidden = 'hidden',
+  Removed = 'removed',
+}
+
+export enum StudyGroupType {
+  Student = 'student',
+  InstructorLed = 'instructor_led',
+}
+
+export enum StudyGroupJoinMode {
+  Open = 'open',
+  Request = 'request',
+  InviteOnly = 'invite_only',
+}
+
+export enum StudyGroupMemberRole {
+  Owner = 'owner',
+  Moderator = 'moderator',
+  Member = 'member',
+}
+
+export enum StudyGroupMemberStatus {
+  Pending = 'pending',
+  Active = 'active',
+  Rejected = 'rejected',
+  Removed = 'removed',
+  Left = 'left',
+}
+
+export enum StudyGroupSessionStatus {
+  Scheduled = 'scheduled',
+  Cancelled = 'cancelled',
+  Completed = 'completed',
+}

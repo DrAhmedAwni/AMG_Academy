@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { PassportModule } from '@nestjs/passport';
 import appConfig from './config/app.config';
@@ -39,7 +40,9 @@ import { ContentPagesModule } from './modules/content-pages/content-pages.module
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { EmailChannel } from './modules/notifications/channels/email.channel';
 import { InAppChannel } from './modules/notifications/channels/in-app.channel';
+import { CaseDiscussionsModule } from './modules/case-discussions/case-discussions.module';
 import { CertificatesModule } from './modules/certificates/certificates.module';
+import { StudyGroupsModule } from './modules/study-groups/study-groups.module';
 
 @Module({
   imports: [
@@ -51,6 +54,7 @@ import { CertificatesModule } from './modules/certificates/certificates.module';
     }),
     CacheModule,
     ThrottlerModule.forRoot(throttlerDefinitions),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -73,7 +77,9 @@ import { CertificatesModule } from './modules/certificates/certificates.module';
     ExportsModule,
     ContentPagesModule,
     NotificationsModule,
+    CaseDiscussionsModule,
     CertificatesModule,
+    StudyGroupsModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
   ],

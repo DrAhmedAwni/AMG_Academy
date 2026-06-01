@@ -61,11 +61,29 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
+          name="cases"
+          options={{
+            title: 'Cases',
+            tabBarIcon: ({ focused }) => (
+              <BottomTabIcon label="Cases" name={focused ? 'chatbubbles' : 'chatbubbles-outline'} focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="courses"
           options={{
             title: 'Courses',
             tabBarIcon: ({ focused }) => (
               <BottomTabIcon label="Courses" name={focused ? 'school' : 'school-outline'} focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="study-groups"
+          options={{
+            title: 'Groups',
+            tabBarIcon: ({ focused }) => (
+              <BottomTabIcon label="Groups" name={focused ? 'people' : 'people-outline'} focused={focused} />
             ),
           }}
         />

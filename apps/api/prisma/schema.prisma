@@ -90,6 +90,66 @@ enum CertificateTemplateScope {
   BOTH
 }
 
+enum CasePostStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum CaseCommentStatus {
+  VISIBLE
+  HIDDEN
+  REMOVED
+}
+
+enum StudyGroupType {
+  STUDENT
+  INSTRUCTOR_LED
+}
+
+enum StudyGroupJoinMode {
+  OPEN
+  REQUEST
+  INVITE_ONLY
+}
+
+enum StudyGroupStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum StudyGroupMemberRole {
+  OWNER
+  MODERATOR
+  MEMBER
+}
+
+enum StudyGroupMemberStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  REMOVED
+  LEFT
+}
+
+enum StudyGroupMessageStatus {
+  VISIBLE
+  HIDDEN
+  REMOVED
+}
+
+enum StudyGroupFileStatus {
+  ACTIVE
+  REMOVED
+}
+
+enum StudyGroupSessionStatus {
+  SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
 enum NotificationType {
   REGISTRATION_SUBMITTED
   REGISTRATION_APPROVED
@@ -101,6 +161,10 @@ enum NotificationType {
   EVENT_CANCELLED
   NEW_ANNOUNCEMENT
   NEW_COURSE_PUBLISHED
+  CASE_COMMENT_REPLY
+  CASE_APPROVED
+  STUDY_GROUP_NEW_MESSAGE
+  STUDY_GROUP_MEMBER_JOINED
 }
 
 enum NotificationChannelType {
@@ -121,6 +185,9 @@ enum AuditAction {
   SCAN
   ASSIGN
   REVOKE
+  HIDE
+  REMOVE
+  REPORT
 }
 
 enum PaymentItemType {
@@ -165,6 +232,15 @@ model User {
   certificates                Certificate[]         @relation("CertificateRecipient")
   reviewedCertificates        Certificate[]         @relation("CertificateReviewer")
   createdCertificateTemplates CertificateTemplate[] @relation("CertificateTemplateCreator")
+  casePosts                   CasePost[]
+  caseComments                CaseComment[]
+  reviewedCases               CasePost[]            @relation("CaseReviewer")
+  createdStudyGroups          StudyGroup[]          @relation("StudyGroupOwner")
+  studyGroupMemberships       StudyGroupMember[]
+  studyGroupMessages          StudyGroupMessage[]
+  uploadedStudyGroupFiles     StudyGroupFile[]
+  createdStudyGroupSessions   StudyGroupSession[]
+  approvedStudyGroupMembers   StudyGroupMember[]  @relation("StudyGroupMemberApprover")
 
   @@index([roleId])
   @@index([status])
@@ -406,6 +482,7 @@ model Course {
   lessons       Lesson[]
   enrollments   CourseEnrollment[]
   certificates  Certificate[]
+  studyGroups   StudyGroup[]
 
   @@index([status])
   @@index([categoryId])
@@ -616,4 +693,182 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@index([action])
+}
+
+model CaseCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       CasePost[]
+
+  @@index([slug])
+  @@index([status])
+}
+
+model CasePost {
+  id                        String          @id @default(uuid()) @db.Uuid
+  authorId                  String          @db.Uuid
+  categoryId                String          @db.Uuid
+  title                     String
+  description               String
+  tags                      String[]
+  status                    CasePostStatus  @default(PENDING_REVIEW)
+  deidentifiedAcknowledgedAt DateTime?
+  reviewedById              String?         @db.Uuid
+  reviewedAt                DateTime?
+  rejectionReason           String?
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+  author                    User            @relation(fields: [authorId], references: [id])
+  category                  CaseCategory    @relation(fields: [categoryId], references: [id])
+  reviewedBy                User?           @relation("CaseReviewer", fields: [reviewedById], references: [id])
+  images                    CaseImage[]
+  comments                  CaseComment[]
+  upvotedBy                 String[]
+  bookmarkedBy              String[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CaseImage {
+  id              String   @id @default(uuid()) @db.Uuid
+  casePostId      String   @db.Uuid
+  storageProvider String   @default("local")
+  storageKey      String
+  caption         String?
+  orderIndex      Int      @default(0)
+  createdAt       DateTime @default(now())
+  casePost        CasePost @relation(fields: [casePostId], references: [id], onDelete: Cascade)
+
+  @@index([casePostId])
+}
+
+model CaseComment {
+  id              String            @id @default(uuid()) @db.Uuid
+  casePostId      String            @db.Uuid
+  authorId        String            @db.Uuid
+  parentCommentId String?           @db.Uuid
+  body            String
+  status          CaseCommentStatus @default(VISIBLE)
+  hiddenById      String?           @db.Uuid
+  hiddenReason    String?
+  reportedBy      String[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  casePost        CasePost          @relation(fields: [casePostId], references: [id], onDelete: Cascade)
+  author          User              @relation(fields: [authorId], references: [id])
+  parentComment   CaseComment?      @relation("CaseCommentReply", fields: [parentCommentId], references: [id])
+  replies         CaseComment[]     @relation("CaseCommentReply")
+
+  @@index([casePostId])
+  @@index([authorId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model StudyGroup {
+  id          String              @id @default(uuid()) @db.Uuid
+  ownerId     String              @db.Uuid
+  courseId    String?             @db.Uuid
+  type        StudyGroupType
+  joinMode    StudyGroupJoinMode  @default(OPEN)
+  title       String
+  description String?
+  status      StudyGroupStatus    @default(ACTIVE)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  owner       User                @relation("StudyGroupOwner", fields: [ownerId], references: [id])
+  course      Course?             @relation(fields: [courseId], references: [id])
+  members     StudyGroupMember[]
+  messages    StudyGroupMessage[]
+  files       StudyGroupFile[]
+  sessions    StudyGroupSession[]
+
+  @@index([ownerId])
+  @@index([courseId])
+  @@index([status])
+  @@index([type])
+}
+
+model StudyGroupMember {
+  id            String                    @id @default(uuid()) @db.Uuid
+  groupId       String                    @db.Uuid
+  userId        String                    @db.Uuid
+  role          StudyGroupMemberRole      @default(MEMBER)
+  status        StudyGroupMemberStatus    @default(PENDING)
+  approvedById  String?                   @db.Uuid
+  joinedAt      DateTime?
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  group         StudyGroup                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user          User                      @relation(fields: [userId], references: [id])
+  approvedBy    User?                     @relation("StudyGroupMemberApprover", fields: [approvedById], references: [id])
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@index([status])
+}
+
+model StudyGroupMessage {
+  id        String                   @id @default(uuid()) @db.Uuid
+  groupId   String                   @db.Uuid
+  authorId  String                   @db.Uuid
+  body      String
+  status    StudyGroupMessageStatus  @default(VISIBLE)
+  hiddenById String?                 @db.Uuid
+  createdAt DateTime                 @default(now())
+  group     StudyGroup               @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  author    User                     @relation(fields: [authorId], references: [id])
+
+  @@index([groupId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model StudyGroupFile {
+  id              String              @id @default(uuid()) @db.Uuid
+  groupId         String              @db.Uuid
+  uploadedById    String              @db.Uuid
+  fileName        String
+  mimeType        String
+  sizeBytes       Int                 @default(0)
+  storageProvider String              @default("local")
+  storageKey      String
+  status          StudyGroupFileStatus @default(ACTIVE)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  group           StudyGroup          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  uploadedBy      User                @relation(fields: [uploadedById], references: [id])
+
+  @@index([groupId])
+  @@index([uploadedById])
+}
+
+model StudyGroupSession {
+  id            String                  @id @default(uuid()) @db.Uuid
+  groupId       String                  @db.Uuid
+  createdById   String                  @db.Uuid
+  title         String
+  startsAt      DateTime
+  endsAt        DateTime?
+  location      String?
+  onlineUrlNote String?
+  status        StudyGroupSessionStatus @default(SCHEDULED)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  group         StudyGroup              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy     User                    @relation(fields: [createdById], references: [id])
+
+  @@index([groupId])
+  @@index([createdById])
+  @@index([startsAt])
+  @@index([status])
 }

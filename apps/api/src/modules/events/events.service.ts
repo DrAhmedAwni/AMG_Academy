@@ -377,6 +377,53 @@ export class EventsService {
     return { id, archived: true };
   }
 
+  async sendEventReminders() {
+    const now = new Date();
+    const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const twentyFiveHoursFromNow = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+
+    const events = await this.prisma.event.findMany({
+      where: {
+        status: 'published',
+        startDate: {
+          gte: twentyFourHoursFromNow,
+          lte: twentyFiveHoursFromNow,
+        },
+      },
+      include: {
+        registrations: {
+          where: { status: RegistrationStatus.APPROVED },
+          select: { userId: true },
+        },
+      },
+    });
+
+    for (const event of events) {
+      if (event.registrations.length === 0) continue;
+
+      const startTime = event.startDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      await Promise.all(
+        event.registrations.map((reg) =>
+          this.notificationService.send(
+            {
+              userId: reg.userId,
+              type: NotificationType.EventReminder,
+              title: 'Event Reminder',
+              message: `Reminder: ${event.title} starts tomorrow at ${startTime}`,
+              entityType: 'Event',
+              entityId: event.id,
+            },
+            ['in_app', 'push'],
+          ),
+        ),
+      );
+    }
+  }
+
   private mapEvent(
     event: Prisma.EventGetPayload<{
       include: { category: true; _count: { select: { registrations: true } } };

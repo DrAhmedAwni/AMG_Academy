@@ -9,6 +9,8 @@ export enum NotificationType {
   EventCancelled = 'EVENT_CANCELLED',
   NewAnnouncement = 'NEW_ANNOUNCEMENT',
   NewCoursePublished = 'NEW_COURSE_PUBLISHED',
+  NewEnrollment = 'NEW_ENROLLMENT',
+  CourseCompleted = 'COURSE_COMPLETED',
 }
 
 export enum NotificationChannelType {

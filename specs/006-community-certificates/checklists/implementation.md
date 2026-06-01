@@ -19,17 +19,17 @@
 - [x] CHK011 Audit logs capture admin certificate release/revoke/void actions.
 - [x] CHK012 Tests/builds pass for API, web, mobile, and shared packages.
 
-## Case Discussion Later Phase
+## Case Discussion (Complete)
 
-- [ ] CHK013 Prisma schema includes CasePost, CaseImage, CaseComment, CaseCategory, votes, bookmarks, and reports.
-- [ ] CHK014 API supports case submit, admin approve/reject, public approved browsing, comments, reports, upvotes, bookmarks, and notifications.
-- [ ] CHK015 Web/mobile case forum includes de-identification reminders and moderation states.
-- [ ] CHK016 Admin moderation queue supports approve/reject/hide/remove flows.
+- [x] CHK013 Prisma schema includes CasePost, CaseImage, CaseComment, CaseCategory, votes, bookmarks, and reports.
+- [x] CHK014 API supports case submit, admin approve/reject, public approved browsing, comments, reports, upvotes, bookmarks, and notifications.
+- [x] CHK015 Web/mobile case forum includes de-identification reminders and moderation states.
+- [x] CHK016 Admin moderation queue supports approve/reject/hide/remove flows.
 
-## Study Groups Later Phase
+## Study Groups (Complete)
 
-- [ ] CHK017 Prisma schema includes StudyGroup, StudyGroupMember, StudyGroupMessage, StudyGroupFile, and StudyGroupSession.
-- [ ] CHK018 API supports student-created open/closed groups and instructor-led course groups.
-- [ ] CHK019 Real-time chat is authenticated, membership-guarded, persisted, and push-notification aware.
-- [ ] CHK020 Study group files use backend-controlled private access without public storage links.
-- [ ] CHK021 Web/mobile study group screens support groups, members, chat, files, and sessions.
+- [x] CHK017 Prisma schema includes StudyGroup, StudyGroupMember, StudyGroupMessage, StudyGroupFile, and StudyGroupSession.
+- [x] CHK018 API supports student-created open/closed groups and instructor-led course groups.
+- [x] CHK019 Real-time chat is authenticated, membership-guarded, persisted, and push-notification aware.
+- [x] CHK020 Study group files use backend-controlled private access without public storage links.
+- [x] CHK021 Web/mobile study group screens support groups, members, chat, files, and sessions.

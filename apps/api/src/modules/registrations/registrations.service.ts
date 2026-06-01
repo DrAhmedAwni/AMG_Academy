@@ -5,8 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, RegistrationStatus, PaymentStatus, QRTicketStatus } from '@prisma/client';
+import { NotificationType } from '@amg/shared';
 import { CacheStoreService } from '../../common/interceptors/cache.interceptor';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationService } from '../notifications/notification.service';
 import type { RegisterForEventDto, RegistrationActionDto } from './dto/registrations.dto';
 
 @Injectable()
@@ -14,9 +16,11 @@ export class RegistrationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheStore: CacheStoreService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async register(userId: string, data: RegisterForEventDto) {
+    let eventTitle = '';
     const result = await this.prisma.$transaction(async (tx) => {
       const event = await tx.event.findUnique({
         where: { id: data.eventId },
@@ -86,9 +90,23 @@ export class RegistrationsService {
         include: { event: true, payment: true },
       });
 
+      eventTitle = fullRegistration!.event.title;
       return this.mapRegistration(fullRegistration!);
     });
     await this.invalidatePublicEventCache();
+
+    await this.notificationService.send(
+      {
+        userId,
+        type: NotificationType.RegistrationSubmitted,
+        title: 'Registration Submitted',
+        message: `Your registration for ${eventTitle} has been submitted and is pending review`,
+        entityType: 'Registration',
+        entityId: String(result.id),
+      },
+      ['in_app', 'push'],
+    );
+
     return result;
   }
 
@@ -181,6 +199,19 @@ export class RegistrationsService {
     }
 
     await this.invalidatePublicEventCache();
+
+    await this.notificationService.send(
+      {
+        userId: updated.userId,
+        type: NotificationType.RegistrationApproved,
+        title: 'Registration Approved',
+        message: `Your registration for ${updated.event.title} has been approved! Your QR ticket is ready.`,
+        entityType: 'Registration',
+        entityId: id,
+      },
+      ['in_app', 'push'],
+    );
+
     return this.mapRegistration(updated, true);
   }
 
@@ -204,6 +235,19 @@ export class RegistrationsService {
     });
 
     await this.invalidatePublicEventCache();
+
+    await this.notificationService.send(
+      {
+        userId: updated.userId,
+        type: NotificationType.RegistrationRejected,
+        title: 'Registration Rejected',
+        message: `Your registration for ${updated.event.title} was not approved.`,
+        entityType: 'Registration',
+        entityId: id,
+      },
+      ['in_app', 'push'],
+    );
+
     return this.mapRegistration(updated, true);
   }
 

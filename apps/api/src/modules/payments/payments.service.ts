@@ -1,12 +1,17 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentStatus, QRTicketStatus } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
+import { NotificationType } from '@amg/shared';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationService } from '../notifications/notification.service';
 import type { ManualPaymentVerificationDto } from './dto/payments.dto';
 
 @Injectable()
 export class PaymentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async findMine(userId: string, query: { page?: number; limit?: number; status?: string }) {
     const page = query.page ?? 1;
@@ -161,6 +166,26 @@ export class PaymentsService {
       }
     }
 
+    const notifyUserId = updated.registration?.userId ?? updated.enrollment?.userId;
+    const itemTitle =
+      updated.registration?.event?.title ??
+      updated.enrollment?.course?.title ??
+      'item';
+
+    if (notifyUserId) {
+      await this.notificationService.send(
+        {
+          userId: notifyUserId,
+          type: NotificationType.PaymentSuccessful,
+          title: 'Payment Confirmed',
+          message: `Payment confirmed for ${itemTitle}`,
+          entityType: 'Payment',
+          entityId: paymentId,
+        },
+        ['in_app', 'push'],
+      );
+    }
+
     return this.mapPayment(updated);
   }
 
@@ -191,6 +216,26 @@ export class PaymentsService {
         enrollment: { include: { course: { select: { id: true, title: true } } } },
       },
     });
+
+    const failUserId = updated.registration?.userId ?? updated.enrollment?.userId;
+    const failTitle =
+      updated.registration?.event?.title ??
+      updated.enrollment?.course?.title ??
+      'item';
+
+    if (failUserId) {
+      await this.notificationService.send(
+        {
+          userId: failUserId,
+          type: NotificationType.PaymentFailed,
+          title: 'Payment Failed',
+          message: `Payment failed for ${failTitle}`,
+          entityType: 'Payment',
+          entityId: paymentId,
+        },
+        ['in_app', 'push'],
+      );
+    }
 
     return this.mapPayment(updated);
   }

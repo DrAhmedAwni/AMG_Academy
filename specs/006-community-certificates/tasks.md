@@ -56,20 +56,20 @@
 
 ## Phase 4: User Story 2 - Moderated Case Discussion (Priority: P2)
 
-- [ ] T023 [P] [US2] Add case discussion schema/migration in `apps/api/prisma/schema.prisma`
-- [ ] T024 [US2] Implement case discussion API module in `apps/api/src/modules/case-discussions/`
-- [ ] T025 [US2] Add web/mobile case forum, case detail, and submission UI in `apps/web/src/` and `apps/mobile/src/`
-- [ ] T026 [US2] Add admin moderation queue and comment report handling in `apps/web/src/app/admin/`
+- [x] T023 [P] [US2] Add case discussion schema/migration in `apps/api/prisma/schema.prisma`
+- [x] T024 [US2] Implement case discussion API module in `apps/api/src/modules/case-discussions/`
+- [x] T025 [US2] Add web/mobile case forum, case detail, and submission UI in `apps/web/src/` and `apps/mobile/src/`
+- [x] T026 [US2] Add admin moderation queue and comment report handling in `apps/web/src/app/admin/`
 
 ---
 
 ## Phase 5: User Story 3 - Study Groups With Real-Time Chat (Priority: P3)
 
-- [ ] T027 [P] [US3] Add study group schema/migration in `apps/api/prisma/schema.prisma`
-- [ ] T028 [US3] Implement study group API module in `apps/api/src/modules/study-groups/`
-- [ ] T029 [US3] Implement authenticated real-time chat gateway in `apps/api/src/modules/study-groups/`
-- [ ] T030 [US3] Add study group file upload/download with private backend access in `apps/api/src/modules/study-groups/`
-- [ ] T031 [US3] Add web/mobile study group screens for groups, members, chat, files, and sessions
+- [x] T027 [P] [US3] Add study group schema/migration in `apps/api/prisma/schema.prisma`
+- [x] T028 [US3] Implement study group API module in `apps/api/src/modules/study-groups/`
+- [x] T029 [US3] Implement authenticated real-time chat gateway in `apps/api/src/modules/study-groups/`
+- [x] T030 [US3] Add study group file upload/download with private backend access in `apps/api/src/modules/study-groups/`
+- [x] T031 [US3] Add web/mobile study group screens for groups, members, chat, files, and sessions
 
 ---
 

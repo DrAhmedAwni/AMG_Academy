@@ -1,8 +1,10 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { JwtPayload } from '@amg/shared';
-import { Prisma, CourseStatus, EnrollmentStatus } from '@prisma/client';
+import { NotificationType } from '@amg/shared';
+import { Prisma, CourseStatus, EnrollmentStatus, UserStatus } from '@prisma/client';
 import { CacheStoreService } from '../../common/interceptors/cache.interceptor';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationService } from '../notifications/notification.service';
 import type { CreateCourseDto, UpdateCourseDto } from './dto/courses.dto';
 
 @Injectable()
@@ -10,6 +12,7 @@ export class CoursesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheStore: CacheStoreService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(data: CreateCourseDto) {
@@ -239,6 +242,28 @@ export class CoursesService {
       },
     });
     await this.cacheStore.invalidatePrefix('courses:public');
+
+    const users = await this.prisma.user.findMany({
+      where: { status: UserStatus.ACTIVE },
+      select: { id: true },
+    });
+
+    await Promise.all(
+      users.map((user) =>
+        this.notificationService.send(
+          {
+            userId: user.id,
+            type: NotificationType.NewCoursePublished,
+            title: 'New Course Available',
+            message: `New course available: ${course.title}`,
+            entityType: 'Course',
+            entityId: id,
+          },
+          ['in_app', 'push'],
+        ),
+      ),
+    );
+
     return this.mapCourse(course);
   }
 

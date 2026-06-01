@@ -29,6 +29,7 @@ const adminRoutePermissions: Array<{ prefix: string; permission: string }> = [
   { prefix: '/admin/content-pages', permission: 'content_pages:read' },
   { prefix: '/admin/attendance', permission: 'attendance:read' },
   { prefix: '/admin/qr-scanner', permission: 'scanner:use' },
+  { prefix: '/admin/cases', permission: 'cases:moderate' },
 ];
 
 const hasUserPermission = (user: { permissions?: string[] }, permission: string) =>

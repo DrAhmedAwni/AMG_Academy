@@ -10,8 +10,10 @@ import {
   RegistrationStatus,
 } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
+import { NotificationType } from '@amg/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { CertificatesService } from '../certificates/certificates.service';
+import { NotificationService } from '../notifications/notification.service';
 import type { QrScanDto } from './dto/qr-tickets.dto';
 
 @Injectable()
@@ -21,6 +23,7 @@ export class QrTicketsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly certificatesService: CertificatesService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   private readonly cancelledEventStatuses = new Set(['cancelled', 'archived']);
@@ -98,6 +101,18 @@ export class QrTicketsService {
       include: { event: true, registration: { include: { payment: true } } },
     });
 
+    await this.notificationService.send(
+      {
+        userId: updated.userId,
+        type: NotificationType.QrIssued,
+        title: 'QR Ticket Ready',
+        message: `Your QR ticket for ${updated.event.title} is ready`,
+        entityType: 'QR Ticket',
+        entityId: updated.id,
+      },
+      ['in_app', 'push'],
+    );
+
     return {
       ...this.mapTicket(updated),
       rawToken,
@@ -113,6 +128,18 @@ export class QrTicketsService {
       data: { status: QRTicketStatus.REVOKED },
       include: { event: true, registration: { include: { payment: true } } },
     });
+
+    await this.notificationService.send(
+      {
+        userId: updated.userId,
+        type: NotificationType.QrIssued,
+        title: 'QR Ticket Revoked',
+        message: `Your QR ticket for ${updated.event.title} has been revoked`,
+        entityType: 'QR Ticket',
+        entityId: updated.id,
+      },
+      ['in_app', 'push'],
+    );
 
     return this.mapTicket(updated);
   }

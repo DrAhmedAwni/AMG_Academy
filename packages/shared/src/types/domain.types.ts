@@ -1,9 +1,11 @@
 import type {
   AnnouncementStatus,
   AttendanceStatus,
-  ContentPageStatus,
+  CaseCommentStatus,
+  CasePostStatus,
   CertificateSourceType,
   CertificateStatus,
+  ContentPageStatus,
   CourseStatus,
   EnrollmentStatus,
   NotificationChannelType,
@@ -11,6 +13,11 @@ import type {
   PaymentStatus,
   QRTicketStatus,
   RegistrationStatus,
+  StudyGroupJoinMode,
+  StudyGroupMemberRole,
+  StudyGroupMemberStatus,
+  StudyGroupSessionStatus,
+  StudyGroupType,
   UserStatus,
 } from '../enums/index';
 
@@ -191,4 +198,115 @@ export interface CertificateVerification {
   issuedAt: string | null;
   hours: number | null;
   credits: number | null;
+}
+
+export interface CaseCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  status: string;
+}
+
+export interface CasePost {
+  id: string;
+  authorId: string;
+  authorName: string;
+  categoryId: string;
+  categoryName: string;
+  title: string;
+  description: string;
+  tags: string[];
+  status: CasePostStatus;
+  imageCount: number;
+  commentCount: number;
+  upvoteCount: number;
+  isUpvoted: boolean;
+  isBookmarked: boolean;
+  createdAt: string;
+}
+
+export interface CasePostDetail extends CasePost {
+  images: CaseImageRef[];
+  comments: CaseComment[];
+}
+
+export interface CaseImageRef {
+  id: string;
+  storageKey: string;
+  caption: string | null;
+  orderIndex: number;
+}
+
+export interface CaseComment {
+  id: string;
+  casePostId: string;
+  authorId: string;
+  authorName: string;
+  parentCommentId: string | null;
+  body: string;
+  status: string;
+  createdAt: string;
+  replyCount: number;
+}
+
+export interface StudyGroup {
+  id: string;
+  title: string;
+  description: string | null;
+  type: StudyGroupType;
+  joinMode: StudyGroupJoinMode;
+  ownerId: string;
+  ownerName: string;
+  courseId: string | null;
+  courseTitle: string | null;
+  memberCount: number;
+  isMember: boolean;
+  memberStatus: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface StudyGroupMember {
+  id: string;
+  groupId: string;
+  userId: string;
+  userName: string;
+  userAvatar: string | null;
+  role: StudyGroupMemberRole;
+  status: StudyGroupMemberStatus;
+  joinedAt: string | null;
+}
+
+export interface StudyGroupMessage {
+  id: string;
+  groupId: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface StudyGroupFile {
+  id: string;
+  groupId: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedById: string;
+  uploadedByName: string;
+  createdAt: string;
+}
+
+export interface StudyGroupSession {
+  id: string;
+  groupId: string;
+  title: string;
+  startsAt: string;
+  endsAt: string | null;
+  location: string | null;
+  onlineUrlNote: string | null;
+  status: StudyGroupSessionStatus;
+  createdById: string;
+  createdByName: string;
 }

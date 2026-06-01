@@ -7,9 +7,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, EnrollmentStatus, PaymentStatus } from '@prisma/client';
+import { NotificationType } from '@amg/shared';
 import { CacheStoreService } from '../../common/interceptors/cache.interceptor';
 import { PrismaService } from '../prisma/prisma.service';
 import { CertificatesService } from '../certificates/certificates.service';
+import { NotificationService } from '../notifications/notification.service';
 
 @Injectable()
 export class EnrollmentsService {
@@ -19,9 +21,11 @@ export class EnrollmentsService {
     private readonly prisma: PrismaService,
     private readonly cacheStore: CacheStoreService,
     private readonly certificatesService: CertificatesService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async enroll(userId: string, data: { courseId: string }) {
+    let courseTitle = '';
     const result = await this.prisma.$transaction(async (tx) => {
       const course = await tx.course.findUnique({
         where: { id: data.courseId },
@@ -43,6 +47,7 @@ export class EnrollmentsService {
         throw new ConflictException('You are already enrolled in this course');
       }
 
+      courseTitle = course.title;
       const priceNumber = Number(course.price);
 
       const enrollment = await tx.courseEnrollment.create({
@@ -74,6 +79,19 @@ export class EnrollmentsService {
       return this.mapEnrollment(enrollment);
     });
     await this.invalidatePublicCourseCache();
+
+    await this.notificationService.send(
+      {
+        userId,
+        type: NotificationType.NewEnrollment,
+        title: 'Enrollment Confirmed',
+        message: `You've enrolled in ${courseTitle}`,
+        entityType: 'Enrollment',
+        entityId: String(result.id),
+      },
+      ['in_app', 'push'],
+    );
+
     return result;
   }
 
@@ -210,6 +228,18 @@ export class EnrollmentsService {
           `Certificate generation failed after course completion ${updated.id}: ${(error as Error).message}`,
         );
       }
+
+      await this.notificationService.send(
+        {
+          userId: enrollment.userId,
+          type: NotificationType.CourseCompleted,
+          title: 'Course Completed',
+          message: `Congratulations! You've completed ${enrollment.course.title}`,
+          entityType: 'Enrollment',
+          entityId: enrollmentId,
+        },
+        ['in_app', 'push'],
+      );
     }
 
     return this.mapEnrollment(updated);
