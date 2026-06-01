@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Video, ResizeMode, type AVPlaybackStatus } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, spacing, typography } from '../../theme';
 
@@ -10,39 +10,28 @@ interface SplashVideoProps {
 }
 
 export function SplashVideo({ videoSource, onFinish }: SplashVideoProps) {
-  const videoRef = useRef<Video>(null);
   const insets = useSafeAreaInsets();
-  const [isReady, setIsReady] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
 
-  useEffect(() => {
-    if (isFinished) {
+  const player = useVideoPlayer(videoSource, (player) => {
+    player.muted = true;
+    player.loop = false;
+    player.play();
+
+    player.addListener('playToEnd', () => {
       onFinish();
-    }
-  }, [isFinished, onFinish]);
+    });
+  });
 
-  const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if (status.isLoaded && status.didJustFinish && !status.isLooping) {
-      setIsFinished(true);
-    }
-  };
-
-  const handleSkip = () => {
-    setIsFinished(true);
-  };
+  const handleSkip = useCallback(() => {
+    onFinish();
+  }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      <Video
-        ref={videoRef}
-        source={videoSource}
+      <VideoView
+        player={player}
         style={styles.video}
-        resizeMode={ResizeMode.COVER}
-        shouldPlay
-        isMuted
-        isLooping={false}
-        onReadyForDisplay={() => setIsReady(true)}
-        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+        nativeControls={false}
       />
       <Pressable
         onPress={handleSkip}
