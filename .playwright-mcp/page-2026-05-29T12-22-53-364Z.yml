@@ -1,0 +1,154 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e25]:
+    - banner [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e29]:
+          - paragraph [ref=e30]: AMG Academy
+          - heading "Member Workspace" [level=1] [ref=e31]
+        - generic [ref=e32]:
+          - navigation [ref=e33]:
+            - link "Dashboard" [ref=e34] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e35]
+              - text: Dashboard
+            - link "Events" [ref=e40] [cursor=pointer]:
+              - /url: /events
+              - img [ref=e41]
+              - text: Events
+            - link "Courses" [ref=e43] [cursor=pointer]:
+              - /url: /courses
+              - img [ref=e44]
+              - text: Courses
+            - link "My Events" [ref=e46] [cursor=pointer]:
+              - /url: /my-reservations
+              - img [ref=e47]
+              - text: My Events
+            - link "My Courses" [ref=e49] [cursor=pointer]:
+              - /url: /my-courses
+              - img [ref=e50]
+              - text: My Courses
+            - link "Alerts" [ref=e53] [cursor=pointer]:
+              - /url: /notifications
+              - img [ref=e54]
+              - text: Alerts
+            - link "Profile" [ref=e57] [cursor=pointer]:
+              - /url: /profile
+              - img [ref=e58]
+              - text: Profile
+          - link "Open notifications" [ref=e62] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e63]
+    - main [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - img [ref=e72]
+            - paragraph [ref=e75]: Welcome back
+          - heading "Playwright QA User" [level=2] [ref=e76]
+          - paragraph [ref=e77]: Your AMG Academy dashboard — manage registrations, access courses, and stay updated with the latest events and announcements.
+          - generic [ref=e78]:
+            - link "Browse Events" [ref=e79] [cursor=pointer]:
+              - /url: /events
+              - button "Browse Events" [ref=e80]:
+                - img [ref=e81]
+                - text: Browse Events
+            - link "My Reservations" [ref=e83] [cursor=pointer]:
+              - /url: /my-reservations
+              - button "My Reservations" [ref=e84]:
+                - img [ref=e85]
+                - text: My Reservations
+        - generic [ref=e87]:
+          - link "My QR Tickets Access your event passes" [ref=e88] [cursor=pointer]:
+            - /url: /my-qr-tickets
+            - generic [ref=e89]:
+              - img [ref=e91]
+              - generic [ref=e97]:
+                - paragraph [ref=e98]: My QR Tickets
+                - paragraph [ref=e99]: Access your event passes
+          - link "My Courses Continue learning" [ref=e100] [cursor=pointer]:
+            - /url: /my-courses
+            - generic [ref=e101]:
+              - img [ref=e103]
+              - generic [ref=e106]:
+                - paragraph [ref=e107]: My Courses
+                - paragraph [ref=e108]: Continue learning
+          - link "Notifications Check your alerts" [ref=e109] [cursor=pointer]:
+            - /url: /notifications
+            - generic [ref=e110]:
+              - img [ref=e112]
+              - generic [ref=e115]:
+                - paragraph [ref=e116]: Notifications
+                - paragraph [ref=e117]: Check your alerts
+          - link "Profile Manage your account" [ref=e118] [cursor=pointer]:
+            - /url: /profile
+            - generic [ref=e119]:
+              - img [ref=e121]
+              - generic [ref=e124]:
+                - paragraph [ref=e125]: Profile
+                - paragraph [ref=e126]: Manage your account
+        - generic [ref=e127]:
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - heading "Upcoming Events" [level=3] [ref=e130]
+              - link "View All" [ref=e131] [cursor=pointer]:
+                - /url: /events
+                - button "View All" [ref=e132]:
+                  - text: View All
+                  - img [ref=e133]
+            - generic [ref=e135]:
+              - generic [ref=e136]:
+                - generic [ref=e137]:
+                  - img [ref=e138]
+                  - generic [ref=e140]:
+                    - paragraph [ref=e141]: AMG Clinical Excellence Congress
+                    - paragraph [ref=e142]: Jun 15, 2026
+                - generic [ref=e143]: upcoming
+              - generic [ref=e144]:
+                - generic [ref=e145]:
+                  - img [ref=e146]
+                  - generic [ref=e148]:
+                    - paragraph [ref=e149]: Digital Dentistry Workshop
+                    - paragraph [ref=e150]: Jul 8, 2026
+                - generic [ref=e151]: upcoming
+              - generic [ref=e152]:
+                - generic [ref=e153]:
+                  - img [ref=e154]
+                  - generic [ref=e156]:
+                    - paragraph [ref=e157]: Practice Growth Roundtable
+                    - paragraph [ref=e158]: Aug 22, 2026
+                - generic [ref=e159]: upcoming
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - heading "Recommended Courses" [level=3] [ref=e162]
+              - link "View All" [ref=e163] [cursor=pointer]:
+                - /url: /courses
+                - button "View All" [ref=e164]:
+                  - text: View All
+                  - img [ref=e165]
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - img [ref=e170]
+                  - paragraph [ref=e172]: Advanced Orthodontics
+                - img [ref=e173]
+              - generic [ref=e175]:
+                - generic [ref=e176]:
+                  - img [ref=e177]
+                  - paragraph [ref=e179]: Endodontic Case Planning
+                - img [ref=e180]
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - img [ref=e184]
+                  - paragraph [ref=e186]: Implant Workflow Essentials
+                - img [ref=e187]
+    - contentinfo [ref=e189]:
+      - generic [ref=e190]:
+        - generic [ref=e191]: AMG Academy. All rights reserved.
+        - generic [ref=e192]:
+          - link "Privacy" [ref=e193] [cursor=pointer]:
+            - /url: /content/privacy-policy
+          - link "Terms" [ref=e194] [cursor=pointer]:
+            - /url: /content/terms-of-service
+          - link "Support" [ref=e195] [cursor=pointer]:
+            - /url: /content/support
+  - alert [ref=e24]

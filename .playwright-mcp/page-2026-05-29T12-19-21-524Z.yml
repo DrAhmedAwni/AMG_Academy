@@ -1,0 +1,74 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - paragraph [ref=e7]: AMG Academy
+        - heading "Admin Console" [level=1] [ref=e8]
+      - generic [ref=e9]: super_admin
+    - navigation [ref=e10]:
+      - link "Dashboard" [ref=e11] [cursor=pointer]:
+        - /url: /admin/dashboard
+        - img [ref=e12]
+        - generic [ref=e17]: Dashboard
+      - link "Users" [ref=e18] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e19]
+        - generic [ref=e24]: Users
+      - link "Roles" [ref=e25] [cursor=pointer]:
+        - /url: /admin/roles
+        - img [ref=e26]
+        - generic [ref=e28]: Roles
+      - link "Announcements" [ref=e29] [cursor=pointer]:
+        - /url: /admin/announcements
+        - img [ref=e30]
+        - generic [ref=e33]: Announcements
+        - img [ref=e34]
+      - link "Audit Logs" [ref=e36] [cursor=pointer]:
+        - /url: /admin/audit-logs
+        - img [ref=e37]
+        - generic [ref=e40]: Audit Logs
+      - link "Events" [ref=e41] [cursor=pointer]:
+        - /url: /admin/events
+        - img [ref=e42]
+        - generic [ref=e44]: Events
+      - link "Registrations" [ref=e45] [cursor=pointer]:
+        - /url: /admin/registrations
+        - img [ref=e46]
+        - generic [ref=e49]: Registrations
+      - link "Payments" [ref=e50] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e51]
+        - generic [ref=e53]: Payments
+      - link "Courses" [ref=e54] [cursor=pointer]:
+        - /url: /admin/courses
+        - img [ref=e55]
+        - generic [ref=e57]: Courses
+      - link "Lessons" [ref=e58] [cursor=pointer]:
+        - /url: /admin/lessons
+        - img [ref=e59]
+        - generic [ref=e62]: Lessons
+      - link "Reports" [ref=e63] [cursor=pointer]:
+        - /url: /admin/reports
+        - img [ref=e64]
+        - generic [ref=e66]: Reports
+      - link "Exports" [ref=e67] [cursor=pointer]:
+        - /url: /admin/exports
+        - img [ref=e68]
+        - generic [ref=e71]: Exports
+      - link "Content Pages" [ref=e72] [cursor=pointer]:
+        - /url: /admin/content-pages
+        - img [ref=e73]
+        - generic [ref=e76]: Content Pages
+      - link "Attendance" [ref=e77] [cursor=pointer]:
+        - /url: /admin/attendance
+        - img [ref=e78]
+        - generic [ref=e82]: Attendance
+      - link "QR Scanner" [ref=e83] [cursor=pointer]:
+        - /url: /admin/qr-scanner
+        - img [ref=e84]
+        - generic [ref=e90]: QR Scanner
+    - link "Back to App" [ref=e92] [cursor=pointer]:
+      - /url: /dashboard
+      - img [ref=e93]
+      - generic [ref=e96]: Back to App
+  - main [ref=e97]

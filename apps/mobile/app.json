@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "AMG Academy",
+    "slug": "amg-academy-mobile",
+    "scheme": "amgacademy",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amgacademy.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "AMG Academy uses the camera so authorized scanner staff can validate event QR tickets.",
+        "NSUserNotificationsUsageDescription": "AMG Academy can send event, course, ticket, and announcement updates."
+      }
+    },
+    "android": {
+      "package": "com.amgacademy.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#020617"
+      },
+      "permissions": [
+        "CAMERA",
+        "POST_NOTIFICATIONS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AMG Academy uses the camera so authorized scanner staff can validate event QR tickets."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#54D9E8"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "appEnv": "$EXPO_PUBLIC_APP_ENV",
+      "apiUrl": "$EXPO_PUBLIC_API_URL",
+      "webUrl": "$EXPO_PUBLIC_WEB_URL",
+      "router": {},
+      "eas": {
+        "projectId": "7d5bed48-7356-4242-9c82-6221a11038d3"
+      }
+    }
+  }
+}

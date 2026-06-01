@@ -1,0 +1,28 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - paragraph [ref=e6]: AMG Academy
+      - paragraph [ref=e7]: Member Workspace
+  - main [ref=e8]
+  - navigation [ref=e16]:
+    - generic [ref=e17]:
+      - link "Dashboard" [ref=e18] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e19]
+        - generic [ref=e24]: Dashboard
+      - link "Events" [ref=e25] [cursor=pointer]:
+        - /url: /events
+        - img [ref=e26]
+        - generic [ref=e28]: Events
+      - link "Courses" [ref=e29] [cursor=pointer]:
+        - /url: /courses
+        - img [ref=e30]
+        - generic [ref=e32]: Courses
+      - link "My Events" [ref=e34] [cursor=pointer]:
+        - /url: /my-reservations
+        - img [ref=e35]
+        - generic [ref=e37]: My Events
+      - link "My Courses" [ref=e38] [cursor=pointer]:
+        - /url: /my-courses
+        - img [ref=e39]
+        - generic [ref=e42]: My Courses

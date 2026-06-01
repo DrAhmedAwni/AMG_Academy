@@ -1,0 +1,160 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - paragraph [ref=e7]: AMG Academy
+          - heading "Admin Console" [level=1] [ref=e8]
+        - generic [ref=e9]: super_admin
+      - navigation [ref=e10]:
+        - link "Dashboard" [ref=e11] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e12]
+          - generic [ref=e17]: Dashboard
+        - link "Users" [ref=e18] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e19]
+          - generic [ref=e24]: Users
+        - link "Roles" [ref=e25] [cursor=pointer]:
+          - /url: /admin/roles
+          - img [ref=e26]
+          - generic [ref=e28]: Roles
+        - link "Announcements" [ref=e29] [cursor=pointer]:
+          - /url: /admin/announcements
+          - img [ref=e30]
+          - generic [ref=e33]: Announcements
+        - link "Audit Logs" [ref=e34] [cursor=pointer]:
+          - /url: /admin/audit-logs
+          - img [ref=e35]
+          - generic [ref=e38]: Audit Logs
+        - link "Events" [ref=e39] [cursor=pointer]:
+          - /url: /admin/events
+          - img [ref=e40]
+          - generic [ref=e42]: Events
+        - link "Registrations" [ref=e43] [cursor=pointer]:
+          - /url: /admin/registrations
+          - img [ref=e44]
+          - generic [ref=e47]: Registrations
+        - link "Payments" [ref=e48] [cursor=pointer]:
+          - /url: /admin/payments
+          - img [ref=e49]
+          - generic [ref=e51]: Payments
+        - link "Courses" [ref=e52] [cursor=pointer]:
+          - /url: /admin/courses
+          - img [ref=e53]
+          - generic [ref=e55]: Courses
+          - img [ref=e56]
+        - link "Lessons" [ref=e58] [cursor=pointer]:
+          - /url: /admin/lessons
+          - img [ref=e59]
+          - generic [ref=e62]: Lessons
+        - link "Reports" [ref=e63] [cursor=pointer]:
+          - /url: /admin/reports
+          - img [ref=e64]
+          - generic [ref=e66]: Reports
+        - link "Exports" [ref=e67] [cursor=pointer]:
+          - /url: /admin/exports
+          - img [ref=e68]
+          - generic [ref=e71]: Exports
+        - link "Content Pages" [ref=e72] [cursor=pointer]:
+          - /url: /admin/content-pages
+          - img [ref=e73]
+          - generic [ref=e76]: Content Pages
+        - link "Attendance" [ref=e77] [cursor=pointer]:
+          - /url: /admin/attendance
+          - img [ref=e78]
+          - generic [ref=e82]: Attendance
+        - link "QR Scanner" [ref=e83] [cursor=pointer]:
+          - /url: /admin/qr-scanner
+          - img [ref=e84]
+          - generic [ref=e90]: QR Scanner
+      - link "Back to App" [ref=e92] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e93]
+        - generic [ref=e96]: Back to App
+    - main [ref=e97]:
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - heading "Courses Management" [level=1] [ref=e109]:
+              - text: Courses
+              - generic [ref=e110]: Management
+            - paragraph [ref=e111]: Manage courses, lessons, pricing, publication status, and enrollment visibility.
+          - generic [ref=e112]:
+            - button "Refresh" [ref=e113] [cursor=pointer]:
+              - img [ref=e114]
+              - text: Refresh
+            - button "Create Course" [ref=e119] [cursor=pointer]:
+              - img [ref=e120]
+              - text: Create Course
+        - generic [ref=e121]:
+          - button "All 1" [ref=e200] [cursor=pointer]:
+            - generic [ref=e123]: All
+            - generic [ref=e124]: "1"
+          - button "Draft 1" [ref=e201] [cursor=pointer]:
+            - generic [ref=e126]: Draft
+            - generic [ref=e127]: "1"
+          - button "Published 0" [ref=e128] [cursor=pointer]:
+            - generic [ref=e129]: Published
+            - generic [ref=e130]: "0"
+          - button "Free 1" [ref=e202] [cursor=pointer]:
+            - generic [ref=e132]: Free
+            - generic [ref=e133]: "1"
+          - button "Paid 0" [ref=e134] [cursor=pointer]:
+            - generic [ref=e135]: Paid
+            - generic [ref=e136]: "0"
+        - generic [ref=e137]:
+          - img
+          - textbox "Search courses..." [ref=e138]
+        - table [ref=e205]:
+          - rowgroup [ref=e206]:
+            - row "Select all rows Course Instructor Price Status Lessons Enrolled Actions" [ref=e207]:
+              - columnheader "Select all rows" [ref=e208]:
+                - checkbox "Select all rows" [ref=e209]
+              - columnheader "Course" [ref=e210]:
+                - button "Course" [ref=e211]
+              - columnheader "Instructor" [ref=e212]:
+                - button "Instructor" [ref=e213]
+              - columnheader "Price" [ref=e214]:
+                - button "Price" [ref=e215]
+              - columnheader "Status" [ref=e216]:
+                - button "Status" [ref=e217]
+              - columnheader "Lessons" [ref=e218]:
+                - button "Lessons" [ref=e219]
+              - columnheader "Enrolled" [ref=e220]:
+                - button "Enrolled" [ref=e221]
+              - columnheader "Actions" [ref=e222]
+          - rowgroup [ref=e223]:
+            - row "Select row 8e830fe9-ec72-4c2c-9029-43970b5e4a96 Playwright QA Course 20260529 1518 General Dentistry AMG Admin Free DRAFT 0 0 Publish" [ref=e224]:
+              - cell "Select row 8e830fe9-ec72-4c2c-9029-43970b5e4a96" [ref=e225]:
+                - checkbox "Select row 8e830fe9-ec72-4c2c-9029-43970b5e4a96" [ref=e226]
+              - cell "Playwright QA Course 20260529 1518 General Dentistry" [ref=e227]:
+                - generic [ref=e228]:
+                  - img [ref=e230]
+                  - generic [ref=e233]:
+                    - paragraph [ref=e234]: Playwright QA Course 20260529 1518
+                    - paragraph [ref=e235]: General Dentistry
+              - cell "AMG Admin" [ref=e236]
+              - cell "Free" [ref=e237]:
+                - generic [ref=e238]: Free
+              - cell "DRAFT" [ref=e239]:
+                - generic [ref=e240]: DRAFT
+              - cell "0" [ref=e242]
+              - cell "0" [ref=e243]
+              - cell "Publish" [ref=e244]:
+                - generic [ref=e246]:
+                  - link [ref=e247] [cursor=pointer]:
+                    - /url: /courses/playwright-qa-course-20260529-1518
+                    - button [ref=e248]:
+                      - img [ref=e249]
+                  - link [ref=e252] [cursor=pointer]:
+                    - /url: /admin/lessons?courseId=8e830fe9-ec72-4c2c-9029-43970b5e4a96
+                    - button [ref=e253]:
+                      - img [ref=e254]
+                  - button "Publish" [ref=e256] [cursor=pointer]
+                  - button [ref=e257] [cursor=pointer]:
+                    - img [ref=e258]
+                  - button [ref=e261] [cursor=pointer]:
+                    - img [ref=e262]
+  - status [ref=e270]: Course created
+  - alert [ref=e146]

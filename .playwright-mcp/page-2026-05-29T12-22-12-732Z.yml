@@ -1,0 +1,132 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - paragraph [ref=e7]: AMG Academy
+          - heading "Admin Console" [level=1] [ref=e8]
+        - generic [ref=e9]: super_admin
+      - navigation [ref=e10]:
+        - link "Dashboard" [ref=e11] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e12]
+          - generic [ref=e17]: Dashboard
+        - link "Users" [ref=e18] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e19]
+          - generic [ref=e24]: Users
+        - link "Roles" [ref=e25] [cursor=pointer]:
+          - /url: /admin/roles
+          - img [ref=e26]
+          - generic [ref=e28]: Roles
+        - link "Announcements" [ref=e29] [cursor=pointer]:
+          - /url: /admin/announcements
+          - img [ref=e30]
+          - generic [ref=e33]: Announcements
+        - link "Audit Logs" [ref=e34] [cursor=pointer]:
+          - /url: /admin/audit-logs
+          - img [ref=e35]
+          - generic [ref=e38]: Audit Logs
+        - link "Events" [ref=e39] [cursor=pointer]:
+          - /url: /admin/events
+          - img [ref=e40]
+          - generic [ref=e42]: Events
+        - link "Registrations" [ref=e43] [cursor=pointer]:
+          - /url: /admin/registrations
+          - img [ref=e44]
+          - generic [ref=e47]: Registrations
+          - img [ref=e48]
+        - link "Payments" [ref=e50] [cursor=pointer]:
+          - /url: /admin/payments
+          - img [ref=e51]
+          - generic [ref=e53]: Payments
+        - link "Courses" [ref=e54] [cursor=pointer]:
+          - /url: /admin/courses
+          - img [ref=e55]
+          - generic [ref=e57]: Courses
+        - link "Lessons" [ref=e58] [cursor=pointer]:
+          - /url: /admin/lessons
+          - img [ref=e59]
+          - generic [ref=e62]: Lessons
+        - link "Reports" [ref=e63] [cursor=pointer]:
+          - /url: /admin/reports
+          - img [ref=e64]
+          - generic [ref=e66]: Reports
+        - link "Exports" [ref=e67] [cursor=pointer]:
+          - /url: /admin/exports
+          - img [ref=e68]
+          - generic [ref=e71]: Exports
+        - link "Content Pages" [ref=e72] [cursor=pointer]:
+          - /url: /admin/content-pages
+          - img [ref=e73]
+          - generic [ref=e76]: Content Pages
+        - link "Attendance" [ref=e77] [cursor=pointer]:
+          - /url: /admin/attendance
+          - img [ref=e78]
+          - generic [ref=e82]: Attendance
+        - link "QR Scanner" [ref=e83] [cursor=pointer]:
+          - /url: /admin/qr-scanner
+          - img [ref=e84]
+          - generic [ref=e90]: QR Scanner
+      - link "Back to App" [ref=e92] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e93]
+        - generic [ref=e96]: Back to App
+    - main [ref=e97]:
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - heading "Registrations" [level=1] [ref=e109]
+            - paragraph [ref=e110]: Review attendee requests, payment status, and QR generation workflow.
+          - button "Refresh" [ref=e112] [cursor=pointer]:
+            - img [ref=e113]
+            - text: Refresh
+        - generic [ref=e118]:
+          - generic [ref=e119]:
+            - generic [ref=e120]: Search registrations
+            - textbox "Search registrations" [ref=e122]:
+              - /placeholder: Name, email, or event
+          - generic [ref=e123]:
+            - button "All 1" [ref=e124] [cursor=pointer]:
+              - generic [ref=e125]: All
+              - generic [ref=e126]: "1"
+            - button "Pending 1" [ref=e127] [cursor=pointer]:
+              - generic [ref=e128]: Pending
+              - generic [ref=e129]: "1"
+            - button "Confirmed 0" [ref=e130] [cursor=pointer]:
+              - generic [ref=e131]: Confirmed
+              - generic [ref=e132]: "0"
+            - button "Attended 0" [ref=e133] [cursor=pointer]:
+              - generic [ref=e134]: Attended
+              - generic [ref=e135]: "0"
+            - button "Rejected 0" [ref=e136] [cursor=pointer]:
+              - generic [ref=e137]: Rejected
+              - generic [ref=e138]: "0"
+        - table [ref=e140]:
+          - rowgroup [ref=e141]:
+            - row "User Event Status Payment QR Actions" [ref=e142]:
+              - columnheader "User" [ref=e143]
+              - columnheader "Event" [ref=e144]
+              - columnheader "Status" [ref=e145]
+              - columnheader "Payment" [ref=e146]
+              - columnheader "QR" [ref=e147]
+              - columnheader "Actions" [ref=e148]
+          - rowgroup [ref=e149]:
+            - row "Playwright QA User Playwright QA Event 20260529 1518 Pending Not Required Not Issued Confirm & Generate QR Reject" [ref=e150]:
+              - cell "Playwright QA User" [ref=e151]
+              - cell "Playwright QA Event 20260529 1518" [ref=e152]
+              - cell "Pending" [ref=e153]:
+                - generic [ref=e154]: Pending
+              - cell "Not Required" [ref=e156]:
+                - generic [ref=e157]: Not Required
+              - cell "Not Issued" [ref=e159]:
+                - generic [ref=e160]: Not Issued
+              - cell "Confirm & Generate QR Reject" [ref=e162]:
+                - generic [ref=e163]:
+                  - button "Confirm & Generate QR" [ref=e164] [cursor=pointer]:
+                    - img [ref=e165]
+                    - text: Confirm & Generate QR
+                  - button "Reject" [ref=e168] [cursor=pointer]:
+                    - img [ref=e169]
+                    - text: Reject
+  - alert [ref=e173]

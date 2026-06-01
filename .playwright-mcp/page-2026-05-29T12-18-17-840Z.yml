@@ -1,0 +1,157 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - paragraph [ref=e7]: AMG Academy
+          - heading "Admin Console" [level=1] [ref=e8]
+        - generic [ref=e9]: super_admin
+      - navigation [ref=e10]:
+        - link "Dashboard" [ref=e11] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e12]
+          - generic [ref=e17]: Dashboard
+        - link "Users" [ref=e18] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e19]
+          - generic [ref=e24]: Users
+        - link "Roles" [ref=e25] [cursor=pointer]:
+          - /url: /admin/roles
+          - img [ref=e26]
+          - generic [ref=e28]: Roles
+        - link "Announcements" [ref=e29] [cursor=pointer]:
+          - /url: /admin/announcements
+          - img [ref=e30]
+          - generic [ref=e33]: Announcements
+        - link "Audit Logs" [ref=e34] [cursor=pointer]:
+          - /url: /admin/audit-logs
+          - img [ref=e35]
+          - generic [ref=e38]: Audit Logs
+        - link "Events" [ref=e39] [cursor=pointer]:
+          - /url: /admin/events
+          - img [ref=e40]
+          - generic [ref=e42]: Events
+          - img [ref=e43]
+        - link "Registrations" [ref=e45] [cursor=pointer]:
+          - /url: /admin/registrations
+          - img [ref=e46]
+          - generic [ref=e49]: Registrations
+        - link "Payments" [ref=e50] [cursor=pointer]:
+          - /url: /admin/payments
+          - img [ref=e51]
+          - generic [ref=e53]: Payments
+        - link "Courses" [ref=e54] [cursor=pointer]:
+          - /url: /admin/courses
+          - img [ref=e55]
+          - generic [ref=e57]: Courses
+        - link "Lessons" [ref=e58] [cursor=pointer]:
+          - /url: /admin/lessons
+          - img [ref=e59]
+          - generic [ref=e62]: Lessons
+        - link "Reports" [ref=e63] [cursor=pointer]:
+          - /url: /admin/reports
+          - img [ref=e64]
+          - generic [ref=e66]: Reports
+        - link "Exports" [ref=e67] [cursor=pointer]:
+          - /url: /admin/exports
+          - img [ref=e68]
+          - generic [ref=e71]: Exports
+        - link "Content Pages" [ref=e72] [cursor=pointer]:
+          - /url: /admin/content-pages
+          - img [ref=e73]
+          - generic [ref=e76]: Content Pages
+        - link "Attendance" [ref=e77] [cursor=pointer]:
+          - /url: /admin/attendance
+          - img [ref=e78]
+          - generic [ref=e82]: Attendance
+        - link "QR Scanner" [ref=e83] [cursor=pointer]:
+          - /url: /admin/qr-scanner
+          - img [ref=e84]
+          - generic [ref=e90]: QR Scanner
+      - link "Back to App" [ref=e92] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e93]
+        - generic [ref=e96]: Back to App
+    - main [ref=e97]:
+      - generic [ref=e178]:
+        - generic [ref=e179]:
+          - generic [ref=e180]:
+            - heading "Events Management" [level=1] [ref=e181]:
+              - text: Events
+              - generic [ref=e182]: Management
+            - paragraph [ref=e183]: Create, edit, delete, and monitor AMG Academy events from one operations surface.
+          - generic [ref=e184]:
+            - button "Refresh" [ref=e185] [cursor=pointer]:
+              - img [ref=e186]
+              - text: Refresh
+            - button "Export" [ref=e191] [cursor=pointer]:
+              - img [ref=e192]
+              - text: Export
+            - link "Create Event" [ref=e195] [cursor=pointer]:
+              - /url: /admin/events/new
+              - button "Create Event" [ref=e196]:
+                - img [ref=e197]
+                - text: Create Event
+        - generic [ref=e198]:
+          - button "All 1" [ref=e199] [cursor=pointer]:
+            - generic [ref=e200]: All
+            - generic [ref=e201]: "1"
+          - button "Draft 0" [ref=e202] [cursor=pointer]:
+            - generic [ref=e203]: Draft
+            - generic [ref=e204]: "0"
+          - button "Published 1" [ref=e205] [cursor=pointer]:
+            - generic [ref=e206]: Published
+            - generic [ref=e207]: "1"
+          - button "Upcoming 1" [ref=e208] [cursor=pointer]:
+            - generic [ref=e209]: Upcoming
+            - generic [ref=e210]: "1"
+          - button "Active 0" [ref=e211] [cursor=pointer]:
+            - generic [ref=e212]: Active
+            - generic [ref=e213]: "0"
+          - button "Finished 0" [ref=e214] [cursor=pointer]:
+            - generic [ref=e215]: Finished
+            - generic [ref=e216]: "0"
+          - button "Cancelled 0" [ref=e217] [cursor=pointer]:
+            - generic [ref=e218]: Cancelled
+            - generic [ref=e219]: "0"
+        - generic [ref=e220]:
+          - img
+          - textbox "Search by title, location, category..." [ref=e221]
+        - generic [ref=e224]:
+          - img [ref=e226]
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - heading "Playwright QA Event 20260529 1518" [level=3] [ref=e230]
+              - generic [ref=e231]: Published
+              - generic [ref=e233]: Free
+            - paragraph [ref=e234]: A Playwright verified academy event used to confirm registration and QR ticket generation.
+            - generic [ref=e235]:
+              - generic [ref=e236]:
+                - img [ref=e237]
+                - text: Jun 28, 2026
+              - generic [ref=e240]:
+                - img [ref=e241]
+                - text: AMG Academy Cairo
+              - generic [ref=e244]:
+                - img [ref=e245]
+                - text: Clinical Congress
+              - generic [ref=e248]:
+                - img [ref=e249]
+                - text: 0/25
+          - generic [ref=e254]:
+            - generic [ref=e256]: 0 registered
+            - generic [ref=e257]:
+              - link [ref=e258] [cursor=pointer]:
+                - /url: /admin/events/12a287c3-5592-43f1-b2b0-5e29163e9408
+                - button [ref=e259]:
+                  - img [ref=e260]
+              - link [ref=e263] [cursor=pointer]:
+                - /url: /admin/events/12a287c3-5592-43f1-b2b0-5e29163e9408/edit
+                - button [ref=e264]:
+                  - img [ref=e265]
+              - link "Registrations" [ref=e268] [cursor=pointer]:
+                - /url: /admin/registrations?eventId=12a287c3-5592-43f1-b2b0-5e29163e9408
+                - button "Registrations" [ref=e269]
+              - button [ref=e270] [cursor=pointer]:
+                - img [ref=e271]
+  - alert [ref=e171]

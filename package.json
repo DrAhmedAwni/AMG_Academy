@@ -1,0 +1,52 @@
+{
+  "name": "amg-academy-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AMG Academy Platform V1 monorepo",
+  "packageManager": "npm@10.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:web": "npm run dev -w @amg/web",
+    "dev:api": "npm run start:dev -w @amg/api",
+    "dev:mobile": "npm run start -w @amg/mobile",
+    "android:mobile": "npm run android -w @amg/mobile",
+    "ios:mobile": "npm run ios -w @amg/mobile",
+    "build": "npm run build --workspaces --if-present",
+    "build:web": "npm run build -w @amg/web",
+    "build:api": "npm run build -w @amg/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:mobile": "npm run lint -w @amg/mobile",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css,yml,yaml}\"",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck:mobile": "npm run typecheck -w @amg/mobile",
+    "test": "npm run test --workspaces --if-present",
+    "test:api": "npm run test -w @amg/api",
+    "test:web": "npm run test -w @amg/web",
+    "test:mobile": "npm run test -w @amg/mobile",
+    "test:e2e": "playwright test",
+    "db:migrate": "npm run prisma:migrate -w @amg/api",
+    "db:studio": "npm run prisma:studio -w @amg/api",
+    "db:seed": "npm run prisma:seed -w @amg/api"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "eslint": "^8.57.0",
+    "expo-router": "^56.2.8",
+    "playwright": "^1.60.0",
+    "prettier": "^3.3.0",
+    "react-native-safe-area-context": "^5.7.0",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@amg/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./eslint/base": "./eslint/base.js",
+    "./typescript/base": "./typescript/base.json",
+    "./tailwind/preset": "./tailwind/preset.ts"
+  }
+}
