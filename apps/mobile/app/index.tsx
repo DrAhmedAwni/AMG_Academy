@@ -1,14 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { LoadingState } from '../src/components/states/LoadingState';
 import { Screen } from '../src/components/layout/Screen';
+import { SplashVideo } from '../src/components/layout/SplashVideo';
 import { useAuth } from '../src/lib/auth';
+
+const splashVideo = require('../assets/splash-video.mp4');
 
 export default function BootstrapRoute() {
   const router = useRouter();
   const { status } = useAuth();
+  const [splashFinished, setSplashFinished] = useState(false);
 
   useEffect(() => {
+    if (!splashFinished) return;
+
     if (status === 'authenticated') {
       router.replace('/(tabs)/home' as never);
     }
@@ -16,7 +22,11 @@ export default function BootstrapRoute() {
     if (status === 'anonymous' || status === 'expired') {
       router.replace('/(auth)/login' as never);
     }
-  }, [router, status]);
+  }, [router, status, splashFinished]);
+
+  if (!splashFinished) {
+    return <SplashVideo videoSource={splashVideo} onFinish={() => setSplashFinished(true)} />;
+  }
 
   return (
     <Screen scroll={false}>

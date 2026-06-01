@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { loginSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
@@ -8,7 +8,7 @@ import { ErrorState } from '../../src/components/states/ErrorState';
 import { useLoginMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, LoginFormValues } from '../../src/features/auth/auth.types';
 import { mapApiErrorToUi } from '../../src/lib/errors';
-import { colors, spacing, textStyles } from '../../src/theme';
+import { spacing, textStyles } from '../../src/theme';
 
 function getLoginErrors(values: LoginFormValues): AuthFormErrors {
   const result = loginSchema.safeParse({
@@ -54,7 +54,7 @@ export default function LoginScreen() {
   return (
     <Screen contentStyle={styles.screen}>
       <View style={styles.hero}>
-        <Text style={styles.eyebrow}>AMG Academy</Text>
+        <Image source={require('../../assets/logo-horizontal.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}>Sign in</Text>
         <Text style={styles.subtitle}>
           Access your events, tickets, courses, and AMG Academy profile.
@@ -116,12 +116,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   hero: {
-    gap: spacing.xs,
+    alignItems: 'center',
+    gap: spacing.md,
   },
-  eyebrow: {
-    ...textStyles.caption,
-    color: colors.accent.primary,
-    textTransform: 'uppercase',
+  logo: {
+    width: 220,
+    height: 56,
   },
   title: textStyles.title,
   subtitle: textStyles.body,

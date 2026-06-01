@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { registerSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
@@ -9,7 +9,7 @@ import { SuccessState } from '../../src/components/states/SuccessState';
 import { useRegisterMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, RegisterFormValues } from '../../src/features/auth/auth.types';
 import { mapApiErrorToUi } from '../../src/lib/errors';
-import { colors, spacing, textStyles } from '../../src/theme';
+import { spacing, textStyles } from '../../src/theme';
 
 function getRegisterErrors(values: RegisterFormValues): AuthFormErrors {
   const result = registerSchema.safeParse(values);
@@ -73,7 +73,7 @@ export default function RegisterScreen() {
   return (
     <Screen contentStyle={styles.screen}>
       <View style={styles.hero}>
-        <Text style={styles.eyebrow}>AMG Academy</Text>
+        <Image source={require('../../assets/logo-horizontal.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}>Create account</Text>
         <Text style={styles.subtitle}>
           Register with your details. Account verification remains handled by AMG Academy.
@@ -161,12 +161,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   hero: {
-    gap: spacing.xs,
+    alignItems: 'center',
+    gap: spacing.md,
   },
-  eyebrow: {
-    ...textStyles.caption,
-    color: colors.accent.primary,
-    textTransform: 'uppercase',
+  logo: {
+    width: 220,
+    height: 56,
   },
   title: textStyles.title,
   subtitle: textStyles.body,
