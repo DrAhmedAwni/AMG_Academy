@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { EXPO_PUSH_TOKEN_REGEX } from './notifications.constants';
 import { z } from 'zod';
 
 const notificationPreferencesSchema = z.object({
   email: z.boolean(),
   inApp: z.boolean(),
+  push: z.boolean(),
   registrationUpdates: z.boolean(),
   paymentUpdates: z.boolean(),
   courseUpdates: z.boolean(),
@@ -14,6 +16,7 @@ const notificationPreferencesSchema = z.object({
 const defaultNotificationPreferences = {
   email: true,
   inApp: true,
+  push: true,
   registrationUpdates: true,
   paymentUpdates: true,
   courseUpdates: true,
@@ -109,6 +112,59 @@ export class NotificationsService {
       where: { id: userId },
       data: { notificationPreferences: sanitizedPreferences } as never,
     });
+    return { success: true };
+  }
+
+  async registerPushToken(
+    userId: string,
+    body: { token?: unknown; platform?: unknown; deviceId?: unknown },
+  ) {
+    const input = z
+      .object({
+        token: z
+          .string()
+          .trim()
+          .regex(EXPO_PUSH_TOKEN_REGEX, 'Invalid Expo push token'),
+        platform: z.string().trim().max(32).optional(),
+        deviceId: z.string().trim().max(128).optional(),
+      })
+      .parse(body);
+
+    const device = await this.prisma.pushDevice.upsert({
+      where: { expoPushToken: input.token },
+      update: {
+        userId,
+        platform: input.platform,
+        deviceId: input.deviceId,
+        enabled: true,
+      },
+      create: {
+        userId,
+        expoPushToken: input.token,
+        platform: input.platform,
+        deviceId: input.deviceId,
+      },
+    });
+
+    return {
+      id: device.id,
+      enabled: device.enabled,
+      platform: device.platform,
+    };
+  }
+
+  async unregisterPushToken(userId: string, body: { token?: unknown }) {
+    const input = z
+      .object({
+        token: z.string().trim().min(10).max(512),
+      })
+      .parse(body);
+
+    await this.prisma.pushDevice.updateMany({
+      where: { userId, expoPushToken: input.token },
+      data: { enabled: false },
+    });
+
     return { success: true };
   }
 }

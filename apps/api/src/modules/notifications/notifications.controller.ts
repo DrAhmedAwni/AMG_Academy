@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import type { JwtPayload } from '@amg/shared';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -32,5 +32,15 @@ export class NotificationsController {
   @Patch('preferences')
   async updatePreferences(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
     return this.notificationsService.updatePreferences(user.sub, body as Record<string, boolean>);
+  }
+
+  @Post('push-token')
+  async registerPushToken(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
+    return this.notificationsService.registerPushToken(user.sub, body as { token?: unknown });
+  }
+
+  @Delete('push-token')
+  async unregisterPushToken(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
+    return this.notificationsService.unregisterPushToken(user.sub, body as { token?: unknown });
   }
 }

@@ -276,12 +276,61 @@ export class PaymentsService {
     return this.mapPayment(updated, true);
   }
 
+  async markRefunded(paymentId: string, adminId: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: {
+        registration: { include: { event: { select: { id: true, title: true } }, user: true } },
+        enrollment: { include: { course: { select: { id: true, title: true } }, user: true } },
+      },
+    });
+
+    if (!payment) throw new NotFoundException('Payment not found');
+
+    if (
+      payment.status !== PaymentStatus.REFUND_PENDING &&
+      payment.status !== PaymentStatus.SUCCESSFUL &&
+      payment.status !== PaymentStatus.MANUALLY_VERIFIED
+    ) {
+      throw new BadRequestException('Payment is not eligible to be marked refunded');
+    }
+
+    const updated = await this.prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        status: PaymentStatus.REFUNDED,
+        refundedAt: new Date(),
+        verifiedById: adminId,
+        verifiedAt: new Date(),
+        adminNotes: 'Refund completed by admin.',
+      },
+      include: {
+        registration: {
+          include: {
+            event: { select: { id: true, title: true } },
+            user: { select: { id: true, name: true } },
+          },
+        },
+        enrollment: {
+          include: {
+            course: { select: { id: true, title: true } },
+            user: { select: { id: true, name: true } },
+          },
+        },
+        verifiedBy: { select: { id: true, name: true } },
+      },
+    });
+
+    return this.mapPayment(updated, true);
+  }
+
   private toPrismaPaymentStatus(status: string): PaymentStatus {
     const map: Record<string, PaymentStatus> = {
       'not_required': PaymentStatus.NOT_REQUIRED,
       'pending': PaymentStatus.PENDING,
       'successful': PaymentStatus.SUCCESSFUL,
       'failed': PaymentStatus.FAILED,
+      'refund_pending': PaymentStatus.REFUND_PENDING,
       'refunded': PaymentStatus.REFUNDED,
       'manually_verified': PaymentStatus.MANUALLY_VERIFIED,
       'cancelled': PaymentStatus.CANCELLED,

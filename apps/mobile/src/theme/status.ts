@@ -69,6 +69,7 @@ export const paymentStatusMap: Record<PaymentStatus, StatusBadgeConfig> = {
   [PaymentStatus.Pending]: makeStatus('Payment pending', 'warning'),
   [PaymentStatus.Successful]: makeStatus('Paid', 'success'),
   [PaymentStatus.Failed]: makeStatus('Payment failed', 'error'),
+  [PaymentStatus.RefundPending]: makeStatus('Refund review', 'warning'),
   [PaymentStatus.Refunded]: makeStatus('Refunded', 'neutral'),
   [PaymentStatus.ManuallyVerified]: makeStatus('Manually verified', 'success'),
   [PaymentStatus.Cancelled]: makeStatus('Payment cancelled', 'neutral'),

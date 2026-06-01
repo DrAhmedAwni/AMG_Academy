@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { AuthLayout } from '@/components/layouts';
 import { Card } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -11,10 +11,11 @@ type VerificationState = 'idle' | 'loading' | 'success' | 'error';
 export default function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams?: { token?: string; email?: string; sent?: string };
+  searchParams?: Promise<{ token?: string; email?: string; sent?: string }>;
 }) {
-  const token = searchParams?.token;
-  const email = searchParams?.email;
+  const resolvedSearchParams = searchParams ? use(searchParams) : undefined;
+  const token = resolvedSearchParams?.token;
+  const email = resolvedSearchParams?.email;
   const [state, setState] = useState<VerificationState>(token ? 'loading' : 'idle');
   const [message, setMessage] = useState(
     token

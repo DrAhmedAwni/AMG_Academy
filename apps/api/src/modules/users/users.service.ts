@@ -110,6 +110,12 @@ export class UsersService {
         where,
         include: {
           role: true,
+          _count: {
+            select: {
+              registrations: true,
+              enrollments: true,
+            },
+          },
         },
         orderBy: {
           createdAt: 'desc',
@@ -129,6 +135,7 @@ export class UsersService {
         status: user.status.toLowerCase(),
         emailVerified: user.emailVerified,
         createdAt: user.createdAt.toISOString(),
+        hasActivity: user._count.registrations > 0 || user._count.enrollments > 0,
       })),
       meta: {
         page,
@@ -205,6 +212,41 @@ export class UsersService {
       include: {
         role: true,
       },
+    });
+
+    return this.mapAdminUser(user);
+  }
+
+  async deleteUser(userId: string, actorId: string) {
+    if (userId === actorId) {
+      throw new ForbiddenException('You cannot delete your own account');
+    }
+
+    await this.ensureUserExists(userId);
+
+    const [registrationCount, enrollmentCount, paymentCount] = await this.prisma.$transaction([
+      this.prisma.eventRegistration.count({ where: { userId } }),
+      this.prisma.courseEnrollment.count({ where: { userId } }),
+      this.prisma.payment.count({
+        where: {
+          OR: [
+            { registration: { userId } },
+            { enrollment: { userId } },
+          ],
+        },
+      }),
+    ]);
+
+    if (registrationCount > 0 || enrollmentCount > 0 || paymentCount > 0) {
+      throw new ConflictException(
+        'User cannot be deleted because they have existing registrations, enrollments, or payments',
+      );
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status: PrismaUserStatus.DELETED },
+      include: { role: true },
     });
 
     return this.mapAdminUser(user);

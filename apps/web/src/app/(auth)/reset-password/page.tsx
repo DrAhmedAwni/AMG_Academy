@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { use } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
@@ -17,12 +18,13 @@ type ResetPasswordValues = {
 export default function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams?: { token?: string };
+  searchParams?: Promise<{ token?: string }>;
 }) {
+  const resolvedSearchParams = searchParams ? use(searchParams) : undefined;
   const form = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      token: searchParams?.token ?? '',
+      token: resolvedSearchParams?.token ?? '',
       password: '',
     },
   });

@@ -3,17 +3,22 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, EnrollmentStatus, PaymentStatus } from '@prisma/client';
 import { CacheStoreService } from '../../common/interceptors/cache.interceptor';
 import { PrismaService } from '../prisma/prisma.service';
+import { CertificatesService } from '../certificates/certificates.service';
 
 @Injectable()
 export class EnrollmentsService {
+  private readonly logger = new Logger(EnrollmentsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheStore: CacheStoreService,
+    private readonly certificatesService: CertificatesService,
   ) {}
 
   async enroll(userId: string, data: { courseId: string }) {
@@ -34,38 +39,11 @@ export class EnrollmentsService {
         where: { userId_courseId: { userId, courseId: data.courseId } },
       });
 
-      if (existing && existing.status !== 'CANCELLED') {
+      if (existing) {
         throw new ConflictException('You are already enrolled in this course');
       }
 
       const priceNumber = Number(course.price);
-
-      if (existing && existing.status === 'CANCELLED') {
-        const updated = await tx.courseEnrollment.update({
-          where: { id: existing.id },
-          data: { status: EnrollmentStatus.ACTIVE },
-          include: { course: true, payment: true },
-        });
-
-        if (priceNumber > 0 && !updated.payment) {
-          await tx.payment.create({
-            data: {
-              enrollmentId: updated.id,
-              amount: course.price,
-              currency: 'EGP',
-              status: PaymentStatus.PENDING,
-              provider: 'mock',
-            },
-          });
-          const fullEnrollment = await tx.courseEnrollment.findUnique({
-            where: { id: updated.id },
-            include: { course: true, payment: true },
-          });
-          return this.mapEnrollment(fullEnrollment!);
-        }
-
-        return this.mapEnrollment(updated);
-      }
 
       const enrollment = await tx.courseEnrollment.create({
         data: {
@@ -184,6 +162,10 @@ export class EnrollmentsService {
       throw new ForbiddenException('You can only update your own progress');
     }
 
+    if (enrollment.status === EnrollmentStatus.CANCELLED || enrollment.course.status !== 'PUBLISHED') {
+      throw new ForbiddenException('This course is archived or no longer available');
+    }
+
     // Upsert lesson progress
     await this.prisma.lessonProgress.upsert({
       where: {
@@ -219,6 +201,16 @@ export class EnrollmentsService {
       },
       include: { course: true, payment: true },
     });
+
+    if (allCompleted) {
+      try {
+        await this.certificatesService.ensureForCourseCompletion(updated.id);
+      } catch (error) {
+        this.logger.warn(
+          `Certificate generation failed after course completion ${updated.id}: ${(error as Error).message}`,
+        );
+      }
+    }
 
     return this.mapEnrollment(updated);
   }
@@ -288,6 +280,8 @@ export class EnrollmentsService {
         },
         totalDuration: course.totalDuration,
         lessonCount: totalLessons,
+        status: course.status.toLowerCase(),
+        accessBlocked: course.status.toLowerCase() !== 'published' || enrollment.status === EnrollmentStatus.CANCELLED,
       },
     };
   }

@@ -46,6 +46,18 @@ export default function AdminPaymentsPage() {
     onError: () => toast.error('Failed to verify payment'),
   });
 
+  const refundMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.post(`/payments/${id}/mark-refunded`);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success('Payment marked refunded');
+      refetch();
+    },
+    onError: () => toast.error('Failed to mark payment refunded'),
+  });
+
   if (isLoading) return <LoadingSkeleton lines={6} />;
   if (isError) return <ErrorState title="Failed to load payments" description={error?.message ?? 'Something went wrong'} onRetry={refetch} />;
 
@@ -120,7 +132,19 @@ export default function AdminPaymentsPage() {
                         </Link>
                       </div>
                     )}
-                    {payment.status !== 'pending' && (
+                    {payment.status === 'refund_pending' && (
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => refundMutation.mutate(payment.id)}>
+                          Mark Refunded
+                        </Button>
+                        <Link href={`/admin/payments/${payment.id}`}>
+                          <Button size="sm" variant="secondary">
+                            View
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                    {payment.status !== 'pending' && payment.status !== 'refund_pending' && (
                       <Link href={`/admin/payments/${payment.id}`}>
                         <Button size="sm" variant="secondary">
                           View

@@ -29,8 +29,8 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermission('courses:read')
   @Throttle(adminThrottle)
-  async findAllAdmin(@Query() query: Record<string, string | undefined>) {
-    return this.coursesService.findAllAdmin(parseWithSchema(courseFiltersSchema, query));
+  async findAllAdmin(@CurrentUser() user: JwtPayload, @Query() query: Record<string, string | undefined>) {
+    return this.coursesService.findAllAdmin(parseWithSchema(courseFiltersSchema, query), user);
   }
 
   @Get(':slug')
@@ -51,31 +51,31 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermission('courses:update')
   @AuditLog(AuditAction.Update, 'Course')
-  async update(@Param('id') id: string, @Body() body: unknown) {
-    return this.coursesService.update(parseWithSchema(uuidSchema, id), parseWithSchema(updateCourseSchema, body));
+  async update(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Body() body: unknown) {
+    return this.coursesService.update(parseWithSchema(uuidSchema, id), parseWithSchema(updateCourseSchema, body), user);
   }
 
   @Post(':id/publish')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermission('courses:update')
   @AuditLog(AuditAction.Publish, 'Course')
-  async publish(@Param('id') id: string) {
-    return this.coursesService.publish(parseWithSchema(uuidSchema, id));
+  async publish(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.coursesService.publish(parseWithSchema(uuidSchema, id), user);
   }
 
   @Post(':id/archive')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermission('courses:update')
   @AuditLog(AuditAction.Archive, 'Course')
-  async archive(@Param('id') id: string) {
-    return this.coursesService.archive(parseWithSchema(uuidSchema, id));
+  async archive(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.coursesService.archive(parseWithSchema(uuidSchema, id), user);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermission('courses:delete')
   @AuditLog(AuditAction.Delete, 'Course')
-  async remove(@Param('id') id: string) {
-    return this.coursesService.remove(parseWithSchema(uuidSchema, id));
+  async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.coursesService.remove(parseWithSchema(uuidSchema, id), user);
   }
 }

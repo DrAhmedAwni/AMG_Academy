@@ -13,6 +13,30 @@ import {
 const matchesPrefix = (pathname: string, prefixes: string[]) =>
   prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
+const adminRoutePermissions: Array<{ prefix: string; permission: string }> = [
+  { prefix: '/admin/users', permission: 'users:read' },
+  { prefix: '/admin/roles', permission: 'roles:read' },
+  { prefix: '/admin/announcements', permission: 'announcements:read' },
+  { prefix: '/admin/audit-logs', permission: 'audit_logs:read' },
+  { prefix: '/admin/events', permission: 'events:read' },
+  { prefix: '/admin/registrations', permission: 'registrations:read' },
+  { prefix: '/admin/payments', permission: 'payments:read' },
+  { prefix: '/admin/certificates', permission: 'certificates:read' },
+  { prefix: '/admin/courses', permission: 'courses:read' },
+  { prefix: '/admin/lessons', permission: 'courses:read' },
+  { prefix: '/admin/reports', permission: 'reports:read' },
+  { prefix: '/admin/exports', permission: 'exports:create' },
+  { prefix: '/admin/content-pages', permission: 'content_pages:read' },
+  { prefix: '/admin/attendance', permission: 'attendance:read' },
+  { prefix: '/admin/qr-scanner', permission: 'scanner:use' },
+];
+
+const hasUserPermission = (user: { permissions?: string[] }, permission: string) =>
+  Boolean(user.permissions?.includes('*:*') || user.permissions?.includes(permission));
+
+const resolveAdminPermission = (pathname: string) =>
+  adminRoutePermissions.find((item) => pathname === item.prefix || pathname.startsWith(`${item.prefix}/`))?.permission;
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
@@ -48,8 +72,23 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    if (needsAdminAuth && !['super_admin', 'amg_admin', 'scanner', 'instructor'].includes(user.role)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+    if (needsAdminAuth) {
+      if (!['super_admin', 'amg_admin', 'scanner', 'instructor'].includes(user.role)) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+
+      if (user.role === 'scanner' && !matchesPrefix(pathname, ['/admin/attendance', '/admin/qr-scanner'])) {
+        return NextResponse.redirect(new URL('/admin/qr-scanner', request.url));
+      }
+
+      if (user.role === 'instructor' && !matchesPrefix(pathname, ['/admin/courses', '/admin/lessons'])) {
+        return NextResponse.redirect(new URL('/admin/courses', request.url));
+      }
+
+      const requiredPermission = resolveAdminPermission(pathname);
+      if (requiredPermission && !hasUserPermission(user, requiredPermission)) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
     }
 
     if (needsScannerAuth && !['scanner', 'super_admin', 'amg_admin'].includes(user.role)) {

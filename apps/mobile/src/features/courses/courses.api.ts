@@ -73,6 +73,8 @@ export interface CourseEnrollmentSummary {
     category: CourseCategorySummary;
     totalDuration: number;
     lessonCount: number;
+    status?: CourseStatus;
+    accessBlocked?: boolean;
   };
 }
 
@@ -116,6 +118,11 @@ export function normalizeEnrollment(raw: CourseEnrollmentSummary): CourseEnrollm
     paymentStatus: normalizePaymentStatus(raw.paymentStatus) ?? PaymentStatus.NotRequired,
     paymentId: raw.paymentId ?? null,
     progressPercent: raw.progressPercent ?? 0,
+    course: {
+      ...raw.course,
+      status: raw.course.status ?? CourseStatus.Published,
+      accessBlocked: raw.course.accessBlocked ?? (raw.course.status === CourseStatus.Archived),
+    },
   };
 }
 
@@ -132,8 +139,9 @@ export function getEnrollmentPaymentRedirect(
 }
 
 export function isLessonLocked(
-  course: Pick<MobileCourse, 'isFree' | 'isEnrolled' | 'paymentStatus'>,
+  course: Pick<MobileCourse, 'isFree' | 'isEnrolled' | 'paymentStatus'> & { status?: CourseStatus },
 ): boolean {
+  if (course.status && course.status !== CourseStatus.Published) return true;
   if (course.isFree) return false;
   if (!course.isEnrolled) return true;
   if (course.paymentStatus === PaymentStatus.Successful) return false;

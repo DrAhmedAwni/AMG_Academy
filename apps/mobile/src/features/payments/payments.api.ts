@@ -95,6 +95,7 @@ export function isTerminalPaymentStatus(status: PaymentStatus) {
     PaymentStatus.Successful,
     PaymentStatus.ManuallyVerified,
     PaymentStatus.Failed,
+    PaymentStatus.RefundPending,
     PaymentStatus.Refunded,
     PaymentStatus.Cancelled,
   ].includes(status);
@@ -144,6 +145,18 @@ export function getPaymentDisplayState(
     return {
       label: 'Payment failed',
       helper: 'The backend rejected this payment attempt.',
+      canMockSuccess: false,
+      canMockFail: false,
+      canMockCancel: false,
+      isSuccessful: false,
+      isPending: false,
+    };
+  }
+
+  if (payment.status === PaymentStatus.RefundPending) {
+    return {
+      label: 'Refund review',
+      helper: 'An admin needs to approve and mark the refund as completed.',
       canMockSuccess: false,
       canMockFail: false,
       canMockCancel: false,

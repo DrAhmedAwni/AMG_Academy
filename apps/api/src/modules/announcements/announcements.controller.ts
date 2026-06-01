@@ -40,7 +40,6 @@ export class AnnouncementsController {
   @Get('admin')
   @UseGuards(PermissionGuard)
   @RequirePermission('announcements:read')
-  @RequirePermission('announcements:read')
   async findAll(@Query() query: Record<string, string | undefined>) {
     const input = parseWithSchema(announcementFiltersSchema, query);
     return this.announcementsService.findAll({
@@ -52,6 +51,7 @@ export class AnnouncementsController {
   }
 
   @Post()
+  @UseGuards(PermissionGuard)
   @RequirePermission('announcements:create')
   @AuditLog(AuditAction.Create, 'Announcement')
   async create(@Body() body: unknown) {
@@ -64,6 +64,7 @@ export class AnnouncementsController {
   }
 
   @Patch(':id')
+  @UseGuards(PermissionGuard)
   @RequirePermission('announcements:update')
   @AuditLog(AuditAction.Update, 'Announcement')
   async update(@Param('id') id: string, @Body() body: unknown) {
@@ -74,6 +75,7 @@ export class AnnouncementsController {
   }
 
   @Post(':id/publish')
+  @UseGuards(PermissionGuard)
   @RequirePermission('announcements:update')
   @AuditLog(AuditAction.Publish, 'Announcement')
   async publish(@Param('id') id: string) {
@@ -81,6 +83,7 @@ export class AnnouncementsController {
   }
 
   @Post(':id/archive')
+  @UseGuards(PermissionGuard)
   @RequirePermission('announcements:update')
   @AuditLog(AuditAction.Archive, 'Announcement')
   async archive(@Param('id') id: string) {
@@ -88,6 +91,7 @@ export class AnnouncementsController {
   }
 
   @Delete(':id')
+  @UseGuards(PermissionGuard)
   @RequirePermission('announcements:delete')
   @AuditLog(AuditAction.Delete, 'Announcement')
   async remove(@Param('id') id: string) {

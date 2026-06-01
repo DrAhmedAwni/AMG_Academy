@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { registerSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
-import { Button, GlassCard, TextField } from '../../src/components/ui';
+import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
 import { SuccessState } from '../../src/components/states/SuccessState';
 import { useRegisterMutation } from '../../src/features/auth/auth.hooks';
@@ -39,6 +39,7 @@ export default function RegisterScreen() {
     city: '',
   });
   const [errors, setErrors] = useState<AuthFormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
   const uiError = useMemo(
     () => (registerMutation.error ? mapApiErrorToUi(registerMutation.error) : null),
     [registerMutation.error],
@@ -101,10 +102,16 @@ export default function RegisterScreen() {
           label="Password"
           value={values.password}
           onChangeText={(password) => setValues((current) => ({ ...current, password }))}
-          secureTextEntry
+          secureTextEntry={!showPassword}
           textContentType="newPassword"
           error={errors.password}
           helperText="Use at least 8 characters with uppercase, lowercase, and a number."
+          rightAction={
+            <PasswordToggle
+              visible={showPassword}
+              onToggle={() => setShowPassword((current) => !current)}
+            />
+          }
         />
         <TextField
           label="Phone"

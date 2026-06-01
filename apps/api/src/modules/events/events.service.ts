@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { NotificationType } from '@amg/shared';
 import { PaymentStatus, Prisma, QRTicketStatus, RegistrationStatus } from '@prisma/client';
 import { CacheStoreService } from '../../common/interceptors/cache.interceptor';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationService } from '../notifications/notification.service';
 import type { CreateEventDto, UpdateEventDto } from './dto/events.dto';
 
 @Injectable()
@@ -9,6 +11,7 @@ export class EventsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheStore: CacheStoreService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(data: CreateEventDto) {
@@ -226,22 +229,152 @@ export class EventsService {
   }
 
   async cancel(id: string) {
-    const event = await this.prisma.event.update({
+    const existingEvent = await this.prisma.event.findUnique({
       where: { id },
-      data: { status: 'cancelled' },
       include: { category: true, _count: { select: { registrations: true } } },
+    });
+
+    if (!existingEvent) {
+      throw new NotFoundException('Event not found');
+    }
+
+    const registrationsToNotify =
+      existingEvent.status === 'cancelled'
+        ? []
+        : await this.prisma.eventRegistration.findMany({
+            where: {
+              eventId: id,
+              status: { in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED] },
+            },
+            select: { userId: true },
+          });
+
+    const now = new Date();
+    const event = await this.prisma.$transaction(async (tx) => {
+      await tx.qRTicket.updateMany({
+        where: {
+          eventId: id,
+          status: { in: [QRTicketStatus.NOT_ISSUED, QRTicketStatus.ACTIVE] },
+        },
+        data: { status: QRTicketStatus.REVOKED },
+      });
+
+      await tx.payment.updateMany({
+        where: {
+          registration: { is: { eventId: id } },
+          status: { in: [PaymentStatus.SUCCESSFUL, PaymentStatus.MANUALLY_VERIFIED] },
+        },
+        data: {
+          status: PaymentStatus.REFUND_PENDING,
+          adminNotes: 'Event cancelled. Refund review required.',
+        },
+      });
+
+      await tx.payment.updateMany({
+        where: {
+          registration: { is: { eventId: id } },
+          status: PaymentStatus.PENDING,
+        },
+        data: {
+          status: PaymentStatus.CANCELLED,
+          cancelledAt: now,
+          adminNotes: 'Event cancelled before payment completed.',
+        },
+      });
+
+      await tx.eventRegistration.updateMany({
+        where: {
+          eventId: id,
+          status: { in: [RegistrationStatus.PENDING, RegistrationStatus.APPROVED] },
+        },
+        data: {
+          status: RegistrationStatus.CANCELLED,
+          adminNotes: 'Event cancelled by AMG Academy.',
+        },
+      });
+
+      return tx.event.update({
+        where: { id },
+        data: { status: 'cancelled' },
+        include: { category: true, _count: { select: { registrations: true } } },
+      });
+    });
+
+    await this.cacheStore.invalidatePrefix('events:public');
+
+    await Promise.all(
+      registrationsToNotify.map((registration) =>
+        this.notificationService.send(
+          {
+            userId: registration.userId,
+            type: NotificationType.EventCancelled,
+            title: `Event cancelled: ${existingEvent.title}`,
+            message:
+              'This event was cancelled. If you already paid, your payment is now waiting for admin refund review.',
+            entityType: 'Event',
+            entityId: id,
+          },
+          ['in_app', 'push'],
+        ),
+      ),
+    );
+
+    return this.mapEvent(event);
+  }
+
+  async end(id: string) {
+    const event = await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.event.findUnique({ where: { id } });
+      if (!existing) {
+        throw new NotFoundException('Event not found');
+      }
+
+      await tx.qRTicket.updateMany({
+        where: {
+          eventId: id,
+          status: { in: [QRTicketStatus.NOT_ISSUED, QRTicketStatus.ACTIVE] },
+        },
+        data: { status: QRTicketStatus.EXPIRED },
+      });
+
+      return tx.event.update({
+        where: { id },
+        data: { status: 'ended' },
+        include: { category: true, _count: { select: { registrations: true } } },
+      });
+    });
+    await this.cacheStore.invalidatePrefix('events:public');
+    return this.mapEvent(event);
+  }
+
+  async archive(id: string) {
+    const event = await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.event.findUnique({ where: { id } });
+      if (!existing) {
+        throw new NotFoundException('Event not found');
+      }
+
+      await tx.qRTicket.updateMany({
+        where: {
+          eventId: id,
+          status: { in: [QRTicketStatus.NOT_ISSUED, QRTicketStatus.ACTIVE] },
+        },
+        data: { status: QRTicketStatus.REVOKED },
+      });
+
+      return tx.event.update({
+        where: { id },
+        data: { status: 'archived' },
+        include: { category: true, _count: { select: { registrations: true } } },
+      });
     });
     await this.cacheStore.invalidatePrefix('events:public');
     return this.mapEvent(event);
   }
 
   async remove(id: string) {
-    await this.prisma.event.update({
-      where: { id },
-      data: { status: 'cancelled' },
-    });
-    await this.cacheStore.invalidatePrefix('events:public');
-    return { id, deleted: true };
+    await this.archive(id);
+    return { id, archived: true };
   }
 
   private mapEvent(
@@ -318,6 +451,7 @@ export class EventsService {
       [PaymentStatus.PENDING]: 'pending',
       [PaymentStatus.SUCCESSFUL]: 'successful',
       [PaymentStatus.FAILED]: 'failed',
+      [PaymentStatus.REFUND_PENDING]: 'refund_pending',
       [PaymentStatus.REFUNDED]: 'refunded',
       [PaymentStatus.MANUALLY_VERIFIED]: 'manually_verified',
       [PaymentStatus.CANCELLED]: 'cancelled',

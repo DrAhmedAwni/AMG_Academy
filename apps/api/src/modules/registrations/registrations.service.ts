@@ -340,6 +340,7 @@ export class RegistrationsService {
       [PaymentStatus.PENDING]: 'pending',
       [PaymentStatus.SUCCESSFUL]: 'successful',
       [PaymentStatus.FAILED]: 'failed',
+      [PaymentStatus.REFUND_PENDING]: 'refund_pending',
       [PaymentStatus.REFUNDED]: 'refunded',
       [PaymentStatus.MANUALLY_VERIFIED]: 'manually_verified',
       [PaymentStatus.CANCELLED]: 'cancelled',

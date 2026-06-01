@@ -11,6 +11,8 @@ export interface TicketEventSummary {
   id: string;
   title: string;
   startDate: string;
+  endDate?: string;
+  status?: string;
 }
 
 export interface MobileTicket {

@@ -69,4 +69,12 @@ export class UsersController {
   async disableUser(@Param('id') id: string, @CurrentUser() currentUser: JwtPayload) {
     return this.usersService.disableUser(parseWithSchema(uuidSchema, id), currentUser.sub);
   }
+
+  @Delete(':id/delete')
+  @UseGuards(PermissionGuard)
+  @RequirePermission('users:delete')
+  @AuditLog(AuditAction.Delete, 'User')
+  async deleteUser(@Param('id') id: string, @CurrentUser() currentUser: JwtPayload) {
+    return this.usersService.deleteUser(parseWithSchema(uuidSchema, id), currentUser.sub);
+  }
 }

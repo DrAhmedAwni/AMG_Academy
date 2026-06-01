@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import {
   Plus,
   Pencil,
-  Trash2,
+  Archive,
   Eye,
   BookOpen,
   Search,
@@ -50,12 +50,13 @@ interface InstructorOption {
   status?: string;
 }
 
-type CourseFilter = 'all' | 'draft' | 'published' | 'free' | 'paid';
+type CourseFilter = 'all' | 'draft' | 'published' | 'archived' | 'free' | 'paid';
 
 const FILTERS: { label: string; value: CourseFilter }[] = [
   { label: 'All', value: 'all' },
   { label: 'Draft', value: 'draft' },
   { label: 'Published', value: 'published' },
+  { label: 'Archived', value: 'archived' },
   { label: 'Free', value: 'free' },
   { label: 'Paid', value: 'paid' },
 ];
@@ -211,6 +212,8 @@ export default function AdminCoursesPage() {
             return course.status.toLowerCase() === 'draft';
           case 'published':
             return course.status.toLowerCase() === 'published';
+          case 'archived':
+            return course.status.toLowerCase() === 'archived';
           case 'free':
             return course.isFree;
           case 'paid':
@@ -228,6 +231,7 @@ export default function AdminCoursesPage() {
         all: courses.length,
         draft: courses.filter((course) => course.status.toLowerCase() === 'draft').length,
         published: courses.filter((course) => course.status.toLowerCase() === 'published').length,
+        archived: courses.filter((course) => course.status.toLowerCase() === 'archived').length,
         free: courses.filter((course) => course.isFree).length,
         paid: courses.filter((course) => !course.isFree).length,
       }) satisfies Record<CourseFilter, number>,
@@ -403,9 +407,9 @@ export default function AdminCoursesPage() {
                 variant="ghost"
                 size="sm"
                 icon
-                onClick={() => setDeleteTarget(course)}
+              onClick={() => setDeleteTarget(course)}
               >
-                <Trash2 className="h-4 w-4 text-status-error/70" />
+                <Archive className="h-4 w-4 text-status-error/70" />
               </Button>
             </div>
           )}

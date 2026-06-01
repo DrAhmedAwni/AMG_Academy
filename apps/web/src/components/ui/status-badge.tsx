@@ -18,6 +18,7 @@ const statusMap: Record<
   pending: 'pending',
   pending_approval: 'pending',
   pending_payment: 'pending',
+  refund_pending: 'pending',
   cancelled: 'error',
   rejected: 'error',
   disabled: 'error',

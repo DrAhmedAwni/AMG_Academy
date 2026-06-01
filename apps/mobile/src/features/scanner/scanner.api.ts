@@ -18,6 +18,7 @@ export type ScannerResultReason =
   | 'unapproved'
   | 'expired'
   | 'revoked'
+  | 'cancelled_event'
   | 'not_found'
   | 'invalid';
 
@@ -100,6 +101,8 @@ const reasonMap: Record<string, ScannerResultReason> = {
   UNAPPROVED: 'unapproved',
   EXPIRED: 'expired',
   REVOKED: 'revoked',
+  EVENT_CANCELLED: 'cancelled_event',
+  EVENT_ARCHIVED: 'cancelled_event',
   NOT_FOUND: 'not_found',
   INVALID: 'invalid',
 };
@@ -132,6 +135,10 @@ const resultCopy: Record<ScannerResultReason, { title: string; message: string }
   revoked: {
     title: 'Revoked ticket',
     message: 'This ticket was revoked and cannot be used.',
+  },
+  cancelled_event: {
+    title: 'Event cancelled',
+    message: 'This event is cancelled, so this QR ticket cannot be checked in.',
   },
   not_found: {
     title: 'Ticket not found',

@@ -21,6 +21,7 @@ import {
   FileText,
   UserCheck,
   QrCode,
+  Award,
   LogOut,
   ChevronRight,
 } from 'lucide-react';
@@ -34,6 +35,7 @@ const menu = [
   { href: '/admin/events', label: 'Events', icon: CalendarDays, permission: 'events:read' },
   { href: '/admin/registrations', label: 'Registrations', icon: ClipboardList, permission: 'registrations:read' },
   { href: '/admin/payments', label: 'Payments', icon: CreditCard, permission: 'payments:read' },
+  { href: '/admin/certificates', label: 'Certificates', icon: Award, permission: 'certificates:read' },
   { href: '/admin/courses', label: 'Courses', icon: BookOpen, permission: 'courses:read' },
   { href: '/admin/lessons', label: 'Lessons', icon: BookMarked, permission: 'courses:read' },
   { href: '/admin/reports', label: 'Reports', icon: BarChart3, permission: 'reports:read' },
@@ -42,6 +44,18 @@ const menu = [
   { href: '/admin/attendance', label: 'Attendance', icon: UserCheck, permission: 'attendance:read' },
   { href: '/admin/qr-scanner', label: 'QR Scanner', icon: QrCode, permission: 'scanner:use' },
 ];
+
+function isAllowedForRole(item: (typeof menu)[number], user: SessionUser | null) {
+  if (user?.role === 'scanner') {
+    return ['/admin/attendance', '/admin/qr-scanner'].includes(item.href);
+  }
+
+  if (user?.role === 'instructor') {
+    return ['/admin/courses', '/admin/lessons'].includes(item.href);
+  }
+
+  return true;
+}
 
 export function AdminLayout({
   children,
@@ -53,7 +67,7 @@ export function AdminLayout({
   const pathname = usePathname();
   const { logout } = useAuth();
   const filteredMenu = menu.filter(
-    (item) => !item.permission || hasPermission(user, item.permission),
+    (item) => isAllowedForRole(item, user) && (!item.permission || hasPermission(user, item.permission)),
   );
 
   return (

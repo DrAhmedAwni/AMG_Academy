@@ -2,6 +2,8 @@ import type {
   AnnouncementStatus,
   AttendanceStatus,
   ContentPageStatus,
+  CertificateSourceType,
+  CertificateStatus,
   CourseStatus,
   EnrollmentStatus,
   NotificationChannelType,
@@ -61,7 +63,7 @@ export interface Registration {
 
 export interface QRTicket {
   id: string;
-  event: Pick<Event, 'id' | 'title' | 'startDate'>;
+  event: Pick<Event, 'id' | 'title' | 'startDate' | 'endDate' | 'status'>;
   status: QRTicketStatus;
   fallbackCode: string;
   issuedAt: string | null;
@@ -159,4 +161,34 @@ export interface CourseEnrollment {
   status: EnrollmentStatus;
   enrolledAt: string;
   completedAt: string | null;
+}
+
+export interface Certificate {
+  id: string;
+  certificateNumber: string;
+  sourceType: CertificateSourceType;
+  sourceTitle: string;
+  learnerName: string;
+  issuerName: string;
+  status: CertificateStatus;
+  issuedAt: string | null;
+  releasedAt: string | null;
+  hours: number | null;
+  credits: number | null;
+  verificationUrl: string;
+  downloadUrl: string;
+  publicDownloadUrl: string;
+}
+
+export interface CertificateVerification {
+  valid: boolean;
+  status: CertificateStatus | 'not_found';
+  certificateNumber: string | null;
+  learnerName: string | null;
+  sourceType: CertificateSourceType | null;
+  sourceTitle: string | null;
+  issuerName: string;
+  issuedAt: string | null;
+  hours: number | null;
+  credits: number | null;
 }

@@ -21,6 +21,8 @@ export class VideosGuard implements CanActivate {
           select: {
             id: true,
             isFree: true,
+            status: true,
+            instructorId: true,
           },
         },
       },
@@ -28,6 +30,17 @@ export class VideosGuard implements CanActivate {
 
     if (!lesson) {
       throw new NotFoundException('Video lesson not found');
+    }
+
+    const permissions = request.user?.permissions ?? [];
+    const role = request.user?.role;
+    const canManageOwnCourse =
+      role === 'instructor' &&
+      lesson.course.instructorId === userId &&
+      (permissions.includes('*:*') || permissions.includes('courses:update'));
+
+    if (lesson.course.status !== 'PUBLISHED' && !canManageOwnCourse) {
+      throw new ForbiddenException('This course is archived or no longer available');
     }
 
     // Free courses: any authenticated user can watch

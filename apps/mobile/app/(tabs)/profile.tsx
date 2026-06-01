@@ -132,6 +132,12 @@ export default function ProfileTab() {
               onPress={() => { router.push('/courses/my-courses' as never); }}
             />
             <ProfileLink
+              icon="ribbon-outline"
+              label="Certificates"
+              helper="Released achievements and PDFs"
+              onPress={() => { router.push('/certificates' as never); }}
+            />
+            <ProfileLink
               icon="calendar-outline"
               label="My Reservations"
               helper="Event registration status"

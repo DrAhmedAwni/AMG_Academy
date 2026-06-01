@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { Button, StatusBadge } from '@/components/ui';
+import { Button, Modal, StatusBadge } from '@/components/ui';
 import { ErrorState, LoadingSkeleton } from '@/components/states';
 import { DataTable } from '@/components/tables/DataTable';
 import { FilterBar } from '@/components/tables/FilterBar';
@@ -17,6 +17,7 @@ type UserRow = {
   status: string;
   emailVerified: boolean;
   createdAt: string;
+  hasActivity: boolean;
 };
 
 type RoleOption = {
@@ -64,10 +65,21 @@ export default function AdminUsersPage() {
     },
   });
 
+  const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
+
   const disableMutation = useMutation({
     mutationFn: async (userId: string) => api.delete(`/users/${userId}`),
     onSuccess: () => {
       toast.success('User disabled.');
+      void usersQuery.refetch();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (userId: string) => api.delete(`/users/${userId}/delete`),
+    onSuccess: () => {
+      toast.success('User deleted.');
+      setDeleteTarget(null);
       void usersQuery.refetch();
     },
   });
@@ -226,18 +238,50 @@ export default function AdminUsersPage() {
           {
             id: 'actions',
             header: 'Actions',
-            cell: (row) => (
-              <Button
-                size="sm"
-                variant="danger"
-                onClick={() => void disableMutation.mutateAsync(row.id)}
-              >
-                Disable
-              </Button>
-            ),
+            cell: (row) =>
+              row.hasActivity ? (
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => void disableMutation.mutateAsync(row.id)}
+                >
+                  Disable
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => setDeleteTarget(row)}
+                >
+                  Delete
+                </Button>
+              ),
           },
         ]}
       />
+      <Modal
+        open={deleteTarget !== null}
+        title="Delete user"
+        description={`Are you sure you want to permanently delete "${deleteTarget?.name}" (${deleteTarget?.email})? This action cannot be undone.`}
+        onClose={() => setDeleteTarget(null)}
+      >
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            loading={deleteMutation.isPending}
+            onClick={() => {
+              if (deleteTarget) {
+                void deleteMutation.mutateAsync(deleteTarget.id);
+              }
+            }}
+          >
+            Delete permanently
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

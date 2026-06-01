@@ -25,6 +25,7 @@ enum PaymentStatus {
   PENDING
   SUCCESSFUL
   FAILED
+  REFUND_PENDING
   REFUNDED
   MANUALLY_VERIFIED
   CANCELLED
@@ -64,6 +65,29 @@ enum AnnouncementStatus {
 enum ContentPageStatus {
   DRAFT
   PUBLISHED
+}
+
+enum CertificateStatus {
+  PENDING_REVIEW
+  RELEASED
+  REVOKED
+  VOIDED
+}
+
+enum CertificateSourceType {
+  EVENT
+  COURSE
+}
+
+enum CertificateTemplateStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CertificateTemplateScope {
+  EVENT
+  COURSE
+  BOTH
 }
 
 enum NotificationType {
@@ -111,32 +135,36 @@ enum PaymentProvider {
 }
 
 model User {
-  id                String               @id @default(uuid()) @db.Uuid
-  email             String               @unique
-  password          String
-  name              String
-  phone             String?
-  specialty         String?
-  clinic            String?
-  city              String?
-  avatarUrl         String?
-  notificationPreferences Json?
-  emailVerified     Boolean              @default(false)
-  emailVerifiedAt   DateTime?
-  status            UserStatus           @default(ACTIVE)
-  tokenVersion      Int                  @default(0)
-  roleId            String               @db.Uuid
-  role              Role                 @relation(fields: [roleId], references: [id])
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  registrations     EventRegistration[]
-  enrollments       CourseEnrollment[]
-  notifications     Notification[]
-  auditLogs         AuditLog[]           @relation("AuditActor")
-  qrTickets         QRTicket[]
-  scans             AttendanceCheckIn[]  @relation("AttendanceScanner")
-  instructedCourses Course[]             @relation("CourseInstructor")
-  verifiedPayments  Payment[]            @relation("PaymentVerifier")
+  id                          String                @id @default(uuid()) @db.Uuid
+  email                       String                @unique
+  password                    String
+  name                        String
+  phone                       String?
+  specialty                   String?
+  clinic                      String?
+  city                        String?
+  avatarUrl                   String?
+  notificationPreferences     Json?
+  emailVerified               Boolean               @default(false)
+  emailVerifiedAt             DateTime?
+  status                      UserStatus            @default(ACTIVE)
+  tokenVersion                Int                   @default(0)
+  roleId                      String                @db.Uuid
+  role                        Role                  @relation(fields: [roleId], references: [id])
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+  registrations               EventRegistration[]
+  enrollments                 CourseEnrollment[]
+  notifications               Notification[]
+  pushDevices                 PushDevice[]
+  auditLogs                   AuditLog[]            @relation("AuditActor")
+  qrTickets                   QRTicket[]
+  scans                       AttendanceCheckIn[]   @relation("AttendanceScanner")
+  instructedCourses           Course[]              @relation("CourseInstructor")
+  verifiedPayments            Payment[]             @relation("PaymentVerifier")
+  certificates                Certificate[]         @relation("CertificateRecipient")
+  reviewedCertificates        Certificate[]         @relation("CertificateReviewer")
+  createdCertificateTemplates CertificateTemplate[] @relation("CertificateTemplateCreator")
 
   @@index([roleId])
   @@index([status])
@@ -212,6 +240,7 @@ model Event {
   registrations        EventRegistration[]
   qrTickets            QRTicket[]
   attendanceRecords    AttendanceCheckIn[]
+  certificates         Certificate[]
 
   @@index([status])
   @@index([categoryId])
@@ -239,42 +268,42 @@ model EventRegistration {
 }
 
 model Payment {
-  id                String              @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  registrationId    String?             @unique @db.Uuid
-  enrollmentId      String?             @unique @db.Uuid
+  registrationId String? @unique @db.Uuid
+  enrollmentId   String? @unique @db.Uuid
 
-  itemType          PaymentItemType     @default(EVENT)
+  itemType PaymentItemType @default(EVENT)
 
-  amount            Decimal             @db.Decimal(10, 2)
-  currency          String              @default("EGP")
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("EGP")
 
-  status            PaymentStatus       @default(PENDING)
-  provider          String              @default("MOCK")
+  status   PaymentStatus @default(PENDING)
+  provider String        @default("MOCK")
 
-  providerRef       String?
-  checkoutUrl       String?
-  receiptRef        String?
+  providerRef String?
+  checkoutUrl String?
+  receiptRef  String?
 
-  paidAt            DateTime?
-  failedAt          DateTime?
-  cancelledAt       DateTime?
-  refundedAt        DateTime?
+  paidAt      DateTime?
+  failedAt    DateTime?
+  cancelledAt DateTime?
+  refundedAt  DateTime?
 
-  failureReason     String?
-  adminNotes        String?
+  failureReason String?
+  adminNotes    String?
 
-  verifiedById      String?             @db.Uuid
-  verifiedAt        DateTime?
+  verifiedById String?   @db.Uuid
+  verifiedAt   DateTime?
 
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  registration      EventRegistration?  @relation(fields: [registrationId], references: [id])
-  enrollment        CourseEnrollment?   @relation(fields: [enrollmentId], references: [id])
-  verifiedBy        User?               @relation("PaymentVerifier", fields: [verifiedById], references: [id])
+  registration EventRegistration? @relation(fields: [registrationId], references: [id])
+  enrollment   CourseEnrollment?  @relation(fields: [enrollmentId], references: [id])
+  verifiedBy   User?              @relation("PaymentVerifier", fields: [verifiedById], references: [id])
 
-  attempts          PaymentAttempt[]
+  attempts PaymentAttempt[]
 
   @@index([status])
   @@index([provider])
@@ -286,22 +315,22 @@ model Payment {
 }
 
 model PaymentAttempt {
-  id                String          @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  paymentId         String          @db.Uuid
-  payment           Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId String  @db.Uuid
+  payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
-  status            PaymentStatus
-  provider          PaymentProvider
-  providerRef       String?
+  status      PaymentStatus
+  provider    PaymentProvider
+  providerRef String?
 
-  amount            Decimal         @db.Decimal(10, 2)
-  currency          String          @default("EGP")
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("EGP")
 
-  responsePayload   Json?
-  failureReason     String?
+  responsePayload Json?
+  failureReason   String?
 
-  createdAt         DateTime        @default(now())
+  createdAt DateTime @default(now())
 
   @@index([paymentId])
   @@index([status])
@@ -310,18 +339,18 @@ model PaymentAttempt {
 }
 
 model QRTicket {
-  id             String         @id @default(uuid()) @db.Uuid
-  registrationId String         @unique @db.Uuid
-  userId         String         @db.Uuid
-  eventId        String         @db.Uuid
-  tokenHash      String         @unique
-  status         QRTicketStatus @default(NOT_ISSUED)
+  id             String              @id @default(uuid()) @db.Uuid
+  registrationId String              @unique @db.Uuid
+  userId         String              @db.Uuid
+  eventId        String              @db.Uuid
+  tokenHash      String              @unique
+  status         QRTicketStatus      @default(NOT_ISSUED)
   issuedAt       DateTime?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  registration   EventRegistration @relation(fields: [registrationId], references: [id])
-  user           User           @relation(fields: [userId], references: [id])
-  event          Event          @relation(fields: [eventId], references: [id])
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  registration   EventRegistration   @relation(fields: [registrationId], references: [id])
+  user           User                @relation(fields: [userId], references: [id])
+  event          Event               @relation(fields: [eventId], references: [id])
   attendance     AttendanceCheckIn[]
 
   @@index([tokenHash])
@@ -359,23 +388,24 @@ model CourseCategory {
 }
 
 model Course {
-  id               String            @id @default(uuid()) @db.Uuid
-  title            String
-  slug             String            @unique
-  description      String
-  instructorId     String            @db.Uuid
-  categoryId       String            @db.Uuid
-  thumbnailUrl     String?
-  price            Decimal           @db.Decimal(10, 2)
-  isFree           Boolean           @default(true)
-  status           CourseStatus      @default(DRAFT)
-  totalDuration    Int               @default(0)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  instructor       User              @relation("CourseInstructor", fields: [instructorId], references: [id])
-  category         CourseCategory    @relation(fields: [categoryId], references: [id])
-  lessons          Lesson[]
-  enrollments      CourseEnrollment[]
+  id            String             @id @default(uuid()) @db.Uuid
+  title         String
+  slug          String             @unique
+  description   String
+  instructorId  String             @db.Uuid
+  categoryId    String             @db.Uuid
+  thumbnailUrl  String?
+  price         Decimal            @db.Decimal(10, 2)
+  isFree        Boolean            @default(true)
+  status        CourseStatus       @default(DRAFT)
+  totalDuration Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  instructor    User               @relation("CourseInstructor", fields: [instructorId], references: [id])
+  category      CourseCategory     @relation(fields: [categoryId], references: [id])
+  lessons       Lesson[]
+  enrollments   CourseEnrollment[]
+  certificates  Certificate[]
 
   @@index([status])
   @@index([categoryId])
@@ -397,9 +427,9 @@ model Lesson {
   video       Video?           @relation(fields: [videoId], references: [id])
   progress    LessonProgress[]
 
+  @@unique([courseId, orderIndex])
   @@index([courseId])
   @@index([orderIndex])
-  @@unique([courseId, orderIndex])
 }
 
 model Video {
@@ -434,17 +464,77 @@ model CourseEnrollment {
 }
 
 model LessonProgress {
-  id           String   @id @default(uuid()) @db.Uuid
-  enrollmentId String   @db.Uuid
-  lessonId     String   @db.Uuid
-  isCompleted  Boolean  @default(false)
+  id           String           @id @default(uuid()) @db.Uuid
+  enrollmentId String           @db.Uuid
+  lessonId     String           @db.Uuid
+  isCompleted  Boolean          @default(false)
   completedAt  DateTime?
   enrollment   CourseEnrollment @relation(fields: [enrollmentId], references: [id])
-  lesson       Lesson   @relation(fields: [lessonId], references: [id])
+  lesson       Lesson           @relation(fields: [lessonId], references: [id])
 
   @@unique([enrollmentId, lessonId])
   @@index([enrollmentId])
   @@index([lessonId])
+}
+
+model CertificateTemplate {
+  id           String                    @id @default(uuid()) @db.Uuid
+  name         String
+  scope        CertificateTemplateScope  @default(BOTH)
+  status       CertificateTemplateStatus @default(ACTIVE)
+  isDefault    Boolean                   @default(false)
+  layoutConfig Json                      @default("{}")
+  createdById  String?                   @db.Uuid
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  createdBy    User?                     @relation("CertificateTemplateCreator", fields: [createdById], references: [id])
+  certificates Certificate[]
+
+  @@index([scope])
+  @@index([status])
+  @@index([isDefault])
+}
+
+model Certificate {
+  id                 String                @id @default(uuid()) @db.Uuid
+  certificateNumber  String                @unique
+  verificationCode   String                @unique
+  userId             String                @db.Uuid
+  sourceType         CertificateSourceType
+  sourceId           String                @db.Uuid
+  eventId            String?               @db.Uuid
+  courseId           String?               @db.Uuid
+  templateId         String?               @db.Uuid
+  status             CertificateStatus     @default(PENDING_REVIEW)
+  learnerName        String
+  sourceTitle        String
+  issuerName         String                @default("AMG Academy")
+  issuedAt           DateTime?
+  releasedAt         DateTime?
+  revokedAt          DateTime?
+  voidedAt           DateTime?
+  hours              Decimal?              @db.Decimal(8, 2)
+  credits            Decimal?              @db.Decimal(8, 2)
+  pdfStorageProvider String?
+  pdfStorageKey      String?
+  reviewNotes        String?
+  invalidReason      String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  reviewedById       String?               @db.Uuid
+  user               User                  @relation("CertificateRecipient", fields: [userId], references: [id])
+  event              Event?                @relation(fields: [eventId], references: [id])
+  course             Course?               @relation(fields: [courseId], references: [id])
+  template           CertificateTemplate?  @relation(fields: [templateId], references: [id])
+  reviewedBy         User?                 @relation("CertificateReviewer", fields: [reviewedById], references: [id])
+
+  @@unique([userId, sourceType, sourceId])
+  @@index([userId])
+  @@index([sourceType, sourceId])
+  @@index([status])
+  @@index([eventId])
+  @@index([courseId])
+  @@index([releasedAt])
 }
 
 model Announcement {
@@ -462,22 +552,37 @@ model Announcement {
 }
 
 model Notification {
-  id        String                    @id @default(uuid()) @db.Uuid
-  userId    String                    @db.Uuid
-  type      NotificationType
-  title     String
-  message   String
-  read      Boolean                   @default(false)
-  readAt    DateTime?
+  id         String                    @id @default(uuid()) @db.Uuid
+  userId     String                    @db.Uuid
+  type       NotificationType
+  title      String
+  message    String
+  read       Boolean                   @default(false)
+  readAt     DateTime?
   entityType String?
-  entityId  String?
-  channels  NotificationChannelType[]
-  createdAt DateTime                  @default(now())
-  user      User                      @relation(fields: [userId], references: [id])
+  entityId   String?
+  channels   NotificationChannelType[]
+  createdAt  DateTime                  @default(now())
+  user       User                      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([read])
   @@index([createdAt])
+}
+
+model PushDevice {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  expoPushToken String   @unique
+  platform      String?
+  deviceId      String?
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([enabled])
 }
 
 model StaticContentPage {

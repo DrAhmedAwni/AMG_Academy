@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { loginSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
-import { Button, GlassCard, TextField } from '../../src/components/ui';
+import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
 import { useLoginMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, LoginFormValues } from '../../src/features/auth/auth.types';
@@ -34,6 +34,7 @@ export default function LoginScreen() {
   const loginMutation = useLoginMutation();
   const [values, setValues] = useState<LoginFormValues>({ email: '', password: '' });
   const [errors, setErrors] = useState<AuthFormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
   const uiError = useMemo(
     () => (loginMutation.error ? mapApiErrorToUi(loginMutation.error) : null),
     [loginMutation.error],
@@ -75,9 +76,15 @@ export default function LoginScreen() {
           label="Password"
           value={values.password}
           onChangeText={(password) => setValues((current) => ({ ...current, password }))}
-          secureTextEntry
+          secureTextEntry={!showPassword}
           textContentType="password"
           error={errors.password}
+          rightAction={
+            <PasswordToggle
+              visible={showPassword}
+              onToggle={() => setShowPassword((current) => !current)}
+            />
+          }
         />
         {uiError ? (
           <ErrorState title={uiError.title} message={uiError.message} />

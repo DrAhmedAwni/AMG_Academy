@@ -1,32 +1,45 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import {
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
   type TextInputProps,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, typography } from '../../theme';
 
 export interface TextFieldProps extends TextInputProps {
   label: string;
   error?: string;
   helperText?: string;
+  rightAction?: ReactNode;
 }
 
-export function TextField({ label, error, helperText, style, ...inputProps }: TextFieldProps) {
+export function TextField({ label, error, helperText, rightAction, style, ...inputProps }: TextFieldProps) {
   const describedBy = error ? `${label}-error` : helperText ? `${label}-helper` : undefined;
 
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput
-        {...inputProps}
-        accessibilityLabel={inputProps.accessibilityLabel ?? label}
-        accessibilityHint={describedBy}
-        placeholderTextColor={colors.text.muted}
-        style={[styles.input, error ? styles.inputError : null, style]}
-      />
+      <View style={styles.inputWrapper}>
+        <TextInput
+          {...inputProps}
+          accessibilityLabel={inputProps.accessibilityLabel ?? label}
+          accessibilityHint={describedBy}
+          placeholderTextColor={colors.text.muted}
+          style={[
+            styles.input,
+            error ? styles.inputError : null,
+            rightAction ? styles.inputWithAction : null,
+            style,
+          ]}
+        />
+        {rightAction ? (
+          <View style={styles.rightAction}>{rightAction}</View>
+        ) : null}
+      </View>
       {error ? (
         <Text nativeID={`${label}-error`} style={styles.error}>
           {error}
@@ -40,6 +53,14 @@ export function TextField({ label, error, helperText, style, ...inputProps }: Te
   );
 }
 
+export function PasswordToggle({ visible, onToggle }: { visible: boolean; onToggle: () => void }) {
+  return (
+    <Pressable onPress={onToggle} accessibilityLabel={visible ? 'Hide password' : 'Show password'} hitSlop={8}>
+      <Ionicons name={visible ? 'eye-off' : 'eye'} size={22} color={colors.text.muted} />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   field: {
     gap: spacing.xs,
@@ -49,6 +70,10 @@ const styles = StyleSheet.create({
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.semibold,
+  },
+  inputWrapper: {
+    position: 'relative',
+    justifyContent: 'center',
   },
   input: {
     minHeight: 48,
@@ -61,8 +86,18 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     fontSize: typography.size.md,
   },
+  inputWithAction: {
+    paddingRight: 48,
+  },
   inputError: {
     borderColor: colors.status.error,
+  },
+  rightAction: {
+    position: 'absolute',
+    right: spacing.sm,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
   },
   helper: {
     color: colors.text.muted,

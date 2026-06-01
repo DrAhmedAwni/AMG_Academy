@@ -145,7 +145,7 @@ export class AnnouncementsService {
             entityType: 'Announcement',
             entityId: announcement.id,
           },
-          ['in_app'],
+          ['in_app', 'push'],
         ),
       ),
     );

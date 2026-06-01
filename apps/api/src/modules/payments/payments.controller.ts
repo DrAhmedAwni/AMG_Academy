@@ -82,4 +82,12 @@ export class PaymentsController {
       parseWithSchema(manualPaymentVerificationSchema, body),
     );
   }
+
+  @Post(':id/mark-refunded')
+  @UseGuards(PermissionGuard)
+  @RequirePermission('payments:update')
+  @AuditLog(AuditAction.Verify, 'Payment')
+  async markRefunded(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.paymentsService.markRefunded(parseWithSchema(uuidSchema, id), user.sub);
+  }
 }

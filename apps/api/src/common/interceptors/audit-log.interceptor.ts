@@ -146,6 +146,8 @@ export class AuditLogInterceptor implements NestInterceptor {
       Announcement: 'announcement',
       Notification: 'notification',
       StaticContentPage: 'staticContentPage',
+      Certificate: 'certificate',
+      CertificateTemplate: 'certificateTemplate',
       AuditLog: 'auditLog',
     };
 

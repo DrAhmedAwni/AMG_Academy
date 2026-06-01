@@ -16,6 +16,7 @@ export enum PaymentStatus {
   Pending = 'pending',
   Successful = 'successful',
   Failed = 'failed',
+  RefundPending = 'refund_pending',
   Refunded = 'refunded',
   ManuallyVerified = 'manually_verified',
   Cancelled = 'cancelled',
@@ -55,4 +56,16 @@ export enum AnnouncementStatus {
 export enum ContentPageStatus {
   Draft = 'draft',
   Published = 'published',
+}
+
+export enum CertificateStatus {
+  PendingReview = 'pending_review',
+  Released = 'released',
+  Revoked = 'revoked',
+  Voided = 'voided',
+}
+
+export enum CertificateSourceType {
+  Event = 'event',
+  Course = 'course',
 }

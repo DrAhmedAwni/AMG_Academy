@@ -39,6 +39,7 @@ import { ContentPagesModule } from './modules/content-pages/content-pages.module
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { EmailChannel } from './modules/notifications/channels/email.channel';
 import { InAppChannel } from './modules/notifications/channels/in-app.channel';
+import { CertificatesModule } from './modules/certificates/certificates.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { InAppChannel } from './modules/notifications/channels/in-app.channel';
     ExportsModule,
     ContentPagesModule,
     NotificationsModule,
+    CertificatesModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
   ],

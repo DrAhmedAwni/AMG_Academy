@@ -9,6 +9,7 @@ export const privateQueryKeyRoots = [
   'tickets',
   'enrollments',
   'notifications',
+  'certificates',
   'profile',
   'scanner',
 ] as const;

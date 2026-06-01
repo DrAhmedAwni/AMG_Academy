@@ -1,5 +1,7 @@
 import React, { type ReactNode } from 'react';
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -20,30 +22,34 @@ export function Screen({ children, scroll = true, contentStyle, ...props }: Scre
   const insets = useSafeAreaInsets();
   const bottomPadding = layout.screenPadding + spacing.xxl + insets.bottom;
 
-  if (!scroll) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={[styles.content, { paddingBottom: bottomPadding }, contentStyle]}>
-          {children}
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const inner = scroll ? (
+    <ScrollView
+      {...props}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: bottomPadding },
+        contentStyle,
+        props.contentContainerStyle,
+      ]}
+    >
+      {children}
+    </ScrollView>
+  ) : (
+    <View style={[styles.content, { paddingBottom: bottomPadding }, contentStyle]}>
+      {children}
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        {...props}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: bottomPadding },
-          contentStyle,
-          props.contentContainerStyle,
-        ]}
+      <KeyboardAvoidingView
+        style={styles.avoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : undefined}
       >
-        {children}
-      </ScrollView>
+        {inner}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -52,6 +58,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background.main,
+  },
+  avoid: {
+    flex: 1,
   },
   content: {
     flexGrow: 1,

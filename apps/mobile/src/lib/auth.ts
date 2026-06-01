@@ -17,6 +17,10 @@ import {
 } from './storage';
 import type { MobileAuthResponse, MobileAuthTokens } from '../types/api';
 import type { MobileSession, SessionStatus } from '../types/domain';
+import {
+  registerPushTokenForCurrentUser,
+  unregisterCurrentPushToken,
+} from '../features/notifications/pushRegistration';
 
 const anonymousSession: MobileSession = {
   status: 'anonymous',
@@ -103,6 +107,7 @@ export async function refreshSession(): Promise<MobileSession> {
 
 export async function logoutSession() {
   try {
+    await unregisterCurrentPushToken();
     await apiRequest<null>('/auth/logout', {
       method: 'POST',
       authFailureMode: 'ignore',
@@ -181,6 +186,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setApiAuthTokenProvider(undefined);
     };
   }, [bootstrap, expire]);
+
+  useEffect(() => {
+    if (session.status === 'authenticated') {
+      void registerPushTokenForCurrentUser();
+    }
+  }, [session.status, session.user?.id]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

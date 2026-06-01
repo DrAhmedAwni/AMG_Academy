@@ -15,7 +15,7 @@ import {
   Search,
   Users,
   Pencil,
-  Trash2,
+  Archive,
   Eye,
   CalendarDays,
   MapPin,
@@ -41,7 +41,7 @@ interface EventItem {
   thumbnailUrl?: string | null;
 }
 
-type FilterStatus = 'all' | 'draft' | 'published' | 'upcoming' | 'active' | 'finished' | 'cancelled';
+type FilterStatus = 'all' | 'draft' | 'published' | 'upcoming' | 'active' | 'finished' | 'cancelled' | 'archived';
 
 const FILTERS: { label: string; value: FilterStatus }[] = [
   { label: 'All', value: 'all' },
@@ -51,12 +51,13 @@ const FILTERS: { label: string; value: FilterStatus }[] = [
   { label: 'Active', value: 'active' },
   { label: 'Finished', value: 'finished' },
   { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Archived', value: 'archived' },
 ];
 
 export default function AdminEventsPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterStatus>('all');
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmArchive, setConfirmArchive] = useState<string | null>(null);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['admin-events', search],
@@ -78,17 +79,17 @@ export default function AdminEventsPage() {
     onError: () => toast.error('Failed to publish event'),
   });
 
-  const deleteMutation = useMutation({
+  const archiveMutation = useMutation({
     mutationFn: async (id: string) => {
       const { data } = await api.delete(`/events/${id}`);
       return data;
     },
     onSuccess: () => {
-      toast.success('Event removed');
-      setConfirmDelete(null);
+      toast.success('Event archived');
+      setConfirmArchive(null);
       refetch();
     },
-    onError: () => toast.error('Failed to remove event'),
+    onError: () => toast.error('Failed to archive event'),
   });
 
   const events: EventItem[] = data?.data?.data ?? data?.data ?? [];
@@ -111,6 +112,8 @@ export default function AdminEventsPage() {
           return event.endDate ? new Date(event.endDate) < now : startDate < now;
         case 'cancelled':
           return event.status === 'cancelled';
+        case 'archived':
+          return event.status === 'archived';
         default:
           return true;
       }
@@ -132,6 +135,7 @@ export default function AdminEventsPage() {
         event.endDate ? new Date(event.endDate) < now : new Date(event.startDate) < now,
       ).length,
       cancelled: events.filter((event) => event.status === 'cancelled').length,
+      archived: events.filter((event) => event.status === 'archived').length,
     } satisfies Record<FilterStatus, number>;
   }, [events]);
 
@@ -150,7 +154,7 @@ export default function AdminEventsPage() {
       <PageHeader
         title="Events"
         accent="Management"
-        description="Create, edit, delete, and monitor AMG Academy events from one operations surface."
+        description="Create, edit, archive, cancel, and monitor AMG Academy events from one operations surface."
         actions={
           <>
           <Button variant="glass" size="sm" onClick={() => refetch()}>
@@ -313,17 +317,17 @@ export default function AdminEventsPage() {
                         Publish
                       </Button>
                     )}
-                    {confirmDelete === event.id ? (
+                    {confirmArchive === event.id ? (
                       <div className="flex items-center gap-1">
                         <Button
                           variant="danger"
                           size="sm"
-                          onClick={() => deleteMutation.mutate(event.id)}
-                          loading={deleteMutation.isPending}
+                          onClick={() => archiveMutation.mutate(event.id)}
+                          loading={archiveMutation.isPending}
                         >
-                          Confirm
+                          Archive
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(null)}>
+                        <Button variant="ghost" size="sm" onClick={() => setConfirmArchive(null)}>
                           Cancel
                         </Button>
                       </div>
@@ -332,9 +336,9 @@ export default function AdminEventsPage() {
                         variant="ghost"
                         size="sm"
                         icon
-                        onClick={() => setConfirmDelete(event.id)}
+                        onClick={() => setConfirmArchive(event.id)}
                       >
-                        <Trash2 className="h-4 w-4 text-status-error/70 hover:text-status-error" />
+                        <Archive className="h-4 w-4 text-status-error/70 hover:text-status-error" />
                       </Button>
                     )}
                   </div>

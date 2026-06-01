@@ -7,12 +7,12 @@ export interface PushRegistrationResult {
 
 export async function preparePushRegistration(
   expoPushToken: string,
+  metadata: { platform?: string; deviceId?: string } = {},
 ): Promise<PushRegistrationResult> {
   try {
     await apiRequest('/notifications/push-token', {
       method: 'POST',
-      body: JSON.stringify({ token: expoPushToken }),
-      headers: { 'Content-Type': 'application/json' },
+      body: { token: expoPushToken, ...metadata },
     });
     return { registered: true, message: 'Push token registered with backend.' };
   } catch {
@@ -23,7 +23,15 @@ export async function preparePushRegistration(
   }
 }
 
-export async function requestPushPermission(): Promise<{ granted: boolean }> {
+export async function unregisterPushToken(expoPushToken: string): Promise<void> {
+  await apiRequest('/notifications/push-token', {
+    method: 'DELETE',
+    body: { token: expoPushToken },
+    authFailureMode: 'ignore',
+  }).catch(() => undefined);
+}
+
+export async function requestPushPermission(): Promise<{ granted: boolean; token?: string }> {
   try {
     const { Notifications } = require('expo-notifications');
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -39,8 +47,33 @@ export async function requestPushPermission(): Promise<{ granted: boolean }> {
     }
 
     const expoPushTokenData = await Notifications.getExpoPushTokenAsync();
-    return { granted: true };
+    return { granted: true, token: expoPushTokenData.data };
   } catch {
     return { granted: false };
+  }
+}
+
+export async function registerPushTokenForCurrentUser(): Promise<PushRegistrationResult> {
+  if (process.env.EXPO_PUBLIC_ENABLE_PUSH_PREP === 'false') {
+    return { registered: false, message: 'Push preparation is disabled.' };
+  }
+
+  const permission = await requestPushPermission();
+  if (!permission.granted || !permission.token) {
+    return { registered: false, message: 'Push permission was not granted.' };
+  }
+
+  return preparePushRegistration(permission.token);
+}
+
+export async function unregisterCurrentPushToken(): Promise<void> {
+  try {
+    const { Notifications } = require('expo-notifications');
+    const expoPushTokenData = await Notifications.getExpoPushTokenAsync();
+    if (expoPushTokenData.data) {
+      await unregisterPushToken(expoPushTokenData.data);
+    }
+  } catch {
+    // Push cleanup is best-effort; SecureStore cleanup still owns logout.
   }
 }

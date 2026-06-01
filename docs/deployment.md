@@ -30,6 +30,10 @@ Important root variables:
 | `API_URL` | Canonical public API URL | `https://academy.example.com/api` |
 | `NEXT_PUBLIC_API_URL` | Frontend browser API base URL | `https://academy.example.com/api` |
 | `UPLOAD_DIR` | Persistent uploads directory | `/var/www/amg/uploads` |
+| `QR_TICKET_GRACE_MINUTES` | Extra check-in window after event end before QR expiry | `120` |
+| `VIDEO_STORAGE_PROVIDER` | Lesson video storage backend: `google_drive` or `vps` | `google_drive` |
+| `GOOGLE_DRIVE_COURSE_VIDEOS_FOLDER_ID` | Private Drive folder id for course videos | `1abc...` |
+| `GOOGLE_APPLICATION_CREDENTIALS` / `GOOGLE_SERVICE_ACCOUNT_JSON` | Service account credentials for backend-only Drive access | `/secure/amg-drive.json` |
 
 Application-specific examples also live in:
 

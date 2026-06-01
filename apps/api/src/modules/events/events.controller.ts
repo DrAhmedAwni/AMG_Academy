@@ -82,10 +82,34 @@ export class EventsController {
     return this.eventsService.publish(parseWithSchema(uuidSchema, id));
   }
 
+  @Post(':id/cancel')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('events:update')
+  @AuditLog(AuditAction.Update, 'Event')
+  async cancel(@Param('id') id: string) {
+    return this.eventsService.cancel(parseWithSchema(uuidSchema, id));
+  }
+
+  @Post(':id/end')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('events:update')
+  @AuditLog(AuditAction.Update, 'Event')
+  async end(@Param('id') id: string) {
+    return this.eventsService.end(parseWithSchema(uuidSchema, id));
+  }
+
+  @Post(':id/archive')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('events:delete')
+  @AuditLog(AuditAction.Archive, 'Event')
+  async archive(@Param('id') id: string) {
+    return this.eventsService.archive(parseWithSchema(uuidSchema, id));
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermission('events:delete')
-  @AuditLog(AuditAction.Delete, 'Event')
+  @AuditLog(AuditAction.Archive, 'Event')
   async remove(@Param('id') id: string) {
     return this.eventsService.remove(parseWithSchema(uuidSchema, id));
   }

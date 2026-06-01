@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, CourseStatus } from '@prisma/client';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import type { JwtPayload } from '@amg/shared';
+import { Prisma, CourseStatus, EnrollmentStatus } from '@prisma/client';
 import { CacheStoreService } from '../../common/interceptors/cache.interceptor';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateCourseDto, UpdateCourseDto } from './dto/courses.dto';
@@ -98,12 +99,16 @@ export class CoursesService {
     limit?: number;
     search?: string;
     status?: string;
-  }) {
+  }, currentUser?: JwtPayload) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 25;
     const skip = (page - 1) * limit;
 
     const where: Prisma.CourseWhereInput = {};
+
+    if (this.isInstructor(currentUser)) {
+      where.instructorId = currentUser!.sub;
+    }
 
     if (query.search) {
       where.OR = [
@@ -162,6 +167,10 @@ export class CoursesService {
       throw new NotFoundException('Course not found');
     }
 
+    if (course.status !== CourseStatus.PUBLISHED) {
+      throw new NotFoundException('Course not found');
+    }
+
     let isEnrolled = false;
     let paymentStatus: string | null = null;
     let paymentId: string | null = null;
@@ -170,7 +179,7 @@ export class CoursesService {
         where: { userId_courseId: { userId, courseId: course.id } },
         include: { payment: { select: { id: true, status: true } } },
       });
-      isEnrolled = !!enrollment && enrollment.status !== 'CANCELLED';
+      isEnrolled = !!enrollment && enrollment.status !== EnrollmentStatus.CANCELLED;
       if (enrollment?.payment) {
         paymentStatus = enrollment.payment.status.toLowerCase();
         paymentId = enrollment.payment.id;
@@ -197,7 +206,8 @@ export class CoursesService {
     return this.mapCourse(course);
   }
 
-  async update(id: string, data: UpdateCourseDto) {
+  async update(id: string, data: UpdateCourseDto, currentUser?: JwtPayload) {
+    await this.assertCanManageCourse(id, currentUser);
     const updateData: Prisma.CourseUpdateInput = { ...data };
     if (data.price !== undefined) {
       updateData.price = new Prisma.Decimal(data.price);
@@ -217,7 +227,8 @@ export class CoursesService {
     return this.mapCourse(course);
   }
 
-  async publish(id: string) {
+  async publish(id: string, currentUser?: JwtPayload) {
+    await this.assertCanManageCourse(id, currentUser);
     const course = await this.prisma.course.update({
       where: { id },
       data: { status: CourseStatus.PUBLISHED },
@@ -231,27 +242,54 @@ export class CoursesService {
     return this.mapCourse(course);
   }
 
-  async archive(id: string) {
-    const course = await this.prisma.course.update({
-      where: { id },
-      data: { status: CourseStatus.ARCHIVED },
-      include: {
-        category: true,
-        instructor: { select: { id: true, name: true, avatarUrl: true } },
-        _count: { select: { enrollments: true, lessons: true } },
-      },
+  async archive(id: string, currentUser?: JwtPayload) {
+    await this.assertCanManageCourse(id, currentUser);
+    const course = await this.prisma.$transaction(async (tx) => {
+      await tx.courseEnrollment.updateMany({
+        where: { courseId: id, status: { not: EnrollmentStatus.CANCELLED } },
+        data: { status: EnrollmentStatus.CANCELLED },
+      });
+
+      return tx.course.update({
+        where: { id },
+        data: { status: CourseStatus.ARCHIVED },
+        include: {
+          category: true,
+          instructor: { select: { id: true, name: true, avatarUrl: true } },
+          _count: { select: { enrollments: true, lessons: true } },
+        },
+      });
     });
     await this.cacheStore.invalidatePrefix('courses:public');
     return this.mapCourse(course);
   }
 
-  async remove(id: string) {
-    await this.prisma.course.update({
+  async remove(id: string, currentUser?: JwtPayload) {
+    await this.archive(id, currentUser);
+    return { id, archived: true };
+  }
+
+  private isInstructor(user?: JwtPayload) {
+    return user?.role === 'instructor' && !user.permissions.includes('*:*');
+  }
+
+  private async assertCanManageCourse(id: string, currentUser?: JwtPayload) {
+    if (!this.isInstructor(currentUser)) {
+      return;
+    }
+
+    const course = await this.prisma.course.findUnique({
       where: { id },
-      data: { status: CourseStatus.ARCHIVED },
+      select: { instructorId: true },
     });
-    await this.cacheStore.invalidatePrefix('courses:public');
-    return { id, deleted: true };
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.instructorId !== currentUser!.sub) {
+      throw new ForbiddenException('Instructors can manage only their own courses');
+    }
   }
 
   private mapCourse(
@@ -282,7 +320,7 @@ export class CoursesService {
       isEnrolled,
       paymentStatus: paymentStatus ?? null,
       paymentId: paymentId ?? null,
-      status: course.status,
+      status: course.status.toLowerCase(),
       lessons: course.lessons,
       createdAt: course.createdAt.toISOString(),
     };

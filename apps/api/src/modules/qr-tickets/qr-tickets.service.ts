@@ -1,6 +1,6 @@
 import {
-  BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -11,11 +11,20 @@ import {
 } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { CertificatesService } from '../certificates/certificates.service';
 import type { QrScanDto } from './dto/qr-tickets.dto';
 
 @Injectable()
 export class QrTicketsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(QrTicketsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly certificatesService: CertificatesService,
+  ) {}
+
+  private readonly cancelledEventStatuses = new Set(['cancelled', 'archived']);
+  private readonly endedEventStatuses = new Set(['ended', 'finished']);
 
   async findMine(userId: string, query: { page?: number; limit?: number; status?: string }) {
     const page = query.page ?? 1;
@@ -134,6 +143,12 @@ export class QrTicketsService {
       return { valid: false, reason: 'WRONG_EVENT' };
     }
 
+    const eventBlockReason = this.getEventBlockReason(hydratedTicket.event);
+    if (eventBlockReason) {
+      await this.persistBlockedTicketStatus(hydratedTicket.id, eventBlockReason);
+      return { valid: false, reason: eventBlockReason };
+    }
+
     if (hydratedTicket.registration.status !== 'APPROVED') {
       return { valid: false, reason: 'NOT_APPROVED' };
     }
@@ -194,6 +209,17 @@ export class QrTicketsService {
         status: AttendanceStatus.VALIDATED,
       },
     });
+
+    try {
+      await this.certificatesService.ensureForEventAttendance(
+        hydratedTicket.userId,
+        hydratedTicket.eventId,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Certificate generation failed after attendance scan ${hydratedTicket.id}: ${(error as Error).message}`,
+      );
+    }
 
     return {
       valid: true,
@@ -262,11 +288,92 @@ export class QrTicketsService {
       [PaymentStatus.PENDING]: 'pending',
       [PaymentStatus.SUCCESSFUL]: 'successful',
       [PaymentStatus.FAILED]: 'failed',
+      [PaymentStatus.REFUND_PENDING]: 'refund_pending',
       [PaymentStatus.REFUNDED]: 'refunded',
       [PaymentStatus.MANUALLY_VERIFIED]: 'manually_verified',
       [PaymentStatus.CANCELLED]: 'cancelled',
     };
     return map[status];
+  }
+
+  private getQrGraceMs() {
+    const minutes = Number(process.env.QR_TICKET_GRACE_MINUTES ?? 120);
+    return Number.isFinite(minutes) && minutes >= 0 ? minutes * 60 * 1000 : 120 * 60 * 1000;
+  }
+
+  private getEventBlockReason(event: { status: string; endDate: Date }) {
+    const normalizedStatus = event.status.toLowerCase();
+    if (this.cancelledEventStatuses.has(normalizedStatus)) {
+      return normalizedStatus === 'cancelled' ? 'EVENT_CANCELLED' : 'REVOKED';
+    }
+
+    const expiryTime = event.endDate.getTime() + this.getQrGraceMs();
+    if (this.endedEventStatuses.has(normalizedStatus) || Date.now() > expiryTime) {
+      return 'EXPIRED';
+    }
+
+    return null;
+  }
+
+  private getEffectiveTicketStatus(ticket: {
+    status: QRTicketStatus;
+    event: { status: string; endDate: Date };
+  }) {
+    if (ticket.status !== QRTicketStatus.NOT_ISSUED && ticket.status !== QRTicketStatus.ACTIVE) {
+      return ticket.status;
+    }
+
+    const blockReason = this.getEventBlockReason(ticket.event);
+    if (blockReason === 'EVENT_CANCELLED' || blockReason === 'REVOKED') {
+      return QRTicketStatus.REVOKED;
+    }
+
+    if (blockReason === 'EXPIRED') {
+      return QRTicketStatus.EXPIRED;
+    }
+
+    return ticket.status;
+  }
+
+  private async persistBlockedTicketStatus(ticketId: string, reason: string) {
+    if (reason === 'EXPIRED') {
+      await this.prisma.qRTicket.updateMany({
+        where: { id: ticketId, status: { in: [QRTicketStatus.NOT_ISSUED, QRTicketStatus.ACTIVE] } },
+        data: { status: QRTicketStatus.EXPIRED },
+      });
+    }
+
+    if (reason === 'EVENT_CANCELLED' || reason === 'REVOKED') {
+      await this.prisma.qRTicket.updateMany({
+        where: { id: ticketId, status: { in: [QRTicketStatus.NOT_ISSUED, QRTicketStatus.ACTIVE] } },
+        data: { status: QRTicketStatus.REVOKED },
+      });
+    }
+  }
+
+  private isTicketDisplayable(ticket: {
+    status: QRTicketStatus;
+    registration?: {
+      status: RegistrationStatus;
+      payment?: { status: PaymentStatus } | null;
+    } | null;
+    event: { status: string; endDate: Date };
+  }) {
+    if (this.getEffectiveTicketStatus(ticket) !== QRTicketStatus.ACTIVE) {
+      return false;
+    }
+
+    if (ticket.registration?.status !== RegistrationStatus.APPROVED) {
+      return false;
+    }
+
+    const paymentStatus = ticket.registration.payment?.status;
+    return (
+      !paymentStatus ||
+      paymentStatus === PaymentStatus.NOT_REQUIRED ||
+      paymentStatus === PaymentStatus.SUCCESSFUL ||
+      paymentStatus === PaymentStatus.MANUALLY_VERIFIED
+    );
   }
 
   private mapTicket(
@@ -276,7 +383,7 @@ export class QrTicketsService {
       status: QRTicketStatus;
       issuedAt: Date | null;
       createdAt: Date;
-      event: { id: string; title: string; startDate: Date };
+      event: { id: string; title: string; startDate: Date; endDate: Date; status: string };
       user?: { id: string; name: string };
       registration?: {
         id: string;
@@ -287,21 +394,24 @@ export class QrTicketsService {
     includeUser = false,
   ) {
     const fallbackCode = ticket.tokenHash.slice(0, 8).toUpperCase();
+    const effectiveStatus = this.getEffectiveTicketStatus(ticket);
     const result: Record<string, unknown> = {
       id: ticket.id,
       event: {
         id: ticket.event.id,
         title: ticket.event.title,
         startDate: ticket.event.startDate.toISOString(),
+        endDate: ticket.event.endDate.toISOString(),
+        status: ticket.event.status,
       },
-      status: ticket.status.toLowerCase(),
+      status: effectiveStatus.toLowerCase(),
       registrationStatus: ticket.registration
         ? this.mapRegistrationStatus(ticket.registration.status)
         : null,
       paymentStatus: ticket.registration?.payment
         ? this.mapPaymentStatus(ticket.registration.payment.status)
         : 'not_required',
-      qrPayload: ticket.status === QRTicketStatus.ACTIVE ? `${ticket.id}:${fallbackCode}` : null,
+      qrPayload: this.isTicketDisplayable(ticket) ? `${ticket.id}:${fallbackCode}` : null,
       fallbackCode,
       issuedAt: ticket.issuedAt?.toISOString() ?? null,
     };
