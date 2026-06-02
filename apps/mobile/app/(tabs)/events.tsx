@@ -134,6 +134,7 @@ export default function EventsTab() {
           data={state.data.data}
           keyExtractor={(item) => item.id}
           renderItem={renderEvent}
+          style={{ flex: 1 }}
           refreshControl={
             <RefreshControl
               tintColor={colors.accent.primary}

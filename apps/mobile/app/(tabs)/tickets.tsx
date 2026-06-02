@@ -128,6 +128,7 @@ export default function TicketsTab() {
           data={filteredTickets}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <TicketCard ticket={item} />}
+          style={{ flex: 1 }}
           refreshControl={
             <RefreshControl
               tintColor={colors.accent.primary}

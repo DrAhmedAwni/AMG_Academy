@@ -20,7 +20,7 @@ export interface ScreenProps extends ScrollViewProps {
 
 export function Screen({ children, scroll = true, contentStyle, ...props }: ScreenProps) {
   const insets = useSafeAreaInsets();
-  const bottomPadding = layout.screenPadding + spacing.xxl + insets.bottom;
+  const bottomPadding = layout.bottomTabContentPadding + insets.bottom;
 
   const inner = scroll ? (
     <ScrollView

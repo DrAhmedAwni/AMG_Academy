@@ -125,6 +125,7 @@ export default function NewAdminEventPage() {
       if (!form.startDate) errors.startDate = 'Start date is required';
       if (!form.endDate) errors.endDate = 'End date is required';
       if (form.startDate && form.endDate && new Date(form.endDate) <= new Date(form.startDate)) errors.endDate = 'End date must be after start date';
+      if (form.startDate && form.registrationDeadline && new Date(form.registrationDeadline) >= new Date(form.startDate)) errors.registrationDeadline = 'Registration deadline must be before start date';
       if (!form.location.trim()) errors.location = 'Location is required';
       if (!form.categoryId) errors.categoryId = 'Category is required';
       if (form.capacity < 1) errors.capacity = 'Capacity must be at least 1';
@@ -159,7 +160,14 @@ export default function NewAdminEventPage() {
     },
     onError: (error: any) => {
       if (error?.message !== 'validation') {
-        toast.error(error?.response?.data?.error?.message ?? 'Failed to create event');
+        const apiError = error?.response?.data?.error;
+        const details = apiError?.details;
+        if (details?.length > 0) {
+          const messages = details.map((d: any) => `${d.field}: ${d.message}`).join('\n');
+          toast.error(messages);
+        } else {
+          toast.error(apiError?.message ?? 'Failed to create event');
+        }
       }
     },
   });

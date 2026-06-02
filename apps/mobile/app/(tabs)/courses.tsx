@@ -147,6 +147,7 @@ export default function CoursesTab() {
           data={state.data.data}
           keyExtractor={(item) => item.id}
           renderItem={renderCourse}
+          style={{ flex: 1 }}
           contentContainerStyle={[
             styles.list,
             { paddingBottom: layout.bottomTabContentPadding + insets.bottom },

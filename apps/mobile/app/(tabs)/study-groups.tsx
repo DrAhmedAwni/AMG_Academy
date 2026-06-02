@@ -223,6 +223,7 @@ export default function StudyGroupsTab() {
           data={state.data.data}
           keyExtractor={(item) => item.id}
           renderItem={renderGroup}
+          style={{ flex: 1 }}
           refreshControl={
             <RefreshControl
               tintColor={colors.accent.primary}

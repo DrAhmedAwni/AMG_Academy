@@ -286,6 +286,7 @@ export default function CasesTab() {
           data={visibleCases}
           keyExtractor={(item) => item.id}
           renderItem={renderCase}
+          style={{ flex: 1 }}
           refreshControl={
             <RefreshControl
               tintColor={colors.accent.primary}
