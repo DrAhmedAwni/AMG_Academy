@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TicketCard } from '../../src/components/cards/TicketCard';
 import { Header, Screen } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
 import { Button, GlassCard } from '../../src/components/ui';
 import {
+  canDeleteTicket,
   getTicketWalletState,
+  useDeleteTicketMutation,
   useTicketsQuery,
 } from '../../src/features/tickets/tickets.hooks';
 import type { MobileTicket } from '../../src/features/tickets/tickets.api';
@@ -37,6 +39,7 @@ export default function TicketsTab() {
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<TicketFilter>('all');
   const ticketsQuery = useTicketsQuery({ page: 1, limit: 50 });
+  const deleteTicketMutation = useDeleteTicketMutation();
   const state = useQueryState(ticketsQuery, {
     isEmpty: (data) => data.data.length === 0,
   });
@@ -52,6 +55,27 @@ export default function TicketsTab() {
     (ticket) => getTicketWalletState(ticket).state === 'active',
   ).length ?? 0;
   const listData = state.status === 'success' ? filteredTickets : [];
+  const confirmDeleteTicket = (ticket: MobileTicket) => {
+    Alert.alert(
+      'Remove QR ticket?',
+      'This removes the QR from your wallet. AMG keeps the attendance record if it is needed later.',
+      [
+        { text: 'Keep', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            void deleteTicketMutation.mutateAsync(ticket.id).catch((error) => {
+              Alert.alert(
+                'Could not remove ticket',
+                error instanceof Error ? error.message : 'Please try again.',
+              );
+            });
+          },
+        },
+      ],
+    );
+  };
 
   const renderListHeader = () => (
     <View style={styles.listHeader}>
@@ -145,7 +169,16 @@ export default function TicketsTab() {
       <FlatList
         data={listData}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <TicketCard ticket={item} />}
+        renderItem={({ item }) => (
+          <TicketCard
+            ticket={item}
+            canDelete={canDeleteTicket(item)}
+            deleteLoading={
+              deleteTicketMutation.isPending && deleteTicketMutation.variables === item.id
+            }
+            onDelete={() => confirmDeleteTicket(item)}
+          />
+        )}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={renderListHeader}
         ListEmptyComponent={renderListEmpty}

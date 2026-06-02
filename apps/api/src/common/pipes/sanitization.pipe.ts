@@ -3,6 +3,7 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
+import { Buffer } from 'buffer';
 import sanitizeHtml from 'sanitize-html';
 
 @Injectable()
@@ -16,6 +17,10 @@ export class SanitizationPipe implements PipeTransform {
   }
 
   private sanitizeDeep(value: unknown): unknown {
+    if (Buffer.isBuffer(value) || value instanceof ArrayBuffer || ArrayBuffer.isView(value)) {
+      return value;
+    }
+
     if (Array.isArray(value)) {
       return value.map((item) => this.sanitizeDeep(item));
     }

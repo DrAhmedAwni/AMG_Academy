@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StatusBadge, GlassCard } from '../ui';
+import { Button, StatusBadge, GlassCard } from '../ui';
 import { QRCodePanel } from '../../features/tickets/QRCodePanel';
 import {
   getTicketWalletState,
@@ -11,6 +11,9 @@ import { colors, radius, spacing, textStyles, typography } from '../../theme';
 
 export interface TicketCardProps {
   ticket: MobileTicket;
+  canDelete?: boolean;
+  deleteLoading?: boolean;
+  onDelete?: () => void;
 }
 
 function formatEventDate(value: string) {
@@ -22,7 +25,12 @@ function formatEventDate(value: string) {
   }).format(new Date(value));
 }
 
-export function TicketCard({ ticket }: TicketCardProps) {
+export function TicketCard({
+  ticket,
+  canDelete = false,
+  deleteLoading = false,
+  onDelete,
+}: TicketCardProps) {
   const walletState = getTicketWalletState(ticket);
   const isActive = walletState.canDisplayQr;
 
@@ -60,6 +68,16 @@ export function TicketCard({ ticket }: TicketCardProps) {
         ) : null}
         <StatusBadge domain="payment" status={ticket.paymentStatus} />
       </View>
+
+      {canDelete ? (
+        <Button
+          label="Remove from wallet"
+          variant="danger"
+          size="sm"
+          loading={deleteLoading}
+          onPress={onDelete}
+        />
+      ) : null}
     </GlassCard>
   );
 }

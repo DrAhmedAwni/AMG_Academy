@@ -32,6 +32,28 @@ interface CourseOption {
   title: string;
 }
 
+type LessonFormState = {
+  title: string;
+  description: string;
+  courseId: string;
+  orderIndex: number;
+  duration: number;
+  videoId: string;
+};
+
+type VideoUploadResponse = {
+  id?: string;
+  originalName?: string | null;
+};
+
+function toControlledString(value: unknown) {
+  return typeof value === 'string' ? value : '';
+}
+
+function toControlledNumber(value: unknown, fallback: number) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
 async function fetchLessons(courseId: string) {
   const res = await api.get('/lessons', { params: { courseId } });
   const payload = res.data?.data ?? res.data;
@@ -261,13 +283,13 @@ function LessonFormModal({
   onSubmit: (body: Record<string, unknown>) => void;
   isSubmitting: boolean;
 }) {
-  const [form, setForm] = useState({
-    title: lesson?.title ?? '',
-    description: lesson?.description ?? '',
+  const [form, setForm] = useState<LessonFormState>({
+    title: toControlledString(lesson?.title),
+    description: toControlledString(lesson?.description),
     courseId,
-    orderIndex: lesson?.orderIndex ?? 1,
-    duration: lesson?.duration ?? 0,
-    videoId: lesson?.videoId ?? '',
+    orderIndex: toControlledNumber(lesson?.orderIndex, 1),
+    duration: toControlledNumber(lesson?.duration, 0),
+    videoId: toControlledString(lesson?.videoId),
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [videoSource, setVideoSource] = useState<'url' | 'upload'>('url');
@@ -288,9 +310,12 @@ function LessonFormModal({
     setAttaching(true);
     try {
       const res = await api.post('/videos/from-url', { url: driveUrl.trim() });
-      const video = res.data.data;
-      setForm((prev) => ({ ...prev, videoId: video.id }));
-      setVideoName(video.originalName);
+      const video = res.data.data as VideoUploadResponse;
+      if (!video.id) {
+        throw new Error('Video response did not include an id');
+      }
+      setForm((prev) => ({ ...prev, videoId: video.id ?? '' }));
+      setVideoName(video.originalName ?? 'Google Drive video');
       setDriveUrl('');
       toast.success('Video attached from Google Drive');
     } catch (err: any) {
@@ -309,10 +334,16 @@ function LessonFormModal({
       const res = await api.post('/videos/upload', fd, {
         timeout: 300000,
       });
-      const video = res.data.data;
-      setForm((prev) => ({ ...prev, videoId: video.id }));
-      setVideoName(video.originalName);
+      const video = res.data.data as VideoUploadResponse;
+      if (!video.id) {
+        throw new Error('Video response did not include an id');
+      }
+      setForm((prev) => ({ ...prev, videoId: video.id ?? '' }));
+      setVideoName(video.originalName ?? uploadFile.name);
       setUploadFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       toast.success('Video uploaded and attached');
     } catch (err: any) {
       toast.error(err?.response?.data?.error?.message ?? 'Failed to upload video');
@@ -369,7 +400,7 @@ function LessonFormModal({
             min={1}
             value={form.orderIndex}
             error={fieldErrors.orderIndex}
-            onChange={(e) => { setForm({ ...form, orderIndex: Number(e.target.value) }); clearError('orderIndex'); }}
+            onChange={(e) => { setForm({ ...form, orderIndex: toControlledNumber(Number(e.target.value), 1) }); clearError('orderIndex'); }}
             required
           />
           <Input
@@ -377,7 +408,7 @@ function LessonFormModal({
             type="number"
             min={0}
             value={form.duration}
-            onChange={(e) => { setForm({ ...form, duration: Number(e.target.value) }); clearError('duration'); }}
+            onChange={(e) => { setForm({ ...form, duration: toControlledNumber(Number(e.target.value), 0) }); clearError('duration'); }}
           />
         </div>
 
@@ -418,7 +449,7 @@ function LessonFormModal({
           </div>
 
           {videoSource === 'url' ? (
-            <div className="flex gap-2">
+            <div key="drive-url-source" className="flex gap-2">
               <input
                 type="text"
                 value={driveUrl}
@@ -431,7 +462,7 @@ function LessonFormModal({
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div key="video-upload-source" className="space-y-2">
               <input
                 ref={fileInputRef}
                 type="file"
