@@ -13,6 +13,7 @@ import {
   Plus,
   Pencil,
   Archive,
+  Trash2,
   Eye,
   BookOpen,
   Search,
@@ -162,6 +163,7 @@ export default function AdminCoursesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
+  const [hardDeleteTarget, setHardDeleteTarget] = useState<Course | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -211,6 +213,20 @@ export default function AdminCoursesPage() {
     },
     onError: (err: any) =>
       toast.error(err?.response?.data?.error?.message ?? 'Failed to archive'),
+  });
+
+  const hardDeleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.delete(`/courses/${id}/hard`);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success('Course deleted permanently');
+      setHardDeleteTarget(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+    },
+    onError: (err: any) =>
+      toast.error(err?.response?.data?.error?.message ?? 'Failed to delete'),
   });
 
   const publishMutation = useMutation({
@@ -439,10 +455,20 @@ export default function AdminCoursesPage() {
                 variant="ghost"
                 size="sm"
                 icon
-              onClick={() => setDeleteTarget(course)}
+                onClick={() => setDeleteTarget(course)}
               >
                 <Archive className="h-4 w-4 text-status-error/70" />
               </Button>
+              {course.enrollmentsCount === 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon
+                  onClick={() => setHardDeleteTarget(course)}
+                >
+                  <Trash2 className="h-4 w-4 text-status-error/70" />
+                </Button>
+              )}
             </div>
           )}
         />
@@ -497,6 +523,29 @@ export default function AdminCoursesPage() {
               loading={deleteMutation.isPending}
             >
               Archive
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {hardDeleteTarget && (
+        <Modal
+          open
+          title="Delete course permanently?"
+          description={`This will permanently delete "${hardDeleteTarget.title}" including all lessons. This cannot be undone.`}
+          onClose={() => setHardDeleteTarget(null)}
+          maxWidth="sm"
+        >
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setHardDeleteTarget(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => hardDeleteMutation.mutate(hardDeleteTarget.id)}
+              loading={hardDeleteMutation.isPending}
+            >
+              Delete
             </Button>
           </div>
         </Modal>

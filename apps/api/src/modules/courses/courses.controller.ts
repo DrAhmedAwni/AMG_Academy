@@ -78,4 +78,12 @@ export class CoursesController {
   async remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.coursesService.remove(parseWithSchema(uuidSchema, id), user);
   }
+
+  @Delete(':id/hard')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('courses:delete')
+  @AuditLog(AuditAction.Delete, 'Course')
+  async hardDelete(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.coursesService.hardDelete(parseWithSchema(uuidSchema, id), user);
+  }
 }

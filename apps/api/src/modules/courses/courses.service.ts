@@ -294,6 +294,22 @@ export class CoursesService {
     return { id, archived: true };
   }
 
+  async hardDelete(id: string, currentUser?: JwtPayload) {
+    await this.assertCanManageCourse(id, currentUser);
+    const enrollmentsCount = await this.prisma.courseEnrollment.count({ where: { courseId: id } });
+    if (enrollmentsCount > 0) {
+      throw new ForbiddenException('Cannot delete course with existing enrollments');
+    }
+    await this.prisma.$transaction([
+      this.prisma.lesson.deleteMany({ where: { courseId: id } }),
+      this.prisma.certificate.deleteMany({ where: { courseId: id } }),
+      this.prisma.studyGroup.deleteMany({ where: { courseId: id } }),
+      this.prisma.course.delete({ where: { id } }),
+    ]);
+    await this.cacheStore.invalidatePrefix('courses:public');
+    return { id, deleted: true };
+  }
+
   private isInstructor(user?: JwtPayload) {
     return user?.role === 'instructor' && !user.permissions.includes('*:*');
   }
