@@ -50,7 +50,7 @@ export default function EditCoursePage() {
   });
 
   const instructorsQuery = useQuery({
-    queryKey: ['course-instructors'], queryFn: async () => { const { data } = await api.get('/users', { params: { page: 1, limit: 100, status: 'active' } }); const u = data?.data ?? data; return (Array.isArray(u) ? u : u?.data ?? []) as Instructor[]; },
+    queryKey: ['course-instructors'], queryFn: async () => { const { data } = await api.get('/users', { params: { page: 1, limit: 100, status: 'active' } }); const u = data?.data ?? data; if (Array.isArray(u)) return u as Instructor[]; if (Array.isArray(u?.data)) return u.data as Instructor[]; if (Array.isArray(u?.items)) return u.items as Instructor[]; return []; },
   });
 
   const categories = categoriesQuery.data ?? [];

@@ -95,7 +95,10 @@ export default function NewCoursePage() {
     queryFn: async () => {
       const { data } = await api.get('/users', { params: { page: 1, limit: 100, status: 'active' } });
       const unwrapped = data?.data ?? data;
-      return (Array.isArray(unwrapped) ? unwrapped : unwrapped?.data ?? []) as Instructor[];
+      if (Array.isArray(unwrapped)) return unwrapped as Instructor[];
+      if (Array.isArray(unwrapped?.data)) return unwrapped.data as Instructor[];
+      if (Array.isArray(unwrapped?.items)) return unwrapped.items as Instructor[];
+      return [];
     },
   });
 
