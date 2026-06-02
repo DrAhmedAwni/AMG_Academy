@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -51,6 +51,24 @@ const convertGoogleDriveUrl = (url: string): string => {
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
 };
 
+const compressImage = (file: File, maxWidth = 800, quality = 0.7): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(maxWidth / img.width, 1);
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = url;
+  });
+
 const defaultDates = () => {
   const start = new Date();
   start.setDate(start.getDate() + 30);
@@ -93,8 +111,31 @@ export default function NewAdminEventPage() {
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const clearError = (field: string) => setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    setUploadingImage(true);
+    try {
+      const dataUrl = await compressImage(file);
+      setImagePreview(dataUrl);
+      setImageError(false);
+      setForm({ ...form, thumbnailUrl: dataUrl });
+    } catch {
+      toast.error('Failed to process image');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const categoriesQuery = useQuery({
     queryKey: ['admin-event-categories-for-create'],
@@ -402,6 +443,21 @@ export default function NewAdminEventPage() {
                 value={form.thumbnailUrl}
                 onChange={(event) => handleImageUrlChange(event.target.value)}
               />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={uploadingImage}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploadingImage ? 'Processing...' : 'Upload'}
+              </Button>
               {imagePreview && (
                 <Button type="button" variant="ghost" onClick={handleClearImage}>
                   Clear
@@ -409,8 +465,7 @@ export default function NewAdminEventPage() {
               )}
             </div>
             <p className="text-xs text-text-muted">
-              Paste a Google Drive shared link (e.g. <code className="text-accent-primary">drive.google.com/file/d/...</code>).
-              It will be converted to a direct image URL automatically.
+              Paste a Google Drive shared link or upload an image directly (max 5MB). Google Drive links are converted to thumbnail URLs automatically. Uploaded images are compressed to ~100-200KB.
             </p>
           </label>
 

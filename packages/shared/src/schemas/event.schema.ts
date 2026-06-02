@@ -18,7 +18,7 @@ const eventBaseSchema = z.object({
   capacity: z.coerce.number().int().positive(),
   registrationDeadline: dateStringSchema.optional().nullable(),
   categoryId: uuidSchema,
-  thumbnailUrl: optionalTrimmedString(500),
+  thumbnailUrl: optionalTrimmedString(500_000),
 });
 
 export const eventSchema = eventBaseSchema
