@@ -78,16 +78,16 @@ const styles = StyleSheet.create({
     minWidth: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.md,
+    borderRadius: radius.pill,
     borderWidth: 1,
   },
   md: {
-    minHeight: 48,
+    minHeight: 52,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
   sm: {
-    minHeight: 40,
+    minHeight: 42,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },
@@ -112,22 +112,22 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
   },
   secondary: {
-    backgroundColor: colors.surface.elevated,
+    backgroundColor: colors.surface.raised,
     borderColor: colors.border.strong,
   },
   secondaryText: {
     color: colors.text.primary,
   },
   ghost: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.surface.soft,
     borderColor: colors.border.default,
   },
   ghostText: {
     color: colors.accent.primary,
   },
   danger: {
-    backgroundColor: 'rgba(239, 68, 68, 0.14)',
-    borderColor: 'rgba(239, 68, 68, 0.44)',
+    backgroundColor: 'rgba(251, 113, 133, 0.14)',
+    borderColor: 'rgba(251, 113, 133, 0.44)',
   },
   dangerText: {
     color: colors.status.error,

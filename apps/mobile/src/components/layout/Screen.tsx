@@ -43,6 +43,8 @@ export function Screen({ children, scroll = true, contentStyle, ...props }: Scre
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <View pointerEvents="none" style={styles.backdropTop} />
+      <View pointerEvents="none" style={styles.backdropBand} />
       <KeyboardAvoidingView
         style={styles.avoid}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -59,12 +61,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.main,
   },
+  backdropTop: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    left: 0,
+    height: 220,
+    backgroundColor: colors.background.secondary,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.default,
+  },
+  backdropBand: {
+    position: 'absolute',
+    top: 38,
+    right: -56,
+    width: 340,
+    height: 54,
+    backgroundColor: 'rgba(94, 234, 212, 0.055)',
+    transform: [{ rotate: '-14deg' }],
+  },
   avoid: {
     flex: 1,
   },
   content: {
     flexGrow: 1,
-    gap: spacing.md,
+    gap: spacing.lg,
     width: '100%',
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',

@@ -56,7 +56,7 @@ export default function LessonPlayerScreen() {
       <Screen>
         <LoadingState
           title="Checking access"
-          message="Verifying backend lesson authorization."
+          message="Checking that this lesson is available for your account."
         />
       </Screen>
     );
@@ -67,7 +67,7 @@ export default function LessonPlayerScreen() {
       <Screen>
         <PermissionDeniedState
           title="Lesson locked"
-          message="This lesson requires backend-approved enrollment and payment. Complete payment or check your enrollment status."
+          message="This lesson requires an active enrollment and completed payment."
           action={{ label: 'Retry', onPress: () => {
             void enrollmentsQuery.refetch().finally(() => {
               void checkAccess();
@@ -83,7 +83,7 @@ export default function LessonPlayerScreen() {
       <Screen>
         <ErrorState
           title="Playback unavailable"
-          message="The lesson video could not be loaded due to a backend authorization error."
+          message="The lesson video could not be loaded right now."
           onRetry={() => {
             void checkAccess();
           }}
@@ -96,7 +96,7 @@ export default function LessonPlayerScreen() {
     <Screen>
       <Header
         title="Lesson"
-        subtitle="Authorized playback - no durable public URLs."
+        subtitle="Protected playback for enrolled learners."
         action={<Button label="Back" variant="secondary" onPress={() => router.back()} />}
       />
 
@@ -104,12 +104,11 @@ export default function LessonPlayerScreen() {
         <View style={styles.playerPlaceholder}>
           <Text style={styles.playerPlaceholderText}>Play</Text>
         </View>
-        <Text style={styles.readyText}>Stream authorized by backend for this session.</Text>
+        <Text style={styles.readyText}>Your lesson is ready to play for this session.</Text>
       </GlassCard>
 
       <Text style={styles.disclaimer}>
-        Protected video streaming is authorized by the backend. No durable public video URLs are
-        stored or exposed.
+        Course videos are streamed inside AMG Academy and are not shared as public links.
       </Text>
     </Screen>
   );

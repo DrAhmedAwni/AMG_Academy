@@ -26,11 +26,12 @@ describe('role-aware mobile navigation', () => {
     );
   });
 
-  it('shows scanner navigation for scanner permission', () => {
+  it('keeps scanner tools out of the bottom tabs for scanner permission', () => {
     const routes = getVisibleTabRoutes(user({ permissions: ['scanner:use'] }));
 
     expect(canAccessScanner(user({ permissions: ['scanner:use'] }))).toBe(true);
-    expect(routes.map((route) => route.name)).toContain('staff');
+    expect(routes.map((route) => route.name)).toEqual(baseTabRoutes.map((route) => route.name));
+    expect(routes.map((route) => route.name)).not.toContain('staff');
   });
 
   it('allows wildcard admins into scanner route guards', () => {

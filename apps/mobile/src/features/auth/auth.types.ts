@@ -57,7 +57,7 @@ export function canAccessScanner(user: AuthUser | null | undefined) {
 }
 
 export interface TabRouteConfig {
-  name: 'home' | 'events' | 'tickets' | 'courses' | 'profile' | 'staff';
+  name: 'home' | 'courses' | 'events' | 'community' | 'profile' | 'staff';
   label: string;
   protected: true;
   requiresScanner?: boolean;
@@ -65,9 +65,9 @@ export interface TabRouteConfig {
 
 export const baseTabRoutes: TabRouteConfig[] = [
   { name: 'home', label: 'Home', protected: true },
-  { name: 'events', label: 'Events', protected: true },
-  { name: 'tickets', label: 'Tickets', protected: true },
   { name: 'courses', label: 'Courses', protected: true },
+  { name: 'events', label: 'Events', protected: true },
+  { name: 'community', label: 'Community', protected: true },
   { name: 'profile', label: 'Profile', protected: true },
 ];
 
@@ -78,10 +78,8 @@ export const scannerTabRoute: TabRouteConfig = {
   requiresScanner: true,
 };
 
-export function getVisibleTabRoutes(user: AuthUser | null | undefined) {
-  return canAccessScanner(user)
-    ? [...baseTabRoutes, scannerTabRoute]
-    : baseTabRoutes;
+export function getVisibleTabRoutes(_user: AuthUser | null | undefined) {
+  return baseTabRoutes;
 }
 
 export function canAccessRoute(

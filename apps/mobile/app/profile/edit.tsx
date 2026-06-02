@@ -63,7 +63,7 @@ export default function EditProfileScreen() {
     <Screen contentStyle={styles.screen}>
       <Header
         title="Edit Profile"
-        subtitle="Updates are validated and saved by the backend."
+        subtitle="Keep your AMG Academy profile up to date."
         action={<Button label="Back" variant="secondary" size="sm" onPress={() => router.back()} />}
       />
 
@@ -141,7 +141,7 @@ export default function EditProfileScreen() {
             }).then(() => {
               setSaved(true);
             }).catch(() => {
-              // Mutation state renders the backend validation or network error.
+              // Mutation state renders validation or network errors.
             });
           }}
         />

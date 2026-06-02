@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { spacing, textStyles } from '../../theme';
+import { colors, radius, spacing, textStyles, typography } from '../../theme';
 
 export interface HeaderProps {
   title: string;
@@ -12,6 +12,10 @@ export function Header({ title, subtitle, action }: HeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.copy}>
+        <View style={styles.brandRow}>
+          <View style={styles.brandMark} />
+          <Text style={styles.eyebrow}>AMG Academy</Text>
+        </View>
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
@@ -22,19 +26,44 @@ export function Header({ title, subtitle, action }: HeaderProps) {
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: 56,
+    minHeight: 82,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: spacing.md,
+    paddingTop: spacing.xs,
   },
   copy: {
     flex: 1,
-    gap: spacing.xxs,
+    gap: spacing.xs,
   },
-  title: textStyles.heading,
-  subtitle: textStyles.body,
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  brandMark: {
+    width: 18,
+    height: 3,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent.gold,
+  },
+  eyebrow: {
+    ...textStyles.caption,
+    color: colors.accent.gold,
+    fontWeight: typography.weight.bold,
+    textTransform: 'uppercase',
+  },
+  title: {
+    ...textStyles.title,
+    letterSpacing: 0,
+  },
+  subtitle: {
+    ...textStyles.body,
+    maxWidth: 520,
+  },
   action: {
     flexShrink: 0,
+    paddingTop: spacing.lg,
   },
 });

@@ -80,7 +80,7 @@ export function getTicketWalletState(ticket: Pick<MobileTicket,
     return {
       state: 'revoked',
       label: 'Revoked',
-      message: 'This QR ticket was revoked by the backend.',
+      message: 'This QR ticket is no longer valid.',
       canDisplayQr: false,
     };
   }
@@ -125,7 +125,7 @@ export function getTicketWalletState(ticket: Pick<MobileTicket,
     return {
       state: 'not_issued',
       label: 'Not issued',
-      message: 'The backend has not issued a displayable QR payload yet.',
+      message: 'Your QR ticket is not ready yet.',
       canDisplayQr: false,
     };
   }

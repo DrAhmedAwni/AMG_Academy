@@ -64,7 +64,8 @@ const cardStyles = StyleSheet.create({
     transform: [{ scale: 0.995 }],
   },
   card: {
-    gap: spacing.sm,
+    gap: spacing.md,
+    borderColor: colors.border.strong,
   },
   headerRow: {
     flexDirection: 'row',
@@ -89,13 +90,17 @@ const cardStyles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: spacing.xs,
   },
   memberCount: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxs,
-    marginLeft: 'auto',
+    borderRadius: 999,
+    backgroundColor: colors.surface.soft,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
   },
   memberText: {
     ...textStyles.caption,
@@ -150,10 +155,10 @@ export default function StudyGroupsTab() {
     <Screen scroll={false} contentStyle={styles.screen}>
       <Header
         title="Study Groups"
-        subtitle="Join or create peer learning groups."
+        subtitle="Join live peer groups and instructor-led course circles."
         action={
           <Button
-            label="Create Group"
+            label="Create"
             variant="secondary"
             size="sm"
             onPress={() => router.push('/study-groups/create' as never)}
@@ -194,7 +199,7 @@ export default function StudyGroupsTab() {
       </View>
 
       {state.status === 'loading' ? (
-        <LoadingState title="Loading groups" message="Fetching available study groups." />
+        <LoadingState title="Loading groups" message="Finding active study groups." />
       ) : state.status === 'error' ? (
         <ErrorState
           title={state.error.title}
@@ -205,8 +210,9 @@ export default function StudyGroupsTab() {
         />
       ) : state.status === 'empty' ? (
         <EmptyState
-          title="No study groups found"
-          message="No groups match your filters. Create a new group to get started."
+          icon="people-outline"
+          title="No study groups yet"
+          message="Create a group or adjust your filters to find student-led and instructor-led circles."
           action={{
             label: 'Create a group',
             onPress: () => router.push('/study-groups/create' as never),

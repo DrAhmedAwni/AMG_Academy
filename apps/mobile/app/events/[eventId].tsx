@@ -64,7 +64,7 @@ export default function EventDetailScreen() {
     <Screen>
       <Header
         title="Event"
-        subtitle="Registration and payment state are backend-derived."
+        subtitle="Review details and manage your registration."
         action={<Button label="Back" variant="secondary" size="sm" onPress={() => router.back()} />}
       />
       {registrationError ? (
@@ -95,7 +95,7 @@ export default function EventDetailScreen() {
 
             void eventQuery.refetch();
           }).catch(() => {
-            // The mutation state renders the backend error message.
+            // The mutation state renders the registration error message.
           });
         }}
       />

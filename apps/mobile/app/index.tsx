@@ -4,16 +4,38 @@ import { LoadingState } from '../src/components/states/LoadingState';
 import { Screen } from '../src/components/layout/Screen';
 import { SplashVideo } from '../src/components/layout/SplashVideo';
 import { useAuth } from '../src/lib/auth';
+import { getSecureItem, setSecureItem } from '../src/lib/storage';
 
 const splashVideo = require('../assets/splash-video.mp4');
+const splashSeenKey = 'intro.splashVideoSeen';
 
 export default function BootstrapRoute() {
   const router = useRouter();
   const { status } = useAuth();
-  const [splashFinished, setSplashFinished] = useState(false);
+  const [splashState, setSplashState] = useState<'checking' | 'showing' | 'done'>('checking');
 
   useEffect(() => {
-    if (!splashFinished) return;
+    let mounted = true;
+
+    void getSecureItem(splashSeenKey)
+      .then((value) => {
+        if (mounted) {
+          setSplashState(value === 'true' ? 'done' : 'showing');
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setSplashState('showing');
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (splashState !== 'done') return;
 
     if (status === 'authenticated') {
       router.replace('/(tabs)/home' as never);
@@ -22,15 +44,20 @@ export default function BootstrapRoute() {
     if (status === 'anonymous' || status === 'expired') {
       router.replace('/(auth)/login' as never);
     }
-  }, [router, status, splashFinished]);
+  }, [router, status, splashState]);
 
-  if (!splashFinished) {
-    return <SplashVideo videoSource={splashVideo} onFinish={() => setSplashFinished(true)} />;
+  const finishSplash = () => {
+    setSplashState('done');
+    void setSecureItem(splashSeenKey, 'true');
+  };
+
+  if (splashState === 'showing') {
+    return <SplashVideo videoSource={splashVideo} onFinish={finishSplash} />;
   }
 
   return (
     <Screen scroll={false}>
-      <LoadingState title="Opening AMG Academy" message="Checking your secure session." />
+      <LoadingState title="Opening AMG Academy" message="Preparing your app." />
     </Screen>
   );
 }

@@ -8,7 +8,7 @@ import { ErrorState } from '../../src/components/states/ErrorState';
 import { useLoginMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, LoginFormValues } from '../../src/features/auth/auth.types';
 import { mapApiErrorToUi } from '../../src/lib/errors';
-import { spacing, textStyles } from '../../src/theme';
+import { colors, radius, spacing, textStyles, typography } from '../../src/theme';
 
 function getLoginErrors(values: LoginFormValues): AuthFormErrors {
   const result = loginSchema.safeParse({
@@ -55,9 +55,12 @@ export default function LoginScreen() {
     <Screen contentStyle={styles.screen}>
       <View style={styles.hero}>
         <Image source={require('../../assets/logo-horizontal.png')} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.title}>Sign in</Text>
+        <View style={styles.brandPill}>
+          <Text style={styles.brandPillText}>Premium dental learning</Text>
+        </View>
+        <Text style={styles.title}>Welcome back</Text>
         <Text style={styles.subtitle}>
-          Access your events, tickets, courses, and AMG Academy profile.
+          Sign in to continue to AMG Academy.
         </Text>
       </View>
 
@@ -114,18 +117,42 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     justifyContent: 'center',
+    gap: spacing.xl,
   },
   hero: {
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   logo: {
-    width: 220,
-    height: 56,
+    width: 238,
+    height: 64,
   },
-  title: textStyles.title,
-  subtitle: textStyles.body,
+  brandPill: {
+    minHeight: 32,
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(248, 198, 109, 0.32)',
+    backgroundColor: colors.accent.goldMuted,
+    paddingHorizontal: spacing.md,
+  },
+  brandPillText: {
+    ...textStyles.caption,
+    color: colors.accent.gold,
+    textTransform: 'uppercase',
+    fontWeight: typography.weight.bold,
+  },
+  title: {
+    ...textStyles.title,
+    marginTop: spacing.xs,
+  },
+  subtitle: {
+    ...textStyles.body,
+    textAlign: 'center',
+  },
   card: {
-    gap: spacing.md,
+    gap: spacing.lg,
+    borderColor: colors.border.strong,
+    padding: spacing.xl,
   },
 });

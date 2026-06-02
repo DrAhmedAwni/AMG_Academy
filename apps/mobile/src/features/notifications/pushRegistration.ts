@@ -1,3 +1,4 @@
+import * as Notifications from 'expo-notifications';
 import { apiRequest } from '../../lib/api';
 
 export interface PushRegistrationResult {
@@ -14,7 +15,7 @@ export async function preparePushRegistration(
       method: 'POST',
       body: { token: expoPushToken, ...metadata },
     });
-    return { registered: true, message: 'Push token registered with backend.' };
+    return { registered: true, message: 'Notifications are ready.' };
   } catch {
     return {
       registered: false,
@@ -33,7 +34,6 @@ export async function unregisterPushToken(expoPushToken: string): Promise<void> 
 
 export async function requestPushPermission(): Promise<{ granted: boolean; token?: string }> {
   try {
-    const { Notifications } = require('expo-notifications');
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
@@ -68,12 +68,11 @@ export async function registerPushTokenForCurrentUser(): Promise<PushRegistratio
 
 export async function unregisterCurrentPushToken(): Promise<void> {
   try {
-    const { Notifications } = require('expo-notifications');
     const expoPushTokenData = await Notifications.getExpoPushTokenAsync();
     if (expoPushTokenData.data) {
       await unregisterPushToken(expoPushTokenData.data);
     }
   } catch {
-    // Push cleanup is best-effort; SecureStore cleanup still owns logout.
+    // Push cleanup is best-effort; session cleanup still owns logout.
   }
 }

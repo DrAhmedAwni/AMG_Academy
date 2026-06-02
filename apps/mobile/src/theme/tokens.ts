@@ -10,9 +10,9 @@ export const typography = {
     xs: 12,
     sm: 14,
     md: 16,
-    lg: 18,
-    xl: 22,
-    xxl: 28,
+    lg: 19,
+    xl: 23,
+    xxl: 30,
   },
   lineHeight: {
     xs: 16,
@@ -20,7 +20,7 @@ export const typography = {
     md: 24,
     lg: 28,
     xl: 32,
-    xxl: 36,
+    xxl: 38,
   },
   weight: {
     regular: '400',
@@ -43,33 +43,33 @@ export const spacing = {
 
 export const radius = {
   xs: 6,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
+  sm: 10,
+  md: 14,
+  lg: 18,
+  xl: 24,
   pill: 999,
 } as const;
 
 export const shadows = {
   glow: {
     shadowColor: colors.accent.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.24,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 7,
   } satisfies ViewStyle,
   card: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.28,
-    shadowRadius: 24,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.24,
+    shadowRadius: 26,
+    elevation: 5,
   } satisfies ViewStyle,
   soft: {
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 18,
+    shadowOpacity: 0.16,
+    shadowRadius: 16,
     elevation: 3,
   } satisfies ViewStyle,
 } as const;
@@ -108,10 +108,10 @@ export const textStyles = {
 } as const;
 
 export const layout = {
-  screenPadding: spacing.md,
+  screenPadding: spacing.lg,
   minTapTarget: 44,
-  bottomTabHeight: 72,
-  bottomTabContentPadding: 112,
+  bottomTabHeight: 78,
+  bottomTabContentPadding: 124,
   maxContentWidth: 720,
 } as const;
 

@@ -85,7 +85,7 @@ export default function MyCoursesScreen() {
     <Screen>
       <Header
         title="My Courses"
-        subtitle="Enrolled courses with backend-derived progress and payment state."
+        subtitle="Continue courses you joined and track your progress."
         action={<Button label="Back" variant="secondary" onPress={() => router.back()} />}
       />
 
@@ -99,6 +99,7 @@ export default function MyCoursesScreen() {
         />
       ) : state.status === 'empty' ? (
         <EmptyState
+          icon="school-outline"
           title="No enrollments"
           message="Browse the course catalog and enroll in a course to get started."
         />

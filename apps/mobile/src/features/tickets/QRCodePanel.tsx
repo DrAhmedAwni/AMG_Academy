@@ -4,16 +4,15 @@ import QRCode from 'react-native-qrcode-svg';
 import { colors, radius, spacing, textStyles } from '../../theme';
 
 export interface QRCodePanelProps {
-  payload: string | null;
-  fallbackCode?: string;
+  value: string | null;
 }
 
-export function QRCodePanel({ payload, fallbackCode }: QRCodePanelProps) {
-  if (!payload) {
+export function QRCodePanel({ value }: QRCodePanelProps) {
+  if (!value) {
     return (
       <View accessibilityRole="text" style={styles.lockedPanel}>
         <Text style={styles.lockedTitle}>QR unavailable</Text>
-        <Text style={styles.lockedMessage}>The backend has not issued a usable QR payload.</Text>
+        <Text style={styles.lockedMessage}>Your QR code is not ready yet.</Text>
       </View>
     );
   }
@@ -22,20 +21,13 @@ export function QRCodePanel({ payload, fallbackCode }: QRCodePanelProps) {
     <View style={styles.panel}>
       <View accessibilityLabel="Event QR code" style={styles.qrFrame}>
         <QRCode
-          value={payload}
-          size={176}
+          value={value}
+          size={190}
           color={colors.text.inverse}
           backgroundColor={colors.text.primary}
         />
       </View>
-      {fallbackCode ? (
-        <View style={styles.fallback}>
-          <Text style={styles.fallbackLabel}>Fallback code</Text>
-          <Text selectable style={styles.fallbackCode}>
-            {fallbackCode}
-          </Text>
-        </View>
-      ) : null}
+      <Text style={styles.helperText}>Show this QR at event check-in.</Text>
     </View>
   );
 }
@@ -43,23 +35,19 @@ export function QRCodePanel({ payload, fallbackCode }: QRCodePanelProps) {
 const styles = StyleSheet.create({
   panel: {
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   qrFrame: {
     overflow: 'hidden',
-    borderRadius: radius.lg,
+    borderRadius: radius.xl,
+    borderWidth: 8,
+    borderColor: colors.surface.raised,
     backgroundColor: colors.text.primary,
-    padding: spacing.md,
+    padding: spacing.lg,
   },
-  fallback: {
-    alignItems: 'center',
-    gap: spacing.xxs,
-  },
-  fallbackLabel: textStyles.caption,
-  fallbackCode: {
-    ...textStyles.heading,
-    color: colors.accent.primary,
-    letterSpacing: 0,
+  helperText: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
   },
   lockedPanel: {
     alignItems: 'center',

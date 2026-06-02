@@ -86,7 +86,7 @@ export default function CourseDetailScreen() {
     <Screen>
       <Header
         title="Course"
-        subtitle="Enrollment and lesson state are backend-derived."
+        subtitle="Review lessons, enrollment, and course access."
         action={<Button label="Back" variant="secondary" onPress={() => router.back()} />}
       />
 

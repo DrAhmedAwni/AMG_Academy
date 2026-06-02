@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { PaymentStatus, RegistrationStatus } from '@amg/shared';
 import { Header, Screen, SectionHeader } from '../../src/components/layout';
-import { Badge, GlassCard } from '../../src/components/ui';
+import { Badge, Button, GlassCard } from '../../src/components/ui';
+import { useCertificatesQuery } from '../../src/features/certificates/certificates.hooks';
 import { useEnrollmentsQuery } from '../../src/features/courses/courses.hooks';
 import { useReservationsQuery } from '../../src/features/events/events.hooks';
 import { useTicketsQuery, getTicketWalletState } from '../../src/features/tickets/tickets.hooks';
@@ -16,9 +17,12 @@ type RouteTarget =
   | '/(tabs)/events'
   | '/(tabs)/tickets'
   | '/(tabs)/courses'
+  | '/(tabs)/cases'
+  | '/(tabs)/community'
   | '/(tabs)/profile'
   | '/events/reservations'
-  | '/courses/my-courses';
+  | '/courses/my-courses'
+  | '/certificates';
 
 function formatShortDate(value: string) {
   return new Intl.DateTimeFormat('en', {
@@ -51,11 +55,13 @@ function SummaryCard({
 
   return (
     <GlassCard style={styles.summaryCard}>
-      <View style={[styles.summaryIcon, { borderColor: toneColor, backgroundColor: `${toneColor}1F` }]}>
-        <Ionicons name={icon} size={20} color={toneColor} />
+      <View style={styles.summaryTop}>
+        <View style={[styles.summaryIcon, { borderColor: toneColor, backgroundColor: `${toneColor}1F` }]}>
+          <Ionicons name={icon} size={20} color={toneColor} />
+        </View>
+        <Text style={styles.summaryValue}>{value}</Text>
       </View>
       <Text style={styles.summaryLabel}>{label}</Text>
-      <Text style={styles.summaryValue}>{value}</Text>
       <Text numberOfLines={2} style={styles.summaryHelper}>{helper}</Text>
     </GlassCard>
   );
@@ -84,9 +90,11 @@ function QuickAction({
       </View>
       <View style={styles.quickCopy}>
         <Text style={styles.quickLabel}>{label}</Text>
-        <Text numberOfLines={1} style={styles.quickHelper}>{helper}</Text>
+        <Text numberOfLines={2} style={styles.quickHelper}>{helper}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+      <View style={styles.quickChevron}>
+        <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+      </View>
     </Pressable>
   );
 }
@@ -97,10 +105,12 @@ export default function HomeTab() {
   const reservationsQuery = useReservationsQuery({ page: 1, limit: 50 });
   const enrollmentsQuery = useEnrollmentsQuery();
   const ticketsQuery = useTicketsQuery({ page: 1, limit: 50 });
+  const certificatesQuery = useCertificatesQuery({ page: 1, limit: 10 });
 
   const reservations = reservationsQuery.data?.data ?? [];
   const enrollments = enrollmentsQuery.data?.data ?? [];
   const tickets = ticketsQuery.data?.data ?? [];
+  const certificates = certificatesQuery.data?.data ?? [];
   const now = Date.now();
   const upcomingReservation = reservations
     .filter((reservation) => new Date(reservation.event.startDate).getTime() >= now)
@@ -115,6 +125,10 @@ export default function HomeTab() {
   );
   const activeTickets = tickets.filter((ticket) => getTicketWalletState(ticket).state === 'active');
   const firstEnrollment = enrollments[0];
+  const bestProgress = enrollments.reduce(
+    (current, enrollment) => Math.max(current, enrollment.progressPercent),
+    0,
+  );
 
   const goTo = (route: RouteTarget) => {
     router.push(route as never);
@@ -124,25 +138,38 @@ export default function HomeTab() {
     <Screen contentStyle={styles.screen}>
       <Header
         title={`Welcome${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
-        subtitle="Your AMG Academy mobile dashboard."
+        subtitle="Continue learning where you left off."
       />
 
       <GlassCard style={styles.heroCard}>
         <View style={styles.heroTopRow}>
           <View style={styles.heroIcon}>
-            <Ionicons name="shield-checkmark" size={24} color={colors.accent.primary} />
+            <Ionicons name="school" size={24} color={colors.accent.primary} />
           </View>
           <Badge
-            label="Secure session"
+            label={pendingReservations.length > 0 ? `${pendingReservations.length} needs attention` : 'Ready'}
             foreground={colors.accent.primary}
             background="rgba(84, 217, 232, 0.14)"
             border="rgba(84, 217, 232, 0.34)"
           />
         </View>
-        <Text style={styles.title}>AMG Academy at a glance</Text>
+        <Text style={styles.title}>Your learning today</Text>
         <Text style={styles.body}>
-          Registration, payment, QR ticket, and course access states are loaded from the backend.
+          Track your courses, events, tickets, and certificates in one place.
         </Text>
+        <View style={styles.heroActions}>
+          <Button
+            label={firstEnrollment ? 'Continue learning' : 'Browse courses'}
+            onPress={() => goTo(firstEnrollment ? '/courses/my-courses' : '/(tabs)/courses')}
+            style={styles.heroAction}
+          />
+          <Button
+            label="My tickets"
+            variant="secondary"
+            onPress={() => goTo('/(tabs)/tickets')}
+            style={styles.heroAction}
+          />
+        </View>
       </GlassCard>
 
       <View style={styles.summaryGrid}>
@@ -160,54 +187,60 @@ export default function HomeTab() {
           tone="accent"
         />
         <SummaryCard
-          icon="time-outline"
-          label="Pending"
-          value={reservationsQuery.isLoading ? 'Loading' : String(pendingReservations.length)}
-          helper="Reservations or payments needing backend completion."
-          tone={pendingReservations.length > 0 ? 'warning' : 'neutral'}
+          icon="qr-code-outline"
+          label="Active ticket"
+          value={ticketsQuery.isLoading ? 'Loading' : String(activeTickets.length)}
+          helper="QR tickets ready for event check-in."
+          tone="accent"
         />
         <SummaryCard
           icon="school-outline"
-          label="Courses"
-          value={enrollmentsQuery.isLoading ? 'Loading' : String(enrollments.length)}
-          helper={firstEnrollment?.course.title ?? 'Enrolled courses and progress show here.'}
+          label="Course progress"
+          value={enrollmentsQuery.isLoading ? 'Loading' : enrollments.length > 0 ? `${bestProgress}%` : '0%'}
+          helper={firstEnrollment?.course.title ?? 'Enroll in a course to start learning.'}
           tone="success"
         />
         <SummaryCard
-          icon="qr-code-outline"
-          label="Active QR"
-          value={ticketsQuery.isLoading ? 'Loading' : String(activeTickets.length)}
-          helper="Only backend-valid QR tickets count as active."
-          tone="accent"
+          icon="ribbon-outline"
+          label="Certificates"
+          value={certificatesQuery.isLoading ? 'Loading' : String(certificates.length)}
+          helper="Released certificates and achievements."
+          tone="success"
         />
       </View>
 
       <View style={styles.section}>
-        <SectionHeader title="Quick actions" subtitle="Jump into the flows used most on mobile." />
+        <SectionHeader title="Quick actions" subtitle="Open the areas you use most." />
         <View style={styles.quickGrid}>
           <QuickAction
+            icon="school"
+            label="Continue Learning"
+            helper="Open your courses"
+            onPress={() => goTo('/courses/my-courses')}
+          />
+          <QuickAction
+            icon="qr-code"
+            label="My Tickets"
+            helper="Open your event wallet"
+            onPress={() => goTo('/(tabs)/tickets')}
+          />
+          <QuickAction
             icon="calendar"
-            label="Events"
+            label="Upcoming Events"
             helper="Browse and register"
             onPress={() => goTo('/(tabs)/events')}
           />
           <QuickAction
-            icon="qr-code"
-            label="Tickets"
-            helper="Open QR wallet"
-            onPress={() => goTo('/(tabs)/tickets')}
+            icon="chatbubbles"
+            label="Case Discussions"
+            helper="Browse community cases"
+            onPress={() => goTo('/(tabs)/cases')}
           />
           <QuickAction
-            icon="school"
-            label="Courses"
-            helper="Continue learning"
-            onPress={() => goTo('/(tabs)/courses')}
-          />
-          <QuickAction
-            icon="person"
-            label="Profile"
-            helper="Account settings"
-            onPress={() => goTo('/(tabs)/profile')}
+            icon="ribbon"
+            label="Certificates"
+            helper="View achievements"
+            onPress={() => goTo('/certificates')}
           />
         </View>
       </View>
@@ -220,8 +253,10 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   heroCard: {
-    gap: spacing.sm,
-    borderColor: 'rgba(84, 217, 232, 0.26)',
+    gap: spacing.md,
+    borderColor: 'rgba(94, 234, 212, 0.32)',
+    backgroundColor: 'rgba(13, 34, 48, 0.94)',
+    padding: spacing.xl,
   },
   heroTopRow: {
     flexDirection: 'row',
@@ -230,17 +265,33 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   heroIcon: {
-    width: 44,
-    height: 44,
+    width: 52,
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: 'rgba(84, 217, 232, 0.34)',
-    backgroundColor: 'rgba(84, 217, 232, 0.12)',
+    backgroundColor: colors.interactive.pressed,
   },
-  title: textStyles.heading,
-  body: textStyles.body,
+  title: {
+    ...textStyles.title,
+    fontSize: 32,
+    lineHeight: 40,
+  },
+  body: {
+    ...textStyles.body,
+    maxWidth: 560,
+  },
+  heroActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
+  },
+  heroAction: {
+    flexGrow: 1,
+  },
   summaryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -248,8 +299,15 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     width: '48%',
-    minHeight: 148,
-    gap: spacing.xs,
+    minHeight: 142,
+    gap: spacing.sm,
+    backgroundColor: colors.surface.glass,
+  },
+  summaryTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   summaryIcon: {
     width: 36,
@@ -262,6 +320,7 @@ const styles = StyleSheet.create({
   summaryLabel: {
     ...textStyles.caption,
     textTransform: 'uppercase',
+    color: colors.text.secondary,
   },
   summaryValue: {
     color: colors.text.primary,
@@ -274,35 +333,44 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   quickGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
   },
   quickAction: {
-    minHeight: 68,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
+    position: 'relative',
+    width: '48%',
+    minHeight: 132,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: colors.border.strong,
     backgroundColor: colors.surface.glass,
-    padding: spacing.md,
+    padding: spacing.lg,
   },
   pressed: {
     opacity: 0.88,
     transform: [{ scale: 0.995 }],
   },
   quickIcon: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,
     backgroundColor: colors.interactive.pressed,
   },
   quickCopy: {
-    flex: 1,
+    width: '100%',
     minWidth: 0,
     gap: spacing.xxs,
+  },
+  quickChevron: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
   },
   quickLabel: {
     color: colors.text.primary,

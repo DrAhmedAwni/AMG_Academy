@@ -56,8 +56,9 @@ export default function RecentScannerScansScreen() {
           />
         ) : state.status === 'empty' ? (
           <EmptyState
+            icon="checkmark-circle-outline"
             title="No recent scans"
-            message="Successful backend check-ins for this scanner will appear here."
+            message="Successful check-ins for this scanner will appear here."
           />
         ) : (
           <FlatList

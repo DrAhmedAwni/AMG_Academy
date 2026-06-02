@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventCard } from '../../src/components/cards/EventCard';
 import { Header, Screen } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
-import { Button, TextField } from '../../src/components/ui';
+import { Button, GlassCard, TextField } from '../../src/components/ui';
 import {
   useEventsQuery,
 } from '../../src/features/events/events.hooks';
 import type { EventFilters, MobileEvent } from '../../src/features/events/events.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
-import { colors, layout, spacing } from '../../src/theme';
+import { colors, layout, spacing, textStyles, typography } from '../../src/theme';
 
 type FreeFilter = 'all' | 'free' | 'paid';
 
@@ -63,16 +63,23 @@ export default function EventsTab() {
     <Screen scroll={false} contentStyle={styles.screen}>
       <Header
         title="Events"
-        subtitle="Browse and register using backend event state."
-        action={
-          <Button
-            label="Reservations"
-            variant="secondary"
-            size="sm"
-            onPress={() => router.push('/events/reservations' as never)}
-          />
-        }
+        subtitle="Upcoming AMG Academy workshops and events."
       />
+
+      <GlassCard style={styles.reservationsCard}>
+        <View style={styles.reservationsCopy}>
+          <Text style={styles.reservationsTitle}>Your event reservations</Text>
+          <Text style={styles.reservationsText}>
+            Track approvals, payments, and tickets for events you joined.
+          </Text>
+        </View>
+        <Button
+          label="Open"
+          variant="secondary"
+          size="sm"
+          onPress={() => router.push('/events/reservations' as never)}
+        />
+      </GlassCard>
 
       <TextField
         label="Search events"
@@ -107,7 +114,7 @@ export default function EventsTab() {
       </View>
 
       {state.status === 'loading' ? (
-        <LoadingState title="Loading events" message="Fetching the latest published events." />
+        <LoadingState title="Loading events" message="Finding upcoming AMG Academy events." />
       ) : state.status === 'error' ? (
         <ErrorState
           title={state.error.title}
@@ -118,8 +125,9 @@ export default function EventsTab() {
         />
       ) : state.status === 'empty' ? (
         <EmptyState
+          icon="calendar-outline"
           title="No events found"
-          message="Try another search or filter. Published events will appear here from the backend."
+          message="Try another search or filter. New workshops and events will appear here."
         />
       ) : (
         <FlatList
@@ -169,7 +177,28 @@ export default function EventsTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    gap: spacing.sm,
+    gap: spacing.md,
+  },
+  reservationsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  reservationsCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: spacing.xxs,
+  },
+  reservationsTitle: {
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    lineHeight: typography.lineHeight.md,
+    fontWeight: typography.weight.bold,
+  },
+  reservationsText: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
   },
   filters: {
     flexDirection: 'row',

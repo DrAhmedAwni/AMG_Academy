@@ -110,7 +110,7 @@ const reasonMap: Record<string, ScannerResultReason> = {
 const resultCopy: Record<ScannerResultReason, { title: string; message: string }> = {
   success: {
     title: 'Valid check-in',
-    message: 'Attendance was recorded by the backend.',
+    message: 'Attendance was recorded successfully.',
   },
   duplicate: {
     title: 'Already checked in',
@@ -122,11 +122,11 @@ const resultCopy: Record<ScannerResultReason, { title: string; message: string }
   },
   unpaid: {
     title: 'Payment required',
-    message: 'The backend payment record is not satisfied.',
+    message: 'Payment is not complete for this ticket.',
   },
   unapproved: {
     title: 'Not approved',
-    message: 'The registration is not approved by the backend.',
+    message: 'The registration is not approved yet.',
   },
   expired: {
     title: 'Expired ticket',
@@ -142,11 +142,11 @@ const resultCopy: Record<ScannerResultReason, { title: string; message: string }
   },
   not_found: {
     title: 'Ticket not found',
-    message: 'The scanned QR payload was not found by the backend.',
+    message: 'This QR code was not found.',
   },
   invalid: {
     title: 'Invalid QR',
-    message: 'The scanned payload is not a valid ticket for check-in.',
+    message: 'This QR code is not a valid ticket for check-in.',
   },
 };
 
@@ -199,7 +199,7 @@ export function buildRecentScanResult(record: AttendanceRecord): ScannerValidati
     valid: true,
     reason: 'success',
     title: 'Validated check-in',
-    message: 'This recent scan was recorded by the backend.',
+    message: 'This recent scan was recorded successfully.',
     attendeeName: record.attendee?.name,
     eventName: record.event.title,
     attendanceStatus: record.status,

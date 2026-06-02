@@ -42,7 +42,7 @@ export default function PaymentScreen() {
   if (paymentQuery.isLoading) {
     return (
       <Screen>
-        <LoadingState title="Loading payment" message="Fetching backend payment state." />
+        <LoadingState title="Loading payment" message="Opening your payment details." />
       </Screen>
     );
   }
@@ -69,7 +69,7 @@ export default function PaymentScreen() {
     <Screen>
       <Header
         title="Payment"
-        subtitle="Mock payment actions update backend records."
+        subtitle="Complete payment and unlock your ticket or course."
         action={<Button label="Back" variant="secondary" onPress={() => router.back()} />}
       />
 
@@ -80,7 +80,7 @@ export default function PaymentScreen() {
             <Text style={styles.title}>{payment.itemTitle}</Text>
           </View>
           <Badge
-            label={payment.mockMode ? 'Mock checkout' : payment.provider}
+            label={payment.mockMode ? 'Checkout' : payment.provider}
             foreground={colors.accent.primary}
             background="rgba(84, 217, 232, 0.14)"
             border="rgba(84, 217, 232, 0.34)"
@@ -105,7 +105,7 @@ export default function PaymentScreen() {
       {displayState.isSuccessful ? (
         <SuccessState
           title="Payment complete"
-          message="Related QR tickets or course access will appear when backend state allows them."
+          message="Your ticket or course access will update automatically."
         />
       ) : null}
 
@@ -116,38 +116,39 @@ export default function PaymentScreen() {
         </GlassCard>
       ) : null}
 
-      <GlassCard style={styles.card}>
-        <Text style={styles.sectionTitle}>Development mock actions</Text>
-        <Text style={styles.body}>
-          These buttons call the existing NestJS mock payment endpoints. They do not fake local
-          payment, registration, QR ticket, or course access state.
-        </Text>
-        <View style={styles.actions}>
-          <Button
-            label="Mark paid"
-            disabled={!displayState.canMockSuccess}
-            loading={actionMutation.isPending}
-            onPress={() => runAction('success')}
-            style={styles.actionButton}
-          />
-          <Button
-            label="Fail"
-            variant="danger"
-            disabled={!displayState.canMockFail}
-            loading={actionMutation.isPending}
-            onPress={() => runAction('fail')}
-            style={styles.actionButton}
-          />
-          <Button
-            label="Cancel"
-            variant="secondary"
-            disabled={!displayState.canMockCancel}
-            loading={actionMutation.isPending}
-            onPress={() => runAction('cancel')}
-            style={styles.actionButton}
-          />
-        </View>
-      </GlassCard>
+      {payment.mockMode ? (
+        <GlassCard style={styles.card}>
+          <Text style={styles.sectionTitle}>Checkout actions</Text>
+          <Text style={styles.body}>
+            Choose a payment result to continue this AMG Academy checkout.
+          </Text>
+          <View style={styles.actions}>
+            <Button
+              label="Mark paid"
+              disabled={!displayState.canMockSuccess}
+              loading={actionMutation.isPending}
+              onPress={() => runAction('success')}
+              style={styles.actionButton}
+            />
+            <Button
+              label="Fail"
+              variant="danger"
+              disabled={!displayState.canMockFail}
+              loading={actionMutation.isPending}
+              onPress={() => runAction('fail')}
+              style={styles.actionButton}
+            />
+            <Button
+              label="Cancel"
+              variant="secondary"
+              disabled={!displayState.canMockCancel}
+              loading={actionMutation.isPending}
+              onPress={() => runAction('cancel')}
+              style={styles.actionButton}
+            />
+          </View>
+        </GlassCard>
+      ) : null}
 
       {payment.itemType === 'event' ? (
         <Button

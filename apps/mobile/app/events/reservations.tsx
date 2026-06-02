@@ -75,7 +75,7 @@ export default function ReservationsScreen() {
     <Screen scroll={false} contentStyle={styles.screen}>
       <Header
         title="My Reservations"
-        subtitle="Backend registration, payment, and QR ticket states."
+        subtitle="Track event registration, payment, and ticket status."
         action={<Button label="Back" variant="secondary" onPress={() => router.back()} />}
       />
 
@@ -112,8 +112,9 @@ export default function ReservationsScreen() {
         />
       ) : state.status === 'empty' ? (
         <EmptyState
+          icon="calendar-outline"
           title="No reservations"
-          message="Event registrations you create through the backend will appear here."
+          message="Your event registrations will appear here after you reserve a seat."
         />
       ) : (
         <FlatList

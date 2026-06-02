@@ -60,7 +60,10 @@ export default function ProfileTab() {
   return (
     <SessionGate>
       <Screen contentStyle={styles.screen}>
-        <Header title="Profile" subtitle="Account, role, and secure session controls." />
+        <Header
+          title="Profile"
+          subtitle="Manage your learning, events, certificates, and account."
+        />
 
         <GlassCard style={styles.profileCard}>
           <View style={styles.headerRow}>
@@ -80,7 +83,7 @@ export default function ProfileTab() {
           <View style={styles.badges}>
             <Badge label={`Role: ${user?.role ?? profile?.role ?? 'unknown'}`} />
             <Badge
-              label={scannerAccess ? 'Scanner access' : 'Standard access'}
+              label={scannerAccess ? 'Scanner tools' : 'Learner account'}
               foreground={scannerAccess ? colors.accent.primary : colors.text.secondary}
               background={scannerAccess ? 'rgba(84, 217, 232, 0.14)' : undefined}
               border={scannerAccess ? 'rgba(84, 217, 232, 0.34)' : undefined}
@@ -103,7 +106,7 @@ export default function ProfileTab() {
           )}
 
           <Button
-            label="Edit Profile"
+            label="Edit profile"
             variant="secondary"
             size="sm"
             onPress={() => { router.push('/profile/edit' as never); }}
@@ -111,7 +114,61 @@ export default function ProfileTab() {
         </GlassCard>
 
         <View style={styles.section}>
-          <SectionHeader title="Quick links" />
+          <SectionHeader title="Learning" />
+          <View style={styles.links}>
+            <ProfileLink
+              icon="school-outline"
+              label="My Courses"
+              helper="Enrollments and progress"
+              onPress={() => { router.push('/courses/my-courses' as never); }}
+            />
+            <ProfileLink
+              icon="ribbon-outline"
+              label="Certificates"
+              helper="Released achievements and PDFs"
+              onPress={() => { router.push('/certificates' as never); }}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="Events & Tickets" />
+          <View style={styles.links}>
+            <ProfileLink
+              icon="calendar-outline"
+              label="My Reservations"
+              helper="Event registration status"
+              onPress={() => { router.push('/events/reservations' as never); }}
+            />
+            <ProfileLink
+              icon="qr-code-outline"
+              label="My Tickets"
+              helper="Event entry QR codes"
+              onPress={() => { router.push('/(tabs)/tickets' as never); }}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="Community" />
+          <View style={styles.links}>
+            <ProfileLink
+              icon="chatbubbles-outline"
+              label="Case Discussions"
+              helper="Clinical cases and replies"
+              onPress={() => { router.push('/(tabs)/cases' as never); }}
+            />
+            <ProfileLink
+              icon="people-outline"
+              label="Study Groups"
+              helper="Peer and instructor-led groups"
+              onPress={() => { router.push('/(tabs)/study-groups' as never); }}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="Account" />
           <View style={styles.links}>
             <ProfileLink
               icon="notifications-outline"
@@ -125,29 +182,19 @@ export default function ProfileTab() {
               helper="Preferences and security"
               onPress={() => { router.push('/settings' as never); }}
             />
-            <ProfileLink
-              icon="school-outline"
-              label="My Courses"
-              helper="Enrollments and progress"
-              onPress={() => { router.push('/courses/my-courses' as never); }}
-            />
-            <ProfileLink
-              icon="ribbon-outline"
-              label="Certificates"
-              helper="Released achievements and PDFs"
-              onPress={() => { router.push('/certificates' as never); }}
-            />
-            <ProfileLink
-              icon="calendar-outline"
-              label="My Reservations"
-              helper="Event registration status"
-              onPress={() => { router.push('/events/reservations' as never); }}
-            />
+            {scannerAccess ? (
+              <ProfileLink
+                icon="scan-outline"
+                label="Scanner"
+                helper="Attendance check-in tools"
+                onPress={() => { router.push('/scanner' as never); }}
+              />
+            ) : null}
           </View>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Session" subtitle="Logout clears SecureStore and private query cache." />
+          <SectionHeader title="Session" subtitle="You will be signed out from this device." />
           <Button
             label="Log out"
             variant="danger"
@@ -165,7 +212,10 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   profileCard: {
-    gap: spacing.md,
+    gap: spacing.lg,
+    borderColor: 'rgba(248, 198, 109, 0.28)',
+    backgroundColor: 'rgba(28, 30, 43, 0.92)',
+    padding: spacing.xl,
   },
   headerRow: {
     flexDirection: 'row',
@@ -173,18 +223,18 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   avatar: {
-    width: 52,
-    height: 52,
+    width: 68,
+    height: 68,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 26,
+    borderRadius: 34,
     borderWidth: 1,
     borderColor: 'rgba(84, 217, 232, 0.34)',
-    backgroundColor: colors.interactive.pressed,
+    backgroundColor: colors.accent.goldMuted,
   },
   avatarText: {
-    color: colors.accent.primary,
-    fontSize: 22,
+    color: colors.accent.gold,
+    fontSize: 28,
     fontWeight: '700',
   },
   identity: {
@@ -238,23 +288,23 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   linkRow: {
-    minHeight: 68,
+    minHeight: 76,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: colors.border.strong,
     backgroundColor: colors.surface.glass,
-    padding: spacing.md,
+    padding: spacing.lg,
   },
   pressed: {
     opacity: 0.88,
     transform: [{ scale: 0.995 }],
   },
   linkIcon: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.md,
