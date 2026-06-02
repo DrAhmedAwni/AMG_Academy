@@ -83,8 +83,8 @@ export function DataTable<T>({
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-3xl border border-surface-border/60 bg-surface-card/70 shadow-card">
-        <table className="w-full text-left text-sm">
+      <div className="rounded-3xl border border-surface-border/60 bg-surface-card/70 shadow-card">
+        <table className="w-full table-fixed text-left text-sm">
           <thead>
             <tr className="border-b border-surface-border/50 bg-surface-elevated/70">
               <th className="w-10 px-4 py-3.5">
@@ -134,7 +134,7 @@ export function DataTable<T>({
                   </button>
                 </th>
               ))}
-              {rowActions ? <th className="w-32 px-4 py-3.5 text-right">Actions</th> : null}
+              {rowActions ? <th className="w-52 px-4 py-3.5 text-right">Actions</th> : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-border/25">
