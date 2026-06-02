@@ -177,6 +177,7 @@ export default function CasesTab() {
 
     return data;
   }, [casesQuery.data?.data, user?.id, viewFilter]);
+  const listData = state.status === 'success' ? visibleCases : [];
 
   const renderCase = ({ item }: { item: CaseItem }) => (
     <CaseCard
@@ -190,8 +191,8 @@ export default function CasesTab() {
     />
   );
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
         title="Case Discussion"
         subtitle="Explore clinical cases and join the conversation."
@@ -250,10 +251,16 @@ export default function CasesTab() {
           />
         ))}
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading cases" message="Fetching the latest case discussions." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading cases" message="Fetching the latest case discussions." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
@@ -261,7 +268,11 @@ export default function CasesTab() {
             void casesQuery.refetch();
           }}
         />
-      ) : state.status === 'empty' ? (
+      );
+    }
+
+    if (state.status === 'empty') {
+      return (
         <EmptyState
           icon="chatbubbles-outline"
           title="No cases yet"
@@ -271,58 +282,68 @@ export default function CasesTab() {
             onPress: () => router.push('/cases/submit' as never),
           }}
         />
-      ) : visibleCases.length === 0 ? (
-        <EmptyState
-          icon="filter-outline"
-          title="No cases in this view"
-          message="Try another view, category, or search term."
-          action={{
-            label: 'Submit a case',
-            onPress: () => router.push('/cases/submit' as never),
-          }}
-        />
-      ) : (
-        <FlatList
-          data={visibleCases}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCase}
-          style={{ flex: 1 }}
-          refreshControl={
-            <RefreshControl
-              tintColor={colors.accent.primary}
-              refreshing={state.isRefreshing}
-              onRefresh={() => {
-                void casesQuery.refetch();
-              }}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListFooterComponent={
-            meta && meta.totalPages > 1 ? (
-              <View style={styles.pagination}>
-                <Button
-                  label="Previous"
-                  variant="secondary"
-                  disabled={page <= 1}
-                  onPress={() => setPage((current) => Math.max(1, current - 1))}
-                  style={styles.pageButton}
-                />
-                <Button
-                  label="Next"
-                  variant="secondary"
-                  disabled={page >= meta.totalPages}
-                  onPress={() => setPage((current) => current + 1)}
-                  style={styles.pageButton}
-                />
-              </View>
-            ) : null
-          }
-        />
-      )}
+      );
+    }
+
+    return (
+      <EmptyState
+        icon="filter-outline"
+        title="No cases in this view"
+        message="Try another view, category, or search term."
+        action={{
+          label: 'Submit a case',
+          onPress: () => router.push('/cases/submit' as never),
+        }}
+      />
+    );
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={renderCase}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.accent.primary}
+            refreshing={state.isRefreshing}
+            onRefresh={() => {
+              void casesQuery.refetch();
+            }}
+          />
+        }
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListFooterComponent={
+          state.status === 'success' && meta && meta.totalPages > 1 ? (
+            <View style={styles.pagination}>
+              <Button
+                label="Previous"
+                variant="secondary"
+                disabled={page <= 1}
+                onPress={() => setPage((current) => Math.max(1, current - 1))}
+                style={styles.pageButton}
+              />
+              <Button
+                label="Next"
+                variant="secondary"
+                disabled={page >= meta.totalPages}
+                onPress={() => setPage((current) => current + 1)}
+                style={styles.pageButton}
+              />
+            </View>
+          ) : null
+        }
+      />
     </Screen>
   );
 }
@@ -330,6 +351,12 @@ export default function CasesTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
     gap: spacing.sm,
   },
   filters: {
@@ -342,7 +369,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     minWidth: 92,
   },
-  listContent: {},
+  listContent: {
+    gap: spacing.md,
+  },
   separator: {
     height: spacing.md,
   },

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { createReadStream, existsSync, mkdirSync, statSync } from 'fs';
 import { isAbsolute, join, normalize, sep } from 'path';
 import { Readable } from 'stream';
@@ -36,7 +36,16 @@ export class VideosService {
     return resolved;
   }
 
-  async upload(file: Express.Multer.File, _userId: string) {
+  async upload(file: Express.Multer.File | undefined, _userId: string) {
+    if (!file) {
+      throw new BadRequestException('No video file provided. Use a field named "video".');
+    }
+    const allowedMime = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
+    const allowedExt = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+    const ext = '.' + (file.originalname.split('.').pop()?.toLowerCase() ?? '');
+    if (!allowedMime.includes(file.mimetype) && !allowedExt.includes(ext)) {
+      throw new BadRequestException('Only video files (MP4, WebM, MOV, AVI, MKV) are allowed');
+    }
     const safeName = this.sanitizeFileName(file.originalname);
 
     if (this.getStorageProvider() === 'google_drive') {
@@ -88,6 +97,54 @@ export class VideosService {
       mimeType: video.mimeType,
       createdAt: video.createdAt.toISOString(),
     };
+  }
+
+  async createFromGoogleDriveUrl(url: string) {
+    const fileId = this.extractGoogleDriveFileId(url);
+    if (!fileId) {
+      throw new BadRequestException('Invalid Google Drive URL. Use a shared link like https://drive.google.com/file/d/FILE_ID/view');
+    }
+
+    const existing = await this.prisma.video.findFirst({
+      where: { provider: 'google_drive', providerVideoId: fileId },
+    });
+
+    if (existing) {
+      return {
+        id: existing.id,
+        provider: existing.provider,
+        originalName: existing.originalName,
+        duration: existing.duration,
+        createdAt: existing.createdAt.toISOString(),
+      };
+    }
+
+    const video = await this.prisma.video.create({
+      data: {
+        provider: 'google_drive',
+        providerVideoId: fileId,
+        originalName: `google-drive-video-${fileId}`,
+        mimeType: 'video/mp4',
+      },
+    });
+
+    return {
+      id: video.id,
+      provider: video.provider,
+      originalName: video.originalName,
+      duration: video.duration,
+      createdAt: video.createdAt.toISOString(),
+    };
+  }
+
+  private extractGoogleDriveFileId(url: string): string | null {
+    const fileMatch = url.match(/\/file\/d\/([^/]+)\//);
+    if (fileMatch?.[1]) return fileMatch[1];
+
+    const idMatch = url.match(/[?&]id=([^&]+)/);
+    if (idMatch?.[1]) return idMatch[1];
+
+    return null;
   }
 
   async stream(id: string, range: string | undefined, res: Response) {

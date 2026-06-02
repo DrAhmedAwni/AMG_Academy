@@ -51,9 +51,10 @@ export default function TicketsTab() {
   const activeTicketCount = ticketsQuery.data?.data.filter(
     (ticket) => getTicketWalletState(ticket).state === 'active',
   ).length ?? 0;
+  const listData = state.status === 'success' ? filteredTickets : [];
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
         title="My Tickets"
         subtitle="View your event tickets and entry QR codes."
@@ -100,10 +101,16 @@ export default function TicketsTab() {
           style={styles.filterButton}
         />
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading tickets" message="Opening your event wallet." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading tickets" message="Opening your event wallet." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
@@ -111,40 +118,54 @@ export default function TicketsTab() {
             void ticketsQuery.refetch();
           }}
         />
-      ) : state.status === 'empty' ? (
+      );
+    }
+
+    if (state.status === 'empty') {
+      return (
         <EmptyState
           icon="qr-code-outline"
           title="No tickets yet"
           message="Your event tickets will appear here after you register and your seat is confirmed."
         />
-      ) : filteredTickets.length === 0 ? (
-        <EmptyState
-          icon="filter-outline"
-          title="No tickets in this view"
-          message="Switch filters to see active, pending, used, expired, or revoked QR tickets."
-        />
-      ) : (
-        <FlatList
-          data={filteredTickets}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <TicketCard ticket={item} />}
-          style={{ flex: 1 }}
-          refreshControl={
-            <RefreshControl
-              tintColor={colors.accent.primary}
-              refreshing={state.isRefreshing}
-              onRefresh={() => {
-                void ticketsQuery.refetch();
-              }}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
-      )}
+      );
+    }
+
+    return (
+      <EmptyState
+        icon="filter-outline"
+        title="No tickets in this view"
+        message="Switch filters to see active, pending, used, expired, or revoked QR tickets."
+      />
+    );
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <TicketCard ticket={item} />}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.accent.primary}
+            refreshing={state.isRefreshing}
+            onRefresh={() => {
+              void ticketsQuery.refetch();
+            }}
+          />
+        }
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+      />
     </Screen>
   );
 }
@@ -152,6 +173,12 @@ export default function TicketsTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
     gap: spacing.md,
   },
   walletHero: {
@@ -208,7 +235,9 @@ const styles = StyleSheet.create({
     minWidth: 78,
     paddingHorizontal: spacing.xs,
   },
-  listContent: {},
+  listContent: {
+    gap: spacing.md,
+  },
   separator: {
     height: spacing.md,
   },

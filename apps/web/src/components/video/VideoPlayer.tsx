@@ -23,17 +23,22 @@ export function VideoPlayer({ videoId, onEnded }: VideoPlayerProps) {
   }, [onEnded]);
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+    <div
+      className="relative aspect-video w-full overflow-hidden rounded-xl bg-black"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <video
         ref={videoRef}
         src={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/videos/${videoId}/stream`}
         controls
-        controlsList="nodownload"
+        controlsList="nodownload noremoteplaytube"
+        disablePictureInPicture
         className="h-full w-full"
         playsInline
       >
         Your browser does not support the video tag.
       </video>
+      <div className="pointer-events-none absolute inset-0 z-10" />
     </div>
   );
 }

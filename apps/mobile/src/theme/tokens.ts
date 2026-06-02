@@ -3,8 +3,8 @@ import { colors } from './colors';
 
 export const typography = {
   fontFamily: {
-    heading: 'Inter',
-    body: 'Inter',
+    heading: 'Montserrat',
+    body: 'Montserrat',
   },
   size: {
     xs: 12,

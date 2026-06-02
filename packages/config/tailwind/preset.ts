@@ -55,8 +55,8 @@ const preset: Partial<Config> = {
         },
       },
       fontFamily: {
-        heading: ['var(--font-hanken-grotesk)', 'Hanken Grotesk', 'sans-serif'],
-        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
+        heading: ['var(--font-hanken-grotesk)', 'Montserrat', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Montserrat', 'sans-serif'],
       },
       screens: {
         xs: '420px',

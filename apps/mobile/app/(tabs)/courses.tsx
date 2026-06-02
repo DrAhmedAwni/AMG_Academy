@@ -44,6 +44,7 @@ export default function CoursesTab() {
   });
   const meta = coursesQuery.data?.meta;
   const firstEnrollment = enrollmentsQuery.data?.data?.[0];
+  const listData = state.status === 'success' ? state.data.data : [];
 
   const renderCourse = ({ item }: { item: MobileCourse }) => (
     <CourseCard
@@ -57,8 +58,8 @@ export default function CoursesTab() {
     />
   );
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
         title="Courses"
         subtitle="Explore dental courses, workshops, and clinical learning programs."
@@ -127,46 +128,66 @@ export default function CoursesTab() {
           />
         ))}
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading courses" message="Opening the AMG Academy course catalog." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading courses" message="Opening the AMG Academy course catalog." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
           onRetry={() => coursesQuery.refetch()}
         />
-      ) : state.status === 'empty' ? (
+      );
+    }
+
+    if (state.status === 'empty') {
+      return (
         <EmptyState
           icon="school-outline"
           title="No courses found"
           message="Try another search or filter. New courses will appear here when they are available."
         />
-      ) : (
-        <FlatList
-          data={state.data.data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCourse}
-          style={{ flex: 1 }}
-          contentContainerStyle={[
-            styles.list,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          refreshControl={
-            <RefreshControl
-              refreshing={state.isRefreshing}
-              onRefresh={() => coursesQuery.refetch()}
-              tintColor={colors.accent.primary}
-            />
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={renderCourse}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        contentContainerStyle={[
+          styles.list,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        refreshControl={
+          <RefreshControl
+            refreshing={state.isRefreshing}
+            onRefresh={() => coursesQuery.refetch()}
+            tintColor={colors.accent.primary}
+          />
+        }
+        onEndReached={() => {
+          if (state.status === 'success' && meta && page < meta.totalPages) {
+            setPage((p) => p + 1);
           }
-          onEndReached={() => {
-            if (meta && page < meta.totalPages) {
-              setPage((p) => p + 1);
-            }
-          }}
-          onEndReachedThreshold={0.5}
-        />
-      )}
+        }}
+        onEndReachedThreshold={0.5}
+      />
     </Screen>
   );
 }
@@ -174,6 +195,12 @@ export default function CoursesTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
     gap: spacing.md,
   },
   continueSection: {

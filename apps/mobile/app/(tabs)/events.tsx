@@ -46,6 +46,7 @@ export default function EventsTab() {
     isEmpty: (data) => data.data.length === 0,
   });
   const meta = eventsQuery.data?.meta;
+  const listData = state.status === 'success' ? state.data.data : [];
 
   const renderEvent = ({ item }: { item: MobileEvent }) => (
     <EventCard
@@ -59,8 +60,8 @@ export default function EventsTab() {
     />
   );
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
         title="Events"
         subtitle="Upcoming AMG Academy workshops and events."
@@ -112,10 +113,16 @@ export default function EventsTab() {
           style={styles.filterButton}
         />
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading events" message="Finding upcoming AMG Academy events." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading events" message="Finding upcoming AMG Academy events." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
@@ -123,54 +130,68 @@ export default function EventsTab() {
             void eventsQuery.refetch();
           }}
         />
-      ) : state.status === 'empty' ? (
+      );
+    }
+
+    if (state.status === 'empty') {
+      return (
         <EmptyState
           icon="calendar-outline"
           title="No events found"
           message="Try another search or filter. New workshops and events will appear here."
         />
-      ) : (
-        <FlatList
-          data={state.data.data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderEvent}
-          style={{ flex: 1 }}
-          refreshControl={
-            <RefreshControl
-              tintColor={colors.accent.primary}
-              refreshing={state.isRefreshing}
-              onRefresh={() => {
-                void eventsQuery.refetch();
-              }}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListFooterComponent={
-            meta && meta.totalPages > 1 ? (
-              <View style={styles.pagination}>
-                <Button
-                  label="Previous"
-                  variant="secondary"
-                  disabled={page <= 1}
-                  onPress={() => setPage((current) => Math.max(1, current - 1))}
-                  style={styles.pageButton}
-                />
-                <Button
-                  label="Next"
-                  variant="secondary"
-                  disabled={page >= meta.totalPages}
-                  onPress={() => setPage((current) => current + 1)}
-                  style={styles.pageButton}
-                />
-              </View>
-            ) : null
-          }
-        />
-      )}
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={renderEvent}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.accent.primary}
+            refreshing={state.isRefreshing}
+            onRefresh={() => {
+              void eventsQuery.refetch();
+            }}
+          />
+        }
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListFooterComponent={
+          state.status === 'success' && meta && meta.totalPages > 1 ? (
+            <View style={styles.pagination}>
+              <Button
+                label="Previous"
+                variant="secondary"
+                disabled={page <= 1}
+                onPress={() => setPage((current) => Math.max(1, current - 1))}
+                style={styles.pageButton}
+              />
+              <Button
+                label="Next"
+                variant="secondary"
+                disabled={page >= meta.totalPages}
+                onPress={() => setPage((current) => current + 1)}
+                style={styles.pageButton}
+              />
+            </View>
+          ) : null
+        }
+      />
     </Screen>
   );
 }
@@ -178,6 +199,12 @@ export default function EventsTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
     gap: spacing.md,
   },
   reservationsCard: {
@@ -203,13 +230,17 @@ const styles = StyleSheet.create({
   },
   filters: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.xs,
     paddingBottom: spacing.xs,
   },
   filterButton: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: 84,
   },
-  listContent: {},
+  listContent: {
+    gap: spacing.md,
+  },
   separator: {
     height: spacing.md,
   },
