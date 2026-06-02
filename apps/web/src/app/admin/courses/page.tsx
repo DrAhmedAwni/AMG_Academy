@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { DataTable } from '@/components/tables/DataTable';
@@ -72,6 +72,38 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function convertGoogleDriveUrl(url: string): string {
+  if (!url) return url;
+  const fileMatch = url.match(/\/file\/d\/([^/]+)\//);
+  const fileId = fileMatch?.[1];
+  if (!fileId) {
+    const idMatch = url.match(/[?&]id=([^&]+)/);
+    const extractedId = idMatch?.[1];
+    if (!extractedId) return url;
+    return `https://drive.google.com/thumbnail?id=${extractedId}&sz=w1000`;
+  }
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+}
+
+function compressImage(file: File, maxWidth = 800, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(maxWidth / img.width, 1);
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = url;
+  });
 }
 
 function readCollection<T>(payload: any): T[] {
@@ -505,6 +537,11 @@ function CourseFormModal({
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [newCategoryName, setNewCategoryName] = useState('General Dentistry');
+  const [imagePreview, setImagePreview] = useState<string | null>(course?.thumbnailUrl ? convertGoogleDriveUrl(course.thumbnailUrl) : null);
+  const [imageError, setImageError] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const clearError = (field: string) => setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
 
@@ -544,9 +581,48 @@ function CourseFormModal({
     onSubmit(body);
   };
 
+  const handleImageUrlChange = (url: string) => {
+    setForm({ ...form, thumbnailUrl: url });
+    if (url) {
+      setImagePreview(convertGoogleDriveUrl(url));
+      setImageError(false);
+    } else {
+      setImagePreview(null);
+      setImageError(false);
+    }
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    setUploadingImage(true);
+    try {
+      const dataUrl = await compressImage(file);
+      setImagePreview(dataUrl);
+      setImageError(false);
+      setForm({ ...form, thumbnailUrl: dataUrl });
+    } catch {
+      toast.error('Failed to process image');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleClearImage = () => {
+    setForm({ ...form, thumbnailUrl: '' });
+    setImagePreview(null);
+    setImageError(false);
+  };
+
   const handleCreateCategory = async () => {
     const category = await onCreateCategory(newCategoryName);
     setForm((current) => ({ ...current, categoryId: category.id }));
+    setShowNewCategory(false);
   };
 
   return (
@@ -611,46 +687,53 @@ function CourseFormModal({
 
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-text-secondary">Category</span>
-          <select
-            value={form.categoryId}
-            onChange={(e) => { setForm({ ...form, categoryId: e.target.value }); clearError('categoryId'); }}
-            className={`h-11 rounded-lg border bg-surface-card px-3 text-sm text-text-primary outline-none focus:ring-2 ${
-              fieldErrors.categoryId
-                ? 'border-status-error/50 focus:border-status-error/60 focus:ring-status-error/20'
-                : 'border-surface-border/60 focus:border-cyan/50 focus:ring-cyan/20'
-            }`}
-            required
-          >
-            <option value="" disabled>
-              Select category
-            </option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
+          <div className="flex gap-2">
+            <select
+              value={form.categoryId}
+              onChange={(e) => { setForm({ ...form, categoryId: e.target.value }); clearError('categoryId'); }}
+              className={`h-11 flex-1 rounded-lg border bg-surface-card px-3 text-sm text-text-primary outline-none focus:ring-2 ${
+                fieldErrors.categoryId
+                  ? 'border-status-error/50 focus:border-status-error/60 focus:ring-status-error/20'
+                  : 'border-surface-border/60 focus:border-cyan/50 focus:ring-cyan/20'
+              }`}
+              required
+            >
+              <option value="" disabled>
+                Select category
               </option>
-            ))}
-          </select>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowNewCategory(!showNewCategory)}
+            >
+              {showNewCategory ? 'Cancel' : 'New'}
+            </Button>
+          </div>
           {fieldErrors.categoryId ? <span className="text-xs text-status-error">{fieldErrors.categoryId}</span> : null}
         </label>
 
-        {categories.length === 0 && (
+        {showNewCategory && (
           <div className="rounded-lg border border-amber-400/35 bg-amber-400/10 p-3">
-            <p className="text-sm font-medium text-text-primary">No course categories are available.</p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
               <Input
-                label="New category"
+                label="New category name"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
               />
               <Button
                 type="button"
                 variant="secondary"
-                className="sm:mt-6"
                 loading={isCreatingCategory}
                 disabled={!newCategoryName.trim()}
                 onClick={() => void handleCreateCategory()}
               >
-                Create category
+                Create
               </Button>
             </div>
           </div>
@@ -668,11 +751,56 @@ function CourseFormModal({
           value={form.price}
           onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
         />
-        <Input
-          label="Thumbnail URL"
-          value={form.thumbnailUrl}
-          onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })}
-        />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-text-secondary">Course Image</span>
+          <div className="flex gap-2">
+            <Input
+              name="thumbnailUrl"
+              placeholder="Paste Google Drive shared link or direct image URL"
+              value={form.thumbnailUrl}
+              onChange={(e) => handleImageUrlChange(e.target.value)}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={uploadingImage}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {uploadingImage ? 'Processing...' : 'Upload'}
+            </Button>
+            {imagePreview && (
+              <Button type="button" variant="ghost" onClick={handleClearImage}>
+                Clear
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-text-muted">
+            Paste a Google Drive shared link or upload an image directly (max 5MB). Uploaded images are compressed to ~100-200KB.
+          </p>
+          {imagePreview && (
+            <div className="relative overflow-hidden rounded-md border border-surface-border">
+              {imageError ? (
+                <div className="flex h-40 items-center justify-center bg-surface-secondary">
+                  <p className="text-sm text-text-muted">Could not load image — check the URL</p>
+                </div>
+              ) : (
+                <img
+                  src={imagePreview}
+                  alt="Course preview"
+                  className="max-h-40 w-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              )}
+            </div>
+          )}
+        </label>
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="ghost" onClick={onClose}>
             Cancel

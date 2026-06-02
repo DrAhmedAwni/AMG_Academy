@@ -13,7 +13,7 @@ export const courseSchema = z.object({
   description: z.string().trim().min(20),
   instructorId: uuidSchema,
   categoryId: uuidSchema,
-  thumbnailUrl: optionalTrimmedString(500),
+  thumbnailUrl: optionalTrimmedString(500_000),
   price: z.coerce.number().min(0),
 });
 
