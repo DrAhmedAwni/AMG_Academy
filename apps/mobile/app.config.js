@@ -12,6 +12,19 @@ module.exports = ({ config }) => {
     ...config,
     plugins: [
       ...(config.plugins ?? []),
+      [
+        'expo-splash-screen',
+        {
+          backgroundColor: '#020617',
+          image: './assets/splash.png',
+          imageWidth: 180,
+          resizeMode: 'contain',
+          dark: {
+            backgroundColor: '#020617',
+            image: './assets/splash.png',
+          },
+        },
+      ],
       ['./plugins/withAndroidCleartextTraffic', { enabled: allowLocalHttp }],
     ],
     extra: {

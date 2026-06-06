@@ -31,9 +31,9 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "local",
-        "EXPO_PUBLIC_API_URL": "http://192.168.100.3:4000/api/v1",
-        "EXPO_PUBLIC_WEB_URL": "http://192.168.100.3:3000",
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://api.amg.bdigital-dental.site/api/v1",
+        "EXPO_PUBLIC_WEB_URL": "https://web.amg.bdigital-dental.site",
         "EXPO_PUBLIC_ENABLE_MOCK_PAYMENTS": "true",
         "EXPO_PUBLIC_ENABLE_PUSH_PREP": "true"
       }
