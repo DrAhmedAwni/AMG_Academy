@@ -41,6 +41,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - api_uploads:/app/apps/api/uploads
 
   web:
     build:
@@ -68,3 +70,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  api_uploads:

@@ -13,9 +13,17 @@ coverage/
 
 dist/
 apps/*/dist/
+packages/*/dist/
 build/
 .next/
 apps/*/.next/
+apps/*/.playwright/
+apps/*/playwright-report/
+apps/*/test-results/
+apps/*/*.log
+
+apps/mobile/
+my-app/
 
 uploads/
 media/
@@ -28,5 +36,11 @@ media/
 .playwright-mcp/
 
 .env.local
+.env
+.env.docker
 .env.production
 .env.example
+apps/*/.env
+apps/*/.env.local
+apps/*/.env.production
+apps/*/.env.example
