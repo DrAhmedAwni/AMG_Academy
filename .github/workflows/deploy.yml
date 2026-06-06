@@ -46,18 +46,29 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_KEY: ${{ secrets.VPS_KEY }}
     steps:
       - uses: actions/checkout@v4
+      - name: Validate VPS secrets
+        run: |
+          test -n "$VPS_HOST" || (echo "::error::Missing GitHub secret VPS_HOST" && exit 1)
+          test -n "$VPS_USER" || (echo "::error::Missing GitHub secret VPS_USER" && exit 1)
+          test -n "$VPS_KEY" || (echo "::error::Missing GitHub secret VPS_KEY" && exit 1)
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ env.VPS_KEY }}
           script: |
+            set -e
             cd /var/www/amg-academy-platform
-            git pull origin main
-            if [ -f package-lock.json ]; then npm ci; else npm install; fi
-            npm run db:migrate
-            npm run build
-            pm2 restart all
+            test -f .env || (echo "Missing .env on VPS at /var/www/amg-academy-platform/.env" && exit 1)
+            git pull --ff-only origin main
+            docker compose build
+            docker compose run --rm api npx prisma migrate deploy
+            docker compose up -d --remove-orphans
+            docker compose ps
