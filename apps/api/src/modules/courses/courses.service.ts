@@ -192,7 +192,9 @@ export class CoursesService {
     return this.mapCourse(course, isEnrolled, paymentStatus, paymentId);
   }
 
-  async findById(id: string) {
+  async findById(id: string, currentUser?: JwtPayload) {
+    await this.assertCanManageCourse(id, currentUser);
+
     const course = await this.prisma.course.findUnique({
       where: { id },
       include: {
@@ -211,10 +213,20 @@ export class CoursesService {
 
   async update(id: string, data: UpdateCourseDto, currentUser?: JwtPayload) {
     await this.assertCanManageCourse(id, currentUser);
-    const updateData: Prisma.CourseUpdateInput = { ...data };
-    if (data.price !== undefined) {
-      updateData.price = new Prisma.Decimal(data.price);
-      updateData.isFree = data.price === 0;
+    const { categoryId, instructorId, price, ...rest } = data;
+    const updateData: Prisma.CourseUpdateInput = { ...rest };
+
+    if (categoryId !== undefined) {
+      updateData.category = { connect: { id: categoryId } };
+    }
+
+    if (instructorId !== undefined) {
+      updateData.instructor = { connect: { id: instructorId } };
+    }
+
+    if (price !== undefined) {
+      updateData.price = new Prisma.Decimal(price);
+      updateData.isFree = price === 0;
     }
 
     const course = await this.prisma.course.update({

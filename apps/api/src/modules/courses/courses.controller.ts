@@ -33,6 +33,14 @@ export class CoursesController {
     return this.coursesService.findAllAdmin(parseWithSchema(courseFiltersSchema, query), user);
   }
 
+  @Get('admin/:id')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('courses:read')
+  @Throttle(adminThrottle)
+  async findAdminById(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.coursesService.findById(parseWithSchema(uuidSchema, id), user);
+  }
+
   @Get(':slug')
   @UseGuards(OptionalJwtAuthGuard)
   async findBySlug(@Param('slug') slug: string, @CurrentUser() user?: JwtPayload) {
