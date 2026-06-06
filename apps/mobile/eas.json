@@ -19,8 +19,11 @@
       },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "staging",
-        "EXPO_PUBLIC_API_URL": "https://staging.amgacademy.com/api/v1",
-        "EXPO_PUBLIC_WEB_URL": "https://staging.amgacademy.com",
+        "EXPO_PUBLIC_API_URL": "https://api.amg.bdigital-dental.site/api/v1",
+        "EXPO_PUBLIC_WEB_URL": "https://amg.bdigital-dental.site",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "664945461418-ucjd14j0jsmrmkanupf7qnio7s8jceos.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "664945461418-qtrpsbc534ct2fvgo72tdfgg51kbvuao.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "",
         "EXPO_PUBLIC_ENABLE_MOCK_PAYMENTS": "true",
         "EXPO_PUBLIC_ENABLE_PUSH_PREP": "true"
       }
@@ -33,17 +36,26 @@
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
         "EXPO_PUBLIC_API_URL": "https://api.amg.bdigital-dental.site/api/v1",
-        "EXPO_PUBLIC_WEB_URL": "https://web.amg.bdigital-dental.site",
-        "EXPO_PUBLIC_ENABLE_MOCK_PAYMENTS": "true",
+        "EXPO_PUBLIC_WEB_URL": "https://amg.bdigital-dental.site",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "664945461418-ucjd14j0jsmrmkanupf7qnio7s8jceos.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "664945461418-qtrpsbc534ct2fvgo72tdfgg51kbvuao.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "",
+        "EXPO_PUBLIC_ENABLE_MOCK_PAYMENTS": "false",
         "EXPO_PUBLIC_ENABLE_PUSH_PREP": "true"
       }
     },
     "production": {
       "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://amgacademy.com/api/v1",
-        "EXPO_PUBLIC_WEB_URL": "https://amgacademy.com",
+        "EXPO_PUBLIC_API_URL": "https://api.amg.bdigital-dental.site/api/v1",
+        "EXPO_PUBLIC_WEB_URL": "https://amg.bdigital-dental.site",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "664945461418-ucjd14j0jsmrmkanupf7qnio7s8jceos.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "664945461418-qtrpsbc534ct2fvgo72tdfgg51kbvuao.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "",
         "EXPO_PUBLIC_ENABLE_MOCK_PAYMENTS": "false",
         "EXPO_PUBLIC_ENABLE_PUSH_PREP": "true"
       }
