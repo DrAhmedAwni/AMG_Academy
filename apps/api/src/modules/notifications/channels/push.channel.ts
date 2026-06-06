@@ -60,13 +60,21 @@ export class PushChannel implements NotificationChannel {
     });
 
     if (!response.ok) {
-      this.logger.warn(`Expo push request failed with status ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      this.logger.warn(`Expo push request failed with status ${response.status}: ${errorText.slice(0, 300)}`);
       return;
     }
 
     const result = (await response.json().catch(() => null)) as
-      | { data?: Array<{ status?: string; details?: { error?: string } }> }
+      | { data?: Array<{ status?: string; details?: { error?: string }; message?: string }> }
       | null;
+
+    const failedTickets = result?.data?.filter((ticket) => ticket.status === 'error') ?? [];
+    if (failedTickets.length > 0) {
+      this.logger.warn(
+        `Expo push returned ${failedTickets.length} failed ticket(s): ${JSON.stringify(failedTickets).slice(0, 500)}`,
+      );
+    }
 
     const disabledDeviceIds = validDevices
       .filter((device, index) => result?.data?.[index]?.details?.error === 'DeviceNotRegistered')
@@ -114,6 +122,8 @@ export class PushChannel implements NotificationChannel {
       case NotificationType.EventReminder:
       case NotificationType.EventCancelled:
         return 'eventReminders';
+      case NotificationType.NewAnnouncement:
+        return 'announcementUpdates';
       default:
         return null;
     }

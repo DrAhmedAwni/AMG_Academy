@@ -16,6 +16,35 @@ type LoginValues = {
   password: string;
 };
 
+type GoogleProfile = {
+  email: string;
+  name?: string;
+  phone?: string;
+  specialty?: string;
+  clinic?: string;
+  city?: string;
+  professionalTitle?: string;
+  practiceType?: string;
+  yearsOfExperience?: number;
+  avatarUrl?: string | null;
+};
+
+type GoogleAuthResult =
+  | { needsProfile: true; profile: GoogleProfile }
+  | { user: AuthUser };
+
+type GoogleProfileValues = {
+  idToken: string;
+  name: string;
+  phone: string;
+  specialty: string;
+  clinic: string;
+  city: string;
+  professionalTitle?: string;
+  practiceType?: string;
+  yearsOfExperience?: number;
+};
+
 const ADMIN_PANEL_ROLES = new Set(['super_admin', 'amg_admin', 'scanner', 'instructor']);
 const PUBLIC_AUTH_ROUTES = new Set([
   '/login',
@@ -74,6 +103,55 @@ export function useAuth() {
     },
   });
 
+  const googleLoginMutation = useMutation({
+    mutationFn: async ({
+      idToken,
+      redirectTo,
+    }: {
+      idToken: string;
+      redirectTo?: string | null;
+    }) => {
+      const response = await api.post<ApiEnvelope<GoogleAuthResult>>('/auth/google', {
+        idToken,
+        client: 'web',
+      });
+
+      return { redirectTo, result: response.data.data };
+    },
+    onSuccess: async ({ redirectTo, result }) => {
+      if ('needsProfile' in result) {
+        return;
+      }
+
+      queryClient.setQueryData(['auth', 'me'], result.user);
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      router.push(redirectTo || (ADMIN_PANEL_ROLES.has(result.user.role) ? '/admin/dashboard' : '/dashboard'));
+      router.refresh();
+    },
+  });
+
+  const googleProfileMutation = useMutation({
+    mutationFn: async ({
+      values,
+      redirectTo,
+    }: {
+      values: GoogleProfileValues;
+      redirectTo?: string | null;
+    }) => {
+      const response = await api.post<ApiEnvelope<{ user: AuthUser }>>('/auth/google/complete-profile', {
+        ...values,
+        client: 'web',
+      });
+      return { redirectTo, user: response.data.data.user };
+    },
+    onSuccess: async ({ redirectTo, user }) => {
+      queryClient.setQueryData(['auth', 'me'], user);
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      router.push(redirectTo || (ADMIN_PANEL_ROLES.has(user.role) ? '/admin/dashboard' : '/dashboard'));
+      router.refresh();
+    },
+  });
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await api.post('/auth/logout');
@@ -102,9 +180,13 @@ export function useAuth() {
     isLoading: authQuery.isLoading,
     isAuthenticated: Boolean(authQuery.data),
     login: loginMutation.mutateAsync,
+    loginWithGoogle: googleLoginMutation.mutateAsync,
+    completeGoogleProfile: googleProfileMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
     refreshSession: refreshMutation.mutateAsync,
     loginPending: loginMutation.isPending,
+    googleLoginPending: googleLoginMutation.isPending,
+    googleProfilePending: googleProfileMutation.isPending,
     logoutPending: logoutMutation.isPending,
   };
 }

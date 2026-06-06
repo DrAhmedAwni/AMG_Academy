@@ -20,6 +20,8 @@ import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '../../common/constant
 import type {
   ChangePasswordDto,
   ForgotPasswordDto,
+  GoogleAuthDto,
+  GoogleCompleteProfileDto,
   GoogleMobileAuthDto,
   LoginDto,
   RegisterDto,
@@ -170,7 +172,132 @@ export class AuthService {
     };
   }
 
-  async loginWithGoogleMobile(input: GoogleMobileAuthDto, response: Response) {
+  async loginWithGoogle(input: GoogleAuthDto | GoogleMobileAuthDto, response: Response) {
+    const googleProfile = await this.verifyGoogleIdToken(input.idToken);
+    const email = googleProfile.email.trim().toLowerCase();
+    const displayName = googleProfile.name?.trim() || email.split('@')[0] || 'AMG Learner';
+
+    let user = await this.getUserWithRoleAndPermissions({ email });
+    if (!user) {
+      return {
+        needsProfile: true,
+        profile: {
+          email,
+          name: displayName,
+          avatarUrl: googleProfile.picture ?? null,
+        },
+      };
+    }
+
+    this.ensureAccountIsActive(user);
+
+    if (!this.hasRequiredGoogleProfile(user)) {
+      return {
+        needsProfile: true,
+        profile: {
+          email,
+          name: user.name || displayName,
+          phone: user.phone,
+          specialty: user.specialty,
+          clinic: user.clinic,
+          city: user.city,
+          professionalTitle: user.professionalTitle,
+          practiceType: user.practiceType,
+          yearsOfExperience: user.yearsOfExperience,
+          avatarUrl: user.avatarUrl ?? googleProfile.picture ?? null,
+        },
+      };
+    }
+
+    if (!user.emailVerified) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerifiedAt: new Date() },
+      });
+      user = await this.getUserWithRoleAndPermissions({ id: user.id });
+    }
+
+    if (!user) {
+      throw new UnauthorizedException('Google sign-in could not create a session');
+    }
+
+    const tokens = await this.createAuthTokens(user);
+    this.writeAuthCookies(response, tokens);
+
+    return {
+      user: this.mapAuthUser(user),
+      ...(input.client === 'mobile' ? { tokens: this.toMobileTokenPair(tokens) } : {}),
+    };
+  }
+
+  async completeGoogleProfile(input: GoogleCompleteProfileDto, response: Response) {
+    const googleProfile = await this.verifyGoogleIdToken(input.idToken);
+    const email = googleProfile.email.trim().toLowerCase();
+    const defaultRole = await this.prisma.role.findUnique({ where: { slug: 'user' } });
+
+    if (!defaultRole) {
+      throw new InternalServerErrorException('Default user role is not configured');
+    }
+
+    const existingUser = await this.prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      if (existingUser.status === PrismaUserStatus.DISABLED || existingUser.status === PrismaUserStatus.DELETED) {
+        throw new ForbiddenException('This account is not active');
+      }
+
+      await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          name: input.name.trim(),
+          phone: input.phone,
+          specialty: input.specialty,
+          clinic: input.clinic,
+          city: input.city,
+          professionalTitle: input.professionalTitle,
+          practiceType: input.practiceType,
+          yearsOfExperience: input.yearsOfExperience,
+          avatarUrl: existingUser.avatarUrl ?? googleProfile.picture ?? null,
+          emailVerified: true,
+          emailVerifiedAt: existingUser.emailVerifiedAt ?? new Date(),
+        },
+      });
+    } else {
+      await this.prisma.user.create({
+        data: {
+          name: input.name.trim(),
+          email,
+          password: await hash(randomUUID(), 12),
+          phone: input.phone,
+          specialty: input.specialty,
+          clinic: input.clinic,
+          city: input.city,
+          professionalTitle: input.professionalTitle,
+          practiceType: input.practiceType,
+          yearsOfExperience: input.yearsOfExperience,
+          avatarUrl: googleProfile.picture ?? null,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+          roleId: defaultRole.id,
+        },
+      });
+    }
+
+    const user = await this.getUserWithRoleAndPermissions({ email });
+    if (!user) {
+      throw new UnauthorizedException('Google sign-in could not create a session');
+    }
+
+    this.ensureAccountIsActive(user);
+    const tokens = await this.createAuthTokens(user);
+    this.writeAuthCookies(response, tokens);
+
+    return {
+      user: this.mapAuthUser(user),
+      ...(input.client === 'mobile' ? { tokens: this.toMobileTokenPair(tokens) } : {}),
+    };
+  }
+
+  private async verifyGoogleIdToken(idToken: string) {
     const clientIds = [
       this.configService.get<string>('auth.googleWebClientId'),
       this.configService.get<string>('auth.googleAndroidClientId'),
@@ -186,7 +313,7 @@ export class AuthService {
       | undefined;
     try {
       const ticket = await new google.auth.OAuth2().verifyIdToken({
-        idToken: input.idToken,
+        idToken,
         audience: clientIds,
       });
       payload = ticket.getPayload();
@@ -197,48 +324,11 @@ export class AuthService {
     if (!payload?.email || !payload.email_verified) {
       throw new UnauthorizedException('Google account email is not verified');
     }
-    const googleProfile = payload;
-    const email = (googleProfile.email as string).trim().toLowerCase();
-    const displayName = googleProfile.name?.trim() || email.split('@')[0] || 'AMG Learner';
-
-    let user = await this.getUserWithRoleAndPermissions({ email });
-    if (!user) {
-      const defaultRole = await this.prisma.role.findUnique({ where: { slug: 'user' } });
-      if (!defaultRole) {
-        throw new InternalServerErrorException('Default user role is not configured');
-      }
-
-      const created = await this.prisma.user.create({
-        data: {
-          name: displayName,
-          email,
-          password: await hash(randomUUID(), 12),
-          avatarUrl: googleProfile.picture ?? null,
-          emailVerified: true,
-          emailVerifiedAt: new Date(),
-          roleId: defaultRole.id,
-        },
-      });
-      user = await this.getUserWithRoleAndPermissions({ id: created.id });
-    } else if (!user.emailVerified) {
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: { emailVerified: true, emailVerifiedAt: new Date() },
-      });
-      user = await this.getUserWithRoleAndPermissions({ id: user.id });
-    }
-
-    if (!user) {
-      throw new UnauthorizedException('Google sign-in could not create a session');
-    }
-
-    this.ensureAccountIsActive(user);
-    const tokens = await this.createAuthTokens(user);
-    this.writeAuthCookies(response, tokens);
 
     return {
-      user: this.mapAuthUser(user),
-      tokens: this.toMobileTokenPair(tokens),
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
     };
   }
 
@@ -455,6 +545,12 @@ export class AuthService {
     if (user.status === PrismaUserStatus.DISABLED || user.status === PrismaUserStatus.DELETED) {
       throw new ForbiddenException('This account is not active');
     }
+  }
+
+  private hasRequiredGoogleProfile(user: NonNullable<UserWithRole>) {
+    return [user.name, user.phone, user.specialty, user.clinic, user.city].every(
+      (value) => typeof value === 'string' && value.trim().length > 0,
+    );
   }
 
   private mapAuthUser(user: NonNullable<UserWithRole>): AuthUser {

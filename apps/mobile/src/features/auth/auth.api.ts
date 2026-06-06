@@ -3,12 +3,15 @@ import {
   forgotPasswordSchema,
   loginSchema,
   googleMobileAuthSchema,
+  googleCompleteProfileSchema,
   registerSchema,
 } from '@amg/shared';
 import { apiRequest } from '../../lib/api';
 import type { MobileAuthResponse, MobileAuthTokens } from '../../types/api';
 import type {
   ForgotPasswordFormValues,
+  GoogleAuthResponse,
+  GoogleProfileCompletionValues,
   LoginFormValues,
   MobileMessageResponse,
   MobileRegisterResponse,
@@ -45,9 +48,17 @@ export async function login(values: LoginFormValues) {
 }
 
 export async function loginWithGoogle(idToken: string) {
-  return apiRequest<MobileAuthResponse>('/auth/google/mobile', {
+  return apiRequest<GoogleAuthResponse>('/auth/google/mobile', {
     method: 'POST',
     body: googleMobileAuthSchema.parse({ idToken, client: mobileClient }),
+    authFailureMode: 'ignore',
+  });
+}
+
+export async function completeGoogleProfile(values: GoogleProfileCompletionValues) {
+  return apiRequest<MobileAuthResponse>('/auth/google/complete-profile', {
+    method: 'POST',
+    body: googleCompleteProfileSchema.parse({ ...values, client: mobileClient }),
     authFailureMode: 'ignore',
   });
 }

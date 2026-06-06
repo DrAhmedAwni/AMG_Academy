@@ -3,6 +3,7 @@ import { useAuth } from '../../lib/auth';
 import { getSessionMaterial } from '../../lib/storage';
 import type {
   ForgotPasswordFormValues,
+  GoogleProfileCompletionValues,
   LoginFormValues,
   RegisterFormValues,
 } from './auth.types';
@@ -36,6 +37,19 @@ export function useGoogleLoginMutation() {
 
   return useMutation({
     mutationFn: (idToken: string) => authApi.loginWithGoogle(idToken),
+    onSuccess: async (response) => {
+      if ('user' in response) {
+        await auth.setAuthenticatedSession(response);
+      }
+    },
+  });
+}
+
+export function useCompleteGoogleProfileMutation() {
+  const auth = useAuth();
+
+  return useMutation({
+    mutationFn: (values: GoogleProfileCompletionValues) => authApi.completeGoogleProfile(values),
     onSuccess: async (response) => {
       await auth.setAuthenticatedSession(response);
     },

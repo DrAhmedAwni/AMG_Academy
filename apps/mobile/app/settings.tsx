@@ -10,6 +10,17 @@ import {
 } from '../src/features/notifications/notifications.hooks';
 import { colors, spacing, textStyles, typography } from '../src/theme';
 
+const preferenceLabels: Record<string, string> = {
+  email: 'Email notifications',
+  inApp: 'In-app notifications',
+  push: 'Mobile push notifications',
+  registrationUpdates: 'Registration updates',
+  paymentUpdates: 'Payment updates',
+  courseUpdates: 'Course updates',
+  eventReminders: 'Event reminders',
+  announcementUpdates: 'Announcement alerts',
+};
+
 export default function SettingsScreen() {
   const router = useRouter();
   const logoutMutation = useLogoutMutation();
@@ -41,9 +52,7 @@ export default function SettingsScreen() {
         ) : (
           Object.entries(preferences).map(([key, value]) => (
             <View key={key} style={styles.prefRow}>
-              <Text style={styles.prefLabel}>
-                {key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-              </Text>
+              <Text style={styles.prefLabel}>{preferenceLabels[key] ?? key}</Text>
               <Switch
                 value={!!value}
                 onValueChange={() => togglePreference(key)}

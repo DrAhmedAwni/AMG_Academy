@@ -11,6 +11,7 @@ const notificationPreferencesSchema = z.object({
   paymentUpdates: z.boolean(),
   courseUpdates: z.boolean(),
   eventReminders: z.boolean(),
+  announcementUpdates: z.boolean(),
 });
 
 const defaultNotificationPreferences = {
@@ -21,7 +22,10 @@ const defaultNotificationPreferences = {
   paymentUpdates: true,
   courseUpdates: true,
   eventReminders: true,
+  announcementUpdates: true,
 } satisfies z.infer<typeof notificationPreferencesSchema>;
+
+const storedNotificationPreferencesSchema = notificationPreferencesSchema.partial();
 
 @Injectable()
 export class NotificationsService {
@@ -96,17 +100,23 @@ export class NotificationsService {
       select: { notificationPreferences: true } as never,
     });
 
-    const parsedPreferences = notificationPreferencesSchema.safeParse(
+    const parsedPreferences = storedNotificationPreferencesSchema.safeParse(
       (user as { notificationPreferences?: unknown } | null)?.notificationPreferences,
     );
 
     return {
-      data: parsedPreferences.success ? parsedPreferences.data : defaultNotificationPreferences,
+      data: {
+        ...defaultNotificationPreferences,
+        ...(parsedPreferences.success ? parsedPreferences.data : {}),
+      },
     };
   }
 
   async updatePreferences(userId: string, preferences: Record<string, boolean>) {
-    const sanitizedPreferences = notificationPreferencesSchema.parse(preferences);
+    const sanitizedPreferences = notificationPreferencesSchema.parse({
+      ...defaultNotificationPreferences,
+      ...preferences,
+    });
 
     await this.prisma.user.update({
       where: { id: userId },

@@ -1,4 +1,5 @@
 import type { AuthUser } from '@amg/shared';
+import type { MobileAuthResponse } from '../../types/api';
 
 export type AuthFlowStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -26,6 +27,38 @@ export interface RegisterFormValues {
   practiceType?: string;
   yearsOfExperience?: number;
 }
+
+export interface GoogleProfileSeed {
+  email: string;
+  name?: string;
+  phone?: string;
+  specialty?: string;
+  clinic?: string;
+  city?: string;
+  professionalTitle?: string;
+  practiceType?: string;
+  yearsOfExperience?: number;
+  avatarUrl?: string | null;
+}
+
+export interface GoogleProfileCompletionValues {
+  idToken: string;
+  name: string;
+  phone: string;
+  specialty: string;
+  clinic: string;
+  city: string;
+  professionalTitle?: string;
+  practiceType?: string;
+  yearsOfExperience?: number;
+}
+
+export type GoogleAuthResponse =
+  | MobileAuthResponse
+  | {
+      needsProfile: true;
+      profile: GoogleProfileSeed;
+    };
 
 export interface ForgotPasswordFormValues {
   email: string;

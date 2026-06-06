@@ -8,8 +8,13 @@ import { Screen } from '../../src/components/layout/Screen';
 import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
 import { SuccessState } from '../../src/components/states/SuccessState';
-import { useGoogleLoginMutation, useRegisterMutation } from '../../src/features/auth/auth.hooks';
-import type { AuthFormErrors, RegisterFormValues } from '../../src/features/auth/auth.types';
+import {
+  useCompleteGoogleProfileMutation,
+  useGoogleLoginMutation,
+  useRegisterMutation,
+} from '../../src/features/auth/auth.hooks';
+import type { AuthFormErrors, GoogleProfileSeed, RegisterFormValues } from '../../src/features/auth/auth.types';
+import { GoogleProfileCompletion } from '../../src/features/auth/GoogleProfileCompletion';
 import { mapApiErrorToUi } from '../../src/lib/errors';
 import { colors, spacing, textStyles } from '../../src/theme';
 
@@ -34,6 +39,7 @@ export default function RegisterScreen() {
   const router = useRouter();
   const registerMutation = useRegisterMutation();
   const googleMutation = useGoogleLoginMutation();
+  const googleProfileMutation = useCompleteGoogleProfileMutation();
   const [googleRequest, googleResponse, promptGoogle] = Google.useIdTokenAuthRequest({
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
@@ -53,11 +59,15 @@ export default function RegisterScreen() {
   const [yearsText, setYearsText] = useState('');
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [googleProfileStep, setGoogleProfileStep] = useState<{
+    idToken: string;
+    profile: GoogleProfileSeed;
+  } | null>(null);
   const uiError = useMemo(
-    () => (registerMutation.error || googleMutation.error
-      ? mapApiErrorToUi(registerMutation.error ?? googleMutation.error)
+    () => (registerMutation.error || googleMutation.error || googleProfileMutation.error
+      ? mapApiErrorToUi(registerMutation.error ?? googleMutation.error ?? googleProfileMutation.error)
       : null),
-    [googleMutation.error, registerMutation.error],
+    [googleMutation.error, googleProfileMutation.error, registerMutation.error],
   );
 
   useEffect(() => {
@@ -66,7 +76,11 @@ export default function RegisterScreen() {
       : undefined;
     if (!idToken) return;
 
-    void googleMutation.mutateAsync(idToken).then(() => {
+    void googleMutation.mutateAsync(idToken).then((response) => {
+      if ('needsProfile' in response) {
+        setGoogleProfileStep({ idToken, profile: response.profile });
+        return;
+      }
       router.replace('/(tabs)/home' as never);
     });
   }, [googleMutation, googleResponse, router]);
@@ -111,6 +125,20 @@ export default function RegisterScreen() {
       </View>
 
       <GlassCard style={styles.card}>
+        {googleProfileStep ? (
+          <GoogleProfileCompletion
+            idToken={googleProfileStep.idToken}
+            profile={googleProfileStep.profile}
+            loading={googleProfileMutation.isPending}
+            error={uiError}
+            onCancel={() => setGoogleProfileStep(null)}
+            onSubmit={async (profileValues) => {
+              await googleProfileMutation.mutateAsync(profileValues);
+              router.replace('/(tabs)/home' as never);
+            }}
+          />
+        ) : (
+          <>
         <Button
           label="Continue with Google"
           variant="secondary"
@@ -217,6 +245,8 @@ export default function RegisterScreen() {
           variant="ghost"
           onPress={() => router.replace('/(auth)/login' as never)}
         />
+          </>
+        )}
       </GlassCard>
     </Screen>
   );

@@ -32,6 +32,26 @@ export const googleMobileAuthSchema = z.object({
   client: z.literal('mobile').optional(),
 });
 
+export const googleAuthSchema = z.object({
+  idToken: z.string().min(10),
+  client: z.enum(['web', 'mobile']).optional(),
+});
+
+const requiredProfileString = (max = 120) => z.string().trim().min(1).max(max);
+
+export const googleCompleteProfileSchema = z.object({
+  idToken: z.string().min(10),
+  client: z.enum(['web', 'mobile']).optional(),
+  name: z.string().trim().min(2).max(120),
+  phone: requiredProfileString(32),
+  specialty: requiredProfileString(100),
+  clinic: requiredProfileString(100),
+  city: requiredProfileString(100),
+  professionalTitle: optionalTrimmedString(100),
+  practiceType: optionalTrimmedString(100),
+  yearsOfExperience: z.coerce.number().int().min(0).max(80).optional(),
+});
+
 export const refreshSessionSchema = z.object({
   refreshToken: z.string().min(10).optional(),
   client: z.enum(['web', 'mobile']).optional(),

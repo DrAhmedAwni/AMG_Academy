@@ -14,6 +14,8 @@ import type { Request, Response } from 'express';
 import {
   changePasswordSchema,
   forgotPasswordSchema,
+  googleAuthSchema,
+  googleCompleteProfileSchema,
   googleMobileAuthSchema,
   loginSchema,
   refreshSessionSchema,
@@ -51,8 +53,25 @@ export class AuthController {
   @HttpCode(200)
   @Throttle(authThrottle)
   async googleMobile(@Body() body: unknown, @Res({ passthrough: true }) response: Response) {
-    return this.authService.loginWithGoogleMobile(
+    return this.authService.loginWithGoogle(
       parseWithSchema(googleMobileAuthSchema, body),
+      response,
+    );
+  }
+
+  @Post('google')
+  @HttpCode(200)
+  @Throttle(authThrottle)
+  async google(@Body() body: unknown, @Res({ passthrough: true }) response: Response) {
+    return this.authService.loginWithGoogle(parseWithSchema(googleAuthSchema, body), response);
+  }
+
+  @Post('google/complete-profile')
+  @HttpCode(200)
+  @Throttle(authThrottle)
+  async googleCompleteProfile(@Body() body: unknown, @Res({ passthrough: true }) response: Response) {
+    return this.authService.completeGoogleProfile(
+      parseWithSchema(googleCompleteProfileSchema, body),
       response,
     );
   }

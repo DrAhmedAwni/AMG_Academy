@@ -1,13 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { use, useMemo, useState } from 'react';
+import { use, useCallback, useMemo, useState } from 'react';
 import { isAxiosError } from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '@amg/shared';
 import { AuthLayout } from '@/components/layouts';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { AuthForm } from '@/components/forms/AuthForm';
+import {
+  GoogleProfileCompletionForm,
+  type GoogleProfileSeed,
+  type GoogleProfileValues,
+} from '@/components/forms/GoogleProfileCompletionForm';
 import { useAuth } from '@/hooks/useAuth';
 
 type LoginFormValues = {
@@ -43,8 +49,19 @@ export default function LoginPage({
 }: {
   searchParams?: Promise<{ redirect?: string }>;
 }) {
-  const { login, loginPending } = useAuth();
+  const {
+    completeGoogleProfile,
+    googleLoginPending,
+    googleProfilePending,
+    login,
+    loginPending,
+    loginWithGoogle,
+  } = useAuth();
   const [verificationUrl, setVerificationUrl] = useState<string | null>(null);
+  const [googleProfileStep, setGoogleProfileStep] = useState<{
+    idToken: string;
+    profile: GoogleProfileSeed;
+  } | null>(null);
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -54,12 +71,52 @@ export default function LoginPage({
   });
   const resolvedSearchParams = searchParams ? use(searchParams) : undefined;
   const redirectTo = useMemo(() => resolvedSearchParams?.redirect ?? null, [resolvedSearchParams?.redirect]);
+  const handleGoogleCredential = useCallback(
+    async (idToken: string) => {
+      const response = await loginWithGoogle({ idToken, redirectTo });
+      if ('needsProfile' in response.result) {
+        setGoogleProfileStep({ idToken, profile: response.result.profile });
+      }
+    },
+    [loginWithGoogle, redirectTo],
+  );
 
   return (
     <AuthLayout
-      title="Sign in to AMG Academy"
-      description="Access your dashboard, event registrations, and course workspace."
+      title={googleProfileStep ? 'Complete your profile' : 'Sign in to AMG Academy'}
+      description={
+        googleProfileStep
+          ? 'Google verified your email. Confirm your AMG Academy profile details to continue.'
+          : 'Access your dashboard, event registrations, and course workspace.'
+      }
     >
+      {googleProfileStep ? (
+        <GoogleProfileCompletionForm
+          profile={googleProfileStep.profile}
+          isSubmitting={googleProfilePending}
+          onSubmit={async (values: GoogleProfileValues) => {
+            await completeGoogleProfile({
+              values: {
+                ...values,
+                idToken: googleProfileStep.idToken,
+              },
+              redirectTo,
+            });
+          }}
+        />
+      ) : (
+        <div className="space-y-5">
+          <GoogleSignInButton onCredential={handleGoogleCredential} text="signin_with" />
+          {googleLoginPending ? (
+            <p className="text-center text-sm text-text-secondary">Checking your Google account...</p>
+          ) : null}
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-surface-border/80" />
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
+              or
+            </span>
+            <span className="h-px flex-1 bg-surface-border/80" />
+          </div>
       <AuthForm
         form={form}
         fields={[
@@ -109,6 +166,8 @@ export default function LoginPage({
           </div>
         }
       />
+        </div>
+      )}
     </AuthLayout>
   );
 }
