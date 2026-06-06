@@ -16,11 +16,13 @@ const pageSize = 10;
 type TypeFilter = 'all' | StudyGroupType;
 
 function getTypeLabel(type: StudyGroupType): string {
-  return type === 'student' ? 'Student-led' : 'Instructor-led';
+  return type === 'STUDENT' ? 'Student-led' : 'Instructor-led';
 }
 
 function getJoinModeLabel(mode: string): string {
-  return mode === 'open' ? 'Open' : 'Approval required';
+  if (mode === 'OPEN') return 'Open';
+  if (mode === 'INVITE_ONLY') return 'Invite only';
+  return 'Approval required';
 }
 
 function GroupCard({ item, onPress }: { item: StudyGroup; onPress: () => void }) {
@@ -43,7 +45,7 @@ function GroupCard({ item, onPress }: { item: StudyGroup; onPress: () => void })
           <Badge label={getTypeLabel(item.type)} />
           <Badge
             label={getJoinModeLabel(item.joinMode)}
-            foreground={item.joinMode === 'open' ? colors.status.success : colors.status.warning}
+            foreground={item.joinMode === 'OPEN' ? colors.status.success : colors.status.warning}
           />
           <View style={cardStyles.memberCount}>
             <Ionicons name="people-outline" size={14} color={colors.text.muted} />
@@ -185,15 +187,15 @@ export default function StudyGroupsTab() {
         />
         <Button
           label="Student"
-          variant={typeFilter === 'student' ? 'primary' : 'secondary'}
-          onPress={() => setTypeFilter('student')}
+          variant={typeFilter === 'STUDENT' ? 'primary' : 'secondary'}
+          onPress={() => setTypeFilter('STUDENT')}
           size="sm"
           style={styles.filterButton}
         />
         <Button
           label="Instructor"
-          variant={typeFilter === 'instructor_led' ? 'primary' : 'secondary'}
-          onPress={() => setTypeFilter('instructor_led')}
+          variant={typeFilter === 'INSTRUCTOR_LED' ? 'primary' : 'secondary'}
+          onPress={() => setTypeFilter('INSTRUCTOR_LED')}
           size="sm"
           style={styles.filterButton}
         />

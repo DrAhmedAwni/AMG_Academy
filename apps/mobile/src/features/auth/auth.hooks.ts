@@ -31,6 +31,17 @@ export function useLoginMutation() {
   });
 }
 
+export function useGoogleLoginMutation() {
+  const auth = useAuth();
+
+  return useMutation({
+    mutationFn: (idToken: string) => authApi.loginWithGoogle(idToken),
+    onSuccess: async (response) => {
+      await auth.setAuthenticatedSession(response);
+    },
+  });
+}
+
 export function useRegisterMutation() {
   return useMutation({
     mutationFn: (values: RegisterFormValues) => authApi.register(values),

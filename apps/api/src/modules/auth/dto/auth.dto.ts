@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import {
   changePasswordSchema,
   forgotPasswordSchema,
+  googleMobileAuthSchema,
   loginSchema,
   refreshSessionSchema,
   registerSchema,
@@ -11,6 +12,7 @@ import {
 
 export type RegisterDto = z.infer<typeof registerSchema>;
 export type LoginDto = z.infer<typeof loginSchema>;
+export type GoogleMobileAuthDto = z.infer<typeof googleMobileAuthSchema>;
 export type RefreshSessionDto = z.infer<typeof refreshSessionSchema>;
 export type VerifyEmailDto = z.infer<typeof verifyEmailSchema>;
 export type ForgotPasswordDto = z.infer<typeof forgotPasswordSchema>;

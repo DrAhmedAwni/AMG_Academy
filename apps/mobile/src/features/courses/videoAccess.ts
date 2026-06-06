@@ -4,6 +4,8 @@ import { getSessionMaterial } from '../../lib/storage';
 export interface VideoAccessResult {
   provider: string;
   available: boolean;
+  streamUrl: string;
+  authorization?: string;
 }
 
 async function getAuthorizationHeader() {
@@ -15,9 +17,11 @@ export async function getLessonVideoStreamUrl(videoId: string): Promise<VideoAcc
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15_000);
 
+  const streamUrl = buildApiUrl(`/videos/${encodeURIComponent(videoId)}/stream`);
+
   try {
     const authorization = await getAuthorizationHeader();
-    const response = await fetch(buildApiUrl(`/videos/${encodeURIComponent(videoId)}/stream`), {
+    const response = await fetch(streamUrl, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -31,11 +35,14 @@ export async function getLessonVideoStreamUrl(videoId: string): Promise<VideoAcc
     return {
       provider: 'vps',
       available: response.ok,
+      streamUrl,
+      authorization,
     };
   } catch {
     return {
       provider: 'vps',
       available: false,
+      streamUrl,
     };
   } finally {
     clearTimeout(timeout);

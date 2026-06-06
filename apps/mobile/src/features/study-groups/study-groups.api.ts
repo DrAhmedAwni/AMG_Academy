@@ -6,8 +6,8 @@ export interface ApiPage<T> {
   meta: PaginationMeta;
 }
 
-export type StudyGroupType = 'student' | 'instructor_led';
-export type JoinMode = 'open' | 'approval';
+export type StudyGroupType = 'STUDENT' | 'INSTRUCTOR_LED';
+export type JoinMode = 'OPEN' | 'REQUEST' | 'INVITE_ONLY';
 
 export interface StudyGroup {
   id: string;
@@ -82,6 +82,44 @@ export interface CreateSessionData {
   location?: string;
 }
 
+function normalizeMessage(raw: any): StudyGroupMessage {
+  return {
+    id: raw.id,
+    groupId: raw.groupId,
+    authorId: raw.authorId,
+    authorName: raw.authorName ?? raw.author?.name ?? 'Member',
+    authorAvatarUrl: raw.authorAvatarUrl ?? raw.author?.avatarUrl ?? null,
+    content: raw.content ?? raw.body ?? '',
+    createdAt: raw.createdAt,
+  };
+}
+
+function normalizeFile(raw: any): StudyGroupFile {
+  return {
+    id: raw.id,
+    groupId: raw.groupId,
+    uploaderId: raw.uploaderId ?? raw.uploadedById,
+    uploaderName: raw.uploaderName ?? raw.uploadedBy?.name ?? 'Member',
+    fileName: raw.fileName,
+    fileSize: raw.fileSize ?? raw.sizeBytes ?? 0,
+    mimeType: raw.mimeType,
+    createdAt: raw.createdAt,
+  };
+}
+
+function normalizeSession(raw: any): StudyGroupSession {
+  return {
+    id: raw.id,
+    groupId: raw.groupId,
+    title: raw.title,
+    description: raw.description ?? raw.onlineUrlNote ?? '',
+    startDate: raw.startDate ?? raw.startsAt,
+    endDate: raw.endDate ?? raw.endsAt ?? raw.startsAt,
+    location: raw.location ?? null,
+    createdAt: raw.createdAt,
+  };
+}
+
 export async function fetchStudyGroups(filters: StudyGroupFilters = {}): Promise<ApiPage<StudyGroup>> {
   return apiRequest<ApiPage<StudyGroup>>('/study-groups', {
     method: 'GET',
@@ -92,7 +130,10 @@ export async function fetchStudyGroups(filters: StudyGroupFilters = {}): Promise
 export async function createStudyGroup(data: CreateStudyGroupData): Promise<StudyGroup> {
   return apiRequest<StudyGroup>('/study-groups', {
     method: 'POST',
-    body: data,
+    body: {
+      ...data,
+      courseId: data.courseId?.trim() || undefined,
+    },
   });
 }
 
@@ -109,33 +150,44 @@ export async function joinStudyGroup(id: string): Promise<{ joined: boolean }> {
 }
 
 export async function fetchStudyGroupMessages(id: string): Promise<StudyGroupMessage[]> {
-  return apiRequest<StudyGroupMessage[]>(`/study-groups/${encodeURIComponent(id)}/messages`, {
+  const response = await apiRequest<ApiPage<any>>(`/study-groups/${encodeURIComponent(id)}/messages`, {
     method: 'GET',
   });
+  return response.data.map(normalizeMessage);
 }
 
 export async function sendStudyGroupMessage(groupId: string, data: SendMessageData): Promise<StudyGroupMessage> {
-  return apiRequest<StudyGroupMessage>(`/study-groups/${encodeURIComponent(groupId)}/messages`, {
+  const response = await apiRequest<any>(`/study-groups/${encodeURIComponent(groupId)}/messages`, {
     method: 'POST',
-    body: data,
+    body: { body: data.content },
   });
+  return normalizeMessage(response);
 }
 
 export async function fetchStudyGroupFiles(id: string): Promise<StudyGroupFile[]> {
-  return apiRequest<StudyGroupFile[]>(`/study-groups/${encodeURIComponent(id)}/files`, {
+  const response = await apiRequest<any[]>(`/study-groups/${encodeURIComponent(id)}/files`, {
     method: 'GET',
   });
+  return response.map(normalizeFile);
 }
 
 export async function fetchStudyGroupSessions(id: string): Promise<StudyGroupSession[]> {
-  return apiRequest<StudyGroupSession[]>(`/study-groups/${encodeURIComponent(id)}/sessions`, {
+  const response = await apiRequest<any[]>(`/study-groups/${encodeURIComponent(id)}/sessions`, {
     method: 'GET',
   });
+  return response.map(normalizeSession);
 }
 
 export async function createStudyGroupSession(groupId: string, data: CreateSessionData): Promise<StudyGroupSession> {
-  return apiRequest<StudyGroupSession>(`/study-groups/${encodeURIComponent(groupId)}/sessions`, {
+  const response = await apiRequest<any>(`/study-groups/${encodeURIComponent(groupId)}/sessions`, {
     method: 'POST',
-    body: data,
+    body: {
+      title: data.title,
+      startsAt: data.startDate,
+      endsAt: data.endDate,
+      location: data.location,
+      onlineUrlNote: data.description,
+    },
   });
+  return normalizeSession(response);
 }

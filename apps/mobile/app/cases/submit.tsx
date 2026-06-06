@@ -4,13 +4,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Header, Screen } from '../../src/components/layout';
 import { Button, GlassCard, TextField } from '../../src/components/ui';
-import { useCreateCaseMutation, useCaseCategoriesQuery } from '../../src/features/cases/cases.hooks';
+import {
+  useCreateCaseCategoryMutation,
+  useCreateCaseMutation,
+  useCaseCategoriesQuery,
+} from '../../src/features/cases/cases.hooks';
 import { mapApiErrorToUi, fieldError } from '../../src/lib/errors';
 import { colors, spacing, textStyles } from '../../src/theme';
 
 export default function CaseSubmitScreen() {
   const router = useRouter();
   const createMutation = useCreateCaseMutation();
+  const createCategoryMutation = useCreateCaseCategoryMutation();
   const categoriesQuery = useCaseCategoriesQuery();
   const categories = categoriesQuery.data ?? [];
 
@@ -18,6 +23,7 @@ export default function CaseSubmitScreen() {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [tagsText, setTagsText] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [showCategories, setShowCategories] = useState(false);
 
   const error = createMutation.error ? mapApiErrorToUi(createMutation.error) : null;
@@ -26,6 +32,16 @@ export default function CaseSubmitScreen() {
   const categoryError = fieldError(createMutation.error, 'categoryId');
 
   const selectedCategory = categories.find((c) => c.id === categoryId);
+
+  const handleCreateCategory = async () => {
+    const name = newCategoryName.trim();
+    if (name.length < 2) return;
+
+    const category = await createCategoryMutation.mutateAsync(name);
+    setCategoryId(category.id);
+    setNewCategoryName('');
+    setShowCategories(false);
+  };
 
   const handleSubmit = () => {
     const tags = tagsText
@@ -102,18 +118,43 @@ export default function CaseSubmitScreen() {
 
         {showCategories ? (
           <GlassCard style={styles.categoryList}>
-            {categories.map((cat) => (
+            {categoriesQuery.isLoading ? (
+              <Text style={styles.mutedText}>Loading categories...</Text>
+            ) : categories.length > 0 ? (
+              categories.map((cat) => (
+                <Button
+                  key={cat.id}
+                  label={cat.name}
+                  variant={categoryId === cat.id ? 'primary' : 'ghost'}
+                  size="sm"
+                  onPress={() => {
+                    setCategoryId(cat.id);
+                    setShowCategories(false);
+                  }}
+                />
+              ))
+            ) : (
+              <Text style={styles.mutedText}>No categories yet. Add the first one below.</Text>
+            )}
+            <View style={styles.newCategoryRow}>
+              <TextField
+                label="New category"
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+                placeholder="e.g., Endodontics"
+                style={styles.newCategoryInput}
+              />
               <Button
-                key={cat.id}
-                label={cat.name}
-                variant={categoryId === cat.id ? 'primary' : 'ghost'}
+                label="Add"
+                variant="secondary"
                 size="sm"
+                loading={createCategoryMutation.isPending}
+                disabled={newCategoryName.trim().length < 2}
                 onPress={() => {
-                  setCategoryId(cat.id);
-                  setShowCategories(false);
+                  void handleCreateCategory();
                 }}
               />
-            ))}
+            </View>
           </GlassCard>
         ) : null}
 
@@ -169,6 +210,17 @@ const styles = StyleSheet.create({
   },
   categoryList: {
     gap: spacing.xs,
+  },
+  newCategoryRow: {
+    gap: spacing.sm,
+    paddingTop: spacing.sm,
+  },
+  newCategoryInput: {
+    minHeight: 48,
+  },
+  mutedText: {
+    ...textStyles.caption,
+    color: colors.text.muted,
   },
   formError: {
     ...textStyles.caption,

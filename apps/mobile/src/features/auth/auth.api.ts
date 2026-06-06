@@ -2,6 +2,7 @@ import type { AuthUser } from '@amg/shared';
 import {
   forgotPasswordSchema,
   loginSchema,
+  googleMobileAuthSchema,
   registerSchema,
 } from '@amg/shared';
 import { apiRequest } from '../../lib/api';
@@ -39,6 +40,14 @@ export async function login(values: LoginFormValues) {
   return apiRequest<MobileAuthResponse>('/auth/login', {
     method: 'POST',
     body: validateLoginInput(values),
+    authFailureMode: 'ignore',
+  });
+}
+
+export async function loginWithGoogle(idToken: string) {
+  return apiRequest<MobileAuthResponse>('/auth/google/mobile', {
+    method: 'POST',
+    body: googleMobileAuthSchema.parse({ idToken, client: mobileClient }),
     authFailureMode: 'ignore',
   });
 }

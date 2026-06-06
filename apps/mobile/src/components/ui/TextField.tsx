@@ -17,8 +17,9 @@ export interface TextFieldProps extends TextInputProps {
   rightAction?: ReactNode;
 }
 
-export function TextField({ label, error, helperText, rightAction, style, ...inputProps }: TextFieldProps) {
+export function TextField({ label, error, helperText, rightAction, style, onPress, ...inputProps }: TextFieldProps) {
   const describedBy = error ? `${label}-error` : helperText ? `${label}-helper` : undefined;
+  const pressableInput = inputProps.editable === false && typeof onPress === 'function';
 
   return (
     <View style={styles.field}>
@@ -36,6 +37,13 @@ export function TextField({ label, error, helperText, rightAction, style, ...inp
             style,
           ]}
         />
+        {pressableInput ? (
+          <Pressable
+            accessibilityLabel={inputProps.accessibilityLabel ?? label}
+            onPress={onPress}
+            style={styles.inputPressOverlay}
+          />
+        ) : null}
         {rightAction ? (
           <View style={styles.rightAction}>{rightAction}</View>
         ) : null}
@@ -74,6 +82,14 @@ const styles = StyleSheet.create({
   inputWrapper: {
     position: 'relative',
     justifyContent: 'center',
+  },
+  inputPressOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    borderRadius: radius.lg,
   },
   input: {
     minHeight: 54,

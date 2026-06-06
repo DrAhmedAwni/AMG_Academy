@@ -15,8 +15,8 @@ export default function CreateStudyGroupScreen() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<StudyGroupType>('student');
-  const [joinMode, setJoinMode] = useState<JoinMode>('open');
+  const [type, setType] = useState<StudyGroupType>('STUDENT');
+  const [joinMode, setJoinMode] = useState<JoinMode>('OPEN');
   const [courseId, setCourseId] = useState('');
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [showJoinPicker, setShowJoinPicker] = useState(false);
@@ -26,13 +26,14 @@ export default function CreateStudyGroupScreen() {
   const descriptionError = fieldError(createMutation.error, 'description');
 
   const typeOptions: { key: StudyGroupType; label: string }[] = [
-    { key: 'student', label: 'Student-led' },
-    { key: 'instructor_led', label: 'Instructor-led' },
+    { key: 'STUDENT', label: 'Student-led' },
+    { key: 'INSTRUCTOR_LED', label: 'Instructor-led' },
   ];
 
   const joinOptions: { key: JoinMode; label: string }[] = [
-    { key: 'open', label: 'Open (anyone can join)' },
-    { key: 'approval', label: 'Approval required' },
+    { key: 'OPEN', label: 'Open (anyone can join)' },
+    { key: 'REQUEST', label: 'Approval required' },
+    { key: 'INVITE_ONLY', label: 'Invite only' },
   ];
 
   const handleSubmit = () => {
@@ -42,7 +43,7 @@ export default function CreateStudyGroupScreen() {
         description: description.trim(),
         type,
         joinMode,
-        ...(type === 'instructor_led' && courseId.trim() ? { courseId: courseId.trim() } : {}),
+        ...(type === 'INSTRUCTOR_LED' && courseId.trim() ? { courseId: courseId.trim() } : {}),
       },
       {
         onSuccess: () => {
@@ -150,7 +151,7 @@ export default function CreateStudyGroupScreen() {
           </GlassCard>
         ) : null}
 
-        {type === 'instructor_led' ? (
+        {type === 'INSTRUCTOR_LED' ? (
           <TextField
             label="Course ID (optional)"
             value={courseId}

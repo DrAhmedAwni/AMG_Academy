@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Header, Screen } from '../../../src/components/layout';
 import { ErrorState, LoadingState, PermissionDeniedState } from '../../../src/components/states';
@@ -13,6 +14,7 @@ function resolveParam(value: string | string[] | undefined) {
 }
 
 type PlayerState = 'loading' | 'ready' | 'denied' | 'error' | 'no-video';
+type StreamSource = { uri: string; headers?: Record<string, string> };
 
 export default function LessonPlayerScreen() {
   const router = useRouter();
@@ -20,6 +22,10 @@ export default function LessonPlayerScreen() {
   const resolvedLessonId = resolveParam(lessonId);
   const enrollmentsQuery = useEnrollmentsQuery();
   const [playerState, setPlayerState] = useState<PlayerState>('loading');
+  const [streamSource, setStreamSource] = useState<StreamSource | null>(null);
+  const player = useVideoPlayer(streamSource, (videoPlayer) => {
+    videoPlayer.loop = false;
+  });
 
   const checkAccess = useCallback(async () => {
     if (!resolvedLessonId) return;
@@ -30,11 +36,17 @@ export default function LessonPlayerScreen() {
       const videoAccess = await getLessonVideoStreamUrl(resolvedLessonId);
 
       if (videoAccess.available) {
+        setStreamSource({
+          uri: videoAccess.streamUrl,
+          ...(videoAccess.authorization ? { headers: { Authorization: videoAccess.authorization } } : {}),
+        });
         setPlayerState('ready');
       } else {
+        setStreamSource(null);
         setPlayerState('denied');
       }
     } catch {
+      setStreamSource(null);
       setPlayerState('error');
     }
   }, [resolvedLessonId]);
@@ -101,9 +113,12 @@ export default function LessonPlayerScreen() {
       />
 
       <GlassCard style={styles.playerCard}>
-        <View style={styles.playerPlaceholder}>
-          <Text style={styles.playerPlaceholderText}>Play</Text>
-        </View>
+        <VideoView
+          player={player}
+          style={styles.video}
+          contentFit="contain"
+          nativeControls
+        />
         <Text style={styles.readyText}>Your lesson is ready to play for this session.</Text>
       </GlassCard>
 
@@ -120,16 +135,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     padding: 0,
   },
-  playerPlaceholder: {
+  video: {
     width: '100%',
     height: 200,
     backgroundColor: colors.surface.elevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playerPlaceholderText: {
-    fontSize: 48,
-    color: colors.text.muted,
   },
   readyText: {
     ...textStyles.caption,

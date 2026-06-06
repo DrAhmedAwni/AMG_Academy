@@ -6,4 +6,7 @@ export default registerAs('auth', () => ({
   jwtResetSecret: process.env.JWT_RESET_SECRET ?? 'change-me-reset-minimum-32-characters',
   accessTokenTtl: process.env.JWT_ACCESS_TTL ?? '15m',
   refreshTokenTtl: process.env.JWT_REFRESH_TTL ?? '7d',
+  googleWebClientId: process.env.GOOGLE_OAUTH_WEB_CLIENT_ID,
+  googleAndroidClientId: process.env.GOOGLE_OAUTH_ANDROID_CLIENT_ID,
+  googleIosClientId: process.env.GOOGLE_OAUTH_IOS_CLIENT_ID,
 }));

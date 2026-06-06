@@ -161,6 +161,8 @@ enum NotificationType {
   EVENT_CANCELLED
   NEW_ANNOUNCEMENT
   NEW_COURSE_PUBLISHED
+  NEW_ENROLLMENT
+  COURSE_COMPLETED
   CASE_COMMENT_REPLY
   CASE_APPROVED
   STUDY_GROUP_NEW_MESSAGE
@@ -210,6 +212,9 @@ model User {
   specialty                   String?
   clinic                      String?
   city                        String?
+  professionalTitle           String?
+  practiceType                String?
+  yearsOfExperience           Int?
   avatarUrl                   String?
   notificationPreferences     Json?
   emailVerified               Boolean               @default(false)

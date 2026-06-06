@@ -22,6 +22,9 @@ export interface RegisterFormValues {
   specialty?: string;
   clinic?: string;
   city?: string;
+  professionalTitle?: string;
+  practiceType?: string;
+  yearsOfExperience?: number;
 }
 
 export interface ForgotPasswordFormValues {

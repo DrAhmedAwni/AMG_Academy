@@ -1,14 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { loginSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
 import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
-import { useLoginMutation } from '../../src/features/auth/auth.hooks';
+import { useGoogleLoginMutation, useLoginMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, LoginFormValues } from '../../src/features/auth/auth.types';
 import { mapApiErrorToUi } from '../../src/lib/errors';
 import { colors, radius, spacing, textStyles, typography } from '../../src/theme';
+
+WebBrowser.maybeCompleteAuthSession();
 
 function getLoginErrors(values: LoginFormValues): AuthFormErrors {
   const result = loginSchema.safeParse({
@@ -32,13 +36,32 @@ function getLoginErrors(values: LoginFormValues): AuthFormErrors {
 export default function LoginScreen() {
   const router = useRouter();
   const loginMutation = useLoginMutation();
+  const googleMutation = useGoogleLoginMutation();
+  const [googleRequest, googleResponse, promptGoogle] = Google.useIdTokenAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
+  });
   const [values, setValues] = useState<LoginFormValues>({ email: '', password: '' });
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const uiError = useMemo(
-    () => (loginMutation.error ? mapApiErrorToUi(loginMutation.error) : null),
-    [loginMutation.error],
+    () => (loginMutation.error || googleMutation.error
+      ? mapApiErrorToUi(loginMutation.error ?? googleMutation.error)
+      : null),
+    [googleMutation.error, loginMutation.error],
   );
+
+  useEffect(() => {
+    const idToken = googleResponse?.type === 'success'
+      ? googleResponse.authentication?.idToken
+      : undefined;
+    if (!idToken) return;
+
+    void googleMutation.mutateAsync(idToken).then(() => {
+      router.replace('/(tabs)/home' as never);
+    });
+  }, [googleMutation, googleResponse, router]);
 
   const submit = async () => {
     const nextErrors = getLoginErrors(values);
@@ -58,13 +81,27 @@ export default function LoginScreen() {
         <View style={styles.brandPill}>
           <Text style={styles.brandPillText}>Premium dental learning</Text>
         </View>
-        <Text style={styles.title}>Welcome back</Text>
+        <Text style={styles.title}>Sign in</Text>
         <Text style={styles.subtitle}>
-          Sign in to continue to AMG Academy.
+          Continue your courses, events, and clinical discussions.
         </Text>
       </View>
 
       <GlassCard style={styles.card}>
+        <Button
+          label="Continue with Google"
+          variant="secondary"
+          loading={googleMutation.isPending}
+          disabled={!googleRequest}
+          onPress={() => {
+            void promptGoogle();
+          }}
+        />
+        <View style={styles.dividerRow}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.divider} />
+        </View>
         <TextField
           label="Email"
           value={values.email}
@@ -99,16 +136,20 @@ export default function LoginScreen() {
             void submit();
           }}
         />
-        <Button
-          label="Create account"
-          variant="ghost"
-          onPress={() => router.push('/(auth)/register' as never)}
-        />
-        <Button
-          label="Forgot password"
-          variant="ghost"
-          onPress={() => router.push('/(auth)/forgot-password' as never)}
-        />
+        <View style={styles.actionRow}>
+          <Button
+            label="Create account"
+            variant="ghost"
+            onPress={() => router.push('/(auth)/register' as never)}
+            style={styles.actionButton}
+          />
+          <Button
+            label="Forgot password"
+            variant="ghost"
+            onPress={() => router.push('/(auth)/forgot-password' as never)}
+            style={styles.actionButton}
+          />
+        </View>
       </GlassCard>
     </Screen>
   );
@@ -117,15 +158,15 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     justifyContent: 'center',
-    gap: spacing.xl,
+    gap: spacing.lg,
   },
   hero: {
     alignItems: 'center',
     gap: spacing.sm,
   },
   logo: {
-    width: 238,
-    height: 64,
+    width: 216,
+    height: 58,
   },
   brandPill: {
     minHeight: 32,
@@ -144,15 +185,36 @@ const styles = StyleSheet.create({
   },
   title: {
     ...textStyles.title,
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
   subtitle: {
     ...textStyles.body,
     textAlign: 'center',
   },
   card: {
-    gap: spacing.lg,
+    gap: spacing.md,
     borderColor: colors.border.strong,
-    padding: spacing.xl,
+    padding: spacing.lg,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border.default,
+  },
+  dividerText: {
+    ...textStyles.caption,
+    color: colors.text.muted,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  actionButton: {
+    flex: 1,
   },
 });

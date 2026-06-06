@@ -14,6 +14,7 @@ import type { Request, Response } from 'express';
 import {
   changePasswordSchema,
   forgotPasswordSchema,
+  googleMobileAuthSchema,
   loginSchema,
   refreshSessionSchema,
   registerSchema,
@@ -44,6 +45,16 @@ export class AuthController {
   @Throttle(authThrottle)
   async login(@Body() body: unknown, @Res({ passthrough: true }) response: Response) {
     return this.authService.login(parseWithSchema(loginSchema, body), response);
+  }
+
+  @Post('google/mobile')
+  @HttpCode(200)
+  @Throttle(authThrottle)
+  async googleMobile(@Body() body: unknown, @Res({ passthrough: true }) response: Response) {
+    return this.authService.loginWithGoogleMobile(
+      parseWithSchema(googleMobileAuthSchema, body),
+      response,
+    );
   }
 
   @Post('logout')

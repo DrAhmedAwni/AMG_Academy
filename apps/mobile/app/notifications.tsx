@@ -1,10 +1,10 @@
 import React from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { NotificationCard } from '../src/components/cards/NotificationCard';
 import { Header, Screen } from '../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../src/components/states';
-import { Button, GlassCard } from '../src/components/ui';
+import { Button } from '../src/components/ui';
 import {
   useAnnouncementsQuery,
   useMarkAllNotificationsReadMutation,
@@ -12,7 +12,7 @@ import {
   useNotificationsQuery,
 } from '../src/features/notifications/notifications.hooks';
 import { useQueryState } from '../src/hooks/useQueryState';
-import { colors, spacing, textStyles } from '../src/theme';
+import { colors, spacing } from '../src/theme';
 
 export default function NotificationsScreen() {
   const router = useRouter();
@@ -25,8 +25,18 @@ export default function NotificationsScreen() {
     isEmpty: (data) => data.data.length === 0,
   });
 
-  const announcements = announcementsQuery.data?.data ?? [];
+  const announcements = (announcementsQuery.data?.data ?? []).map((announcement) => ({
+    id: `announcement-${announcement.id}`,
+    type: 'NEW_ANNOUNCEMENT',
+    title: announcement.title,
+    message: announcement.body,
+    read: true,
+    entityType: 'Announcement',
+    entityId: announcement.id,
+    createdAt: announcement.publishedAt ?? announcement.createdAt,
+  }));
   const allNotifications = [...announcements, ...(state.data?.data ?? [])];
+  const announcementError = announcementsQuery.error ? mapAnnouncementsError(announcementsQuery.error) : null;
 
   const renderItem = ({ item }: { item: any }) => (
     <NotificationCard
@@ -64,22 +74,16 @@ export default function NotificationsScreen() {
         }
       />
 
-      {announcements.length > 0 ? (
-        <GlassCard style={styles.announcementCard}>
-          <Text style={styles.announcementLabel}>Announcements</Text>
-          <Text style={styles.announcementCount}>
-            {announcements.length} published announcement{announcements.length !== 1 ? 's' : ''}
-          </Text>
-        </GlassCard>
-      ) : null}
-
-      {state.status === 'loading' ? (
+      {state.status === 'loading' || announcementsQuery.isLoading ? (
         <LoadingState title="Loading notifications" message="Fetching your inbox." />
-      ) : state.status === 'error' ? (
+      ) : state.status === 'error' || announcementError ? (
         <ErrorState
-          title={state.error.title}
-          message={state.error.message}
-          onRetry={() => { void notificationsQuery.refetch(); }}
+          title={state.status === 'error' ? state.error.title : announcementError?.title}
+          message={state.status === 'error' ? state.error.message : announcementError?.message}
+          onRetry={() => {
+            void notificationsQuery.refetch();
+            void announcementsQuery.refetch();
+          }}
         />
       ) : state.status === 'empty' && announcements.length === 0 ? (
         <EmptyState
@@ -109,18 +113,15 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  announcementCard: {
-    gap: spacing.xs,
-  },
-  announcementLabel: {
-    ...textStyles.label,
-  },
-  announcementCount: {
-    ...textStyles.caption,
-    color: colors.text.secondary,
-  },
   list: {
     gap: spacing.sm,
     paddingBottom: spacing.xl,
   },
 });
+
+function mapAnnouncementsError(error: unknown) {
+  if (error instanceof Error) {
+    return { title: 'Announcements unavailable', message: error.message };
+  }
+  return { title: 'Announcements unavailable', message: 'Please try again.' };
+}

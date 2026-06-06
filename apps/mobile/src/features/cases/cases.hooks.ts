@@ -45,6 +45,17 @@ export function useCreateCaseMutation() {
   });
 }
 
+export function useCreateCaseCategoryMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (name: string) => casesApi.createCaseCategory({ name }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: caseQueryKeys.categories() });
+    },
+  });
+}
+
 export function useToggleCaseUpvoteMutation() {
   const queryClient = useQueryClient();
 

@@ -27,11 +27,11 @@ function resolveParam(value: string | string[] | undefined) {
 }
 
 function getTypeLabel(type: StudyGroupType): string {
-  return type === 'student' ? 'Student-led' : 'Instructor-led';
+  return type === 'STUDENT' ? 'Student-led' : 'Instructor-led';
 }
 
 function getJoinModeLabel(mode: string): string {
-  return mode === 'open' ? 'Open' : 'Approval required';
+  return mode === 'OPEN' ? 'Open' : mode === 'INVITE_ONLY' ? 'Invite only' : 'Approval required';
 }
 
 function MessageItem({ item }: { item: StudyGroupMessage }) {
@@ -246,7 +246,7 @@ export default function StudyGroupDetailScreen() {
           <Badge label={getTypeLabel(group.type)} />
           <Badge
             label={getJoinModeLabel(group.joinMode)}
-            foreground={group.joinMode === 'open' ? colors.status.success : colors.status.warning}
+            foreground={group.joinMode === 'OPEN' ? colors.status.success : colors.status.warning}
           />
           <View style={styles.memberStat}>
             <Ionicons name="people-outline" size={14} color={colors.text.muted} />
@@ -376,3 +376,4 @@ const styles = StyleSheet.create({
     height: spacing.sm,
   },
 });
+

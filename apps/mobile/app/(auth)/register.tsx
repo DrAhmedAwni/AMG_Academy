@@ -1,15 +1,19 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { registerSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
 import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
 import { SuccessState } from '../../src/components/states/SuccessState';
-import { useRegisterMutation } from '../../src/features/auth/auth.hooks';
+import { useGoogleLoginMutation, useRegisterMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, RegisterFormValues } from '../../src/features/auth/auth.types';
 import { mapApiErrorToUi } from '../../src/lib/errors';
-import { spacing, textStyles } from '../../src/theme';
+import { colors, spacing, textStyles } from '../../src/theme';
+
+WebBrowser.maybeCompleteAuthSession();
 
 function getRegisterErrors(values: RegisterFormValues): AuthFormErrors {
   const result = registerSchema.safeParse(values);
@@ -29,6 +33,12 @@ function getRegisterErrors(values: RegisterFormValues): AuthFormErrors {
 export default function RegisterScreen() {
   const router = useRouter();
   const registerMutation = useRegisterMutation();
+  const googleMutation = useGoogleLoginMutation();
+  const [googleRequest, googleResponse, promptGoogle] = Google.useIdTokenAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
+  });
   const [values, setValues] = useState<RegisterFormValues>({
     name: '',
     email: '',
@@ -37,22 +47,42 @@ export default function RegisterScreen() {
     specialty: '',
     clinic: '',
     city: '',
+    professionalTitle: '',
+    practiceType: '',
   });
+  const [yearsText, setYearsText] = useState('');
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const uiError = useMemo(
-    () => (registerMutation.error ? mapApiErrorToUi(registerMutation.error) : null),
-    [registerMutation.error],
+    () => (registerMutation.error || googleMutation.error
+      ? mapApiErrorToUi(registerMutation.error ?? googleMutation.error)
+      : null),
+    [googleMutation.error, registerMutation.error],
   );
 
+  useEffect(() => {
+    const idToken = googleResponse?.type === 'success'
+      ? googleResponse.authentication?.idToken
+      : undefined;
+    if (!idToken) return;
+
+    void googleMutation.mutateAsync(idToken).then(() => {
+      router.replace('/(tabs)/home' as never);
+    });
+  }, [googleMutation, googleResponse, router]);
+
   const submit = async () => {
-    const nextErrors = getRegisterErrors(values);
+    const payload: RegisterFormValues = {
+      ...values,
+      yearsOfExperience: yearsText.trim() ? Number(yearsText.trim()) : undefined,
+    };
+    const nextErrors = getRegisterErrors(payload);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
       return;
     }
 
-    await registerMutation.mutateAsync(values);
+    await registerMutation.mutateAsync(payload);
   };
 
   if (registerMutation.isSuccess) {
@@ -76,11 +106,25 @@ export default function RegisterScreen() {
         <Image source={require('../../assets/logo-horizontal.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}>Create account</Text>
         <Text style={styles.subtitle}>
-          Register with your details. Account verification remains handled by AMG Academy.
+          Join AMG Academy with your professional profile.
         </Text>
       </View>
 
       <GlassCard style={styles.card}>
+        <Button
+          label="Continue with Google"
+          variant="secondary"
+          loading={googleMutation.isPending}
+          disabled={!googleRequest}
+          onPress={() => {
+            void promptGoogle();
+          }}
+        />
+        <View style={styles.dividerRow}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>or complete your details</Text>
+          <View style={styles.divider} />
+        </View>
         <TextField
           label="Full name"
           value={values.name}
@@ -127,6 +171,28 @@ export default function RegisterScreen() {
           error={errors.specialty}
         />
         <TextField
+          label="Professional title"
+          value={values.professionalTitle}
+          onChangeText={(professionalTitle) => setValues((current) => ({ ...current, professionalTitle }))}
+          placeholder="e.g., Consultant, Resident, GP dentist"
+          error={errors.professionalTitle}
+        />
+        <TextField
+          label="Practice type"
+          value={values.practiceType}
+          onChangeText={(practiceType) => setValues((current) => ({ ...current, practiceType }))}
+          placeholder="e.g., Private clinic, hospital, university"
+          error={errors.practiceType}
+        />
+        <TextField
+          label="Years of experience"
+          value={yearsText}
+          onChangeText={setYearsText}
+          keyboardType="number-pad"
+          placeholder="e.g., 5"
+          error={errors.yearsOfExperience}
+        />
+        <TextField
           label="Clinic"
           value={values.clinic}
           onChangeText={(clinic) => setValues((current) => ({ ...current, clinic }))}
@@ -159,18 +225,38 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   screen: {
     justifyContent: 'center',
+    gap: spacing.lg,
   },
   hero: {
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   logo: {
     width: 220,
     height: 56,
   },
   title: textStyles.title,
-  subtitle: textStyles.body,
+  subtitle: {
+    ...textStyles.body,
+    textAlign: 'center',
+  },
   card: {
     gap: spacing.md,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border.default,
+  },
+  dividerText: {
+    ...textStyles.caption,
+    color: colors.text.muted,
   },
 });

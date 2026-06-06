@@ -25,6 +25,7 @@ import {
   LogOut,
   ChevronRight,
   MessageSquareText,
+  UsersRound,
 } from 'lucide-react';
 
 const menu = [
@@ -38,6 +39,7 @@ const menu = [
   { href: '/admin/payments', label: 'Payments', icon: CreditCard, permission: 'payments:read' },
   { href: '/admin/certificates', label: 'Certificates', icon: Award, permission: 'certificates:read' },
   { href: '/admin/cases', label: 'Cases', icon: MessageSquareText, permission: 'cases:moderate' },
+  { href: '/admin/study-groups', label: 'Study Groups', icon: UsersRound, permission: 'study-groups:read' },
   { href: '/admin/courses', label: 'Courses', icon: BookOpen, permission: 'courses:read' },
   { href: '/admin/lessons', label: 'Lessons', icon: BookMarked, permission: 'courses:read' },
   { href: '/admin/reports', label: 'Reports', icon: BarChart3, permission: 'reports:read' },

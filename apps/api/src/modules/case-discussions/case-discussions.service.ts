@@ -11,6 +11,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   CasePostFiltersDto,
+  CreateCaseCategoryDto,
   CreateCaseCommentDto,
   CreateCasePostDto,
   CaseModerationDto,
@@ -152,6 +153,24 @@ export class CaseDiscussionsService {
     });
 
     return this.mapPost(post, userId);
+  }
+
+  async createCategory(input: CreateCaseCategoryDto, _userId: string) {
+    const name = input.name.trim();
+    const slugBase = this.slugify(name);
+    const slug = await this.nextCategorySlug(name, slugBase);
+
+    const category = await this.prisma.caseCategory.upsert({
+      where: { slug },
+      update: { status: 'active' },
+      create: {
+        name,
+        slug,
+        status: 'active',
+      },
+    });
+
+    return category;
   }
 
   async toggleUpvote(id: string, userId: string) {
@@ -468,5 +487,39 @@ export class CaseDiscussionsService {
     if (normalized === 'REJECTED') return PrismaCasePostStatus.REJECTED;
     if (normalized === 'ARCHIVED') return PrismaCasePostStatus.ARCHIVED;
     return undefined;
+  }
+
+  private slugify(value: string) {
+    const slug = value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    return slug || 'case-category';
+  }
+
+  private async nextCategorySlug(name: string, base: string) {
+    const existing = await this.prisma.caseCategory.findMany({
+      where: { slug: { startsWith: base } },
+      select: { slug: true, name: true },
+    });
+
+    const exactByName = existing.find((category) => category.name.toLowerCase() === name.toLowerCase());
+    if (exactByName) {
+      return exactByName.slug;
+    }
+
+    const used = new Set(existing.map((category) => category.slug));
+    if (!used.has(base)) {
+      return base;
+    }
+
+    let index = 2;
+    while (used.has(`${base}-${index}`)) {
+      index += 1;
+    }
+
+    return `${base}-${index}`;
   }
 }
