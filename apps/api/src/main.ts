@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SanitizationPipe } from './common/pipes/sanitization.pipe';
 import { PrismaService } from './modules/prisma/prisma.service';
@@ -13,11 +14,23 @@ async function bootstrap() {
   const prisma = app.get(PrismaService);
   const apiPrefix = config.get<string>('app.apiPrefix', 'api/v1');
   const frontendUrl = config.get<string>('app.frontendUrl', 'http://localhost:3000');
+  const corsOrigins = Array.from(
+    new Set([
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      frontendUrl,
+      ...(process.env.CORS_ORIGINS ?? '')
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    ]),
+  );
 
+  app.use(helmet());
   app.use(cookieParser());
   app.setGlobalPrefix(apiPrefix);
   app.enableCors({
-    origin: frontendUrl,
+    origin: corsOrigins,
     credentials: true,
   });
   app.useGlobalPipes(

@@ -12,6 +12,7 @@ import { EmailChannel } from '../notifications/channels/email.channel';
     ConfigModule,
     PrismaModule,
     JwtModule.registerAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('auth.jwtSecret', 'change-me-minimum-32-characters'),

@@ -43,7 +43,7 @@ export class VideosService {
     const allowedMime = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
     const allowedExt = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
     const ext = '.' + (file.originalname.split('.').pop()?.toLowerCase() ?? '');
-    if (!allowedMime.includes(file.mimetype) && !allowedExt.includes(ext)) {
+    if (!allowedMime.includes(file.mimetype) || !allowedExt.includes(ext)) {
       throw new BadRequestException('Only video files (MP4, WebM, MOV, AVI, MKV) are allowed');
     }
     const safeName = this.sanitizeFileName(file.originalname);

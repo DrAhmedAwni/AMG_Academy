@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 const seededAdmin = {
   email: 'admin@amgacademy.local',
-  password: 'AdminPass123',
+  password: process.env.SEED_ADMIN_PASSWORD ?? 'ChangeMeAdminPass123!',
   name: 'AMG Admin',
 };
 
@@ -226,7 +226,7 @@ async function main() {
     },
   });
 
-  console.log(`Seeded admin user: ${seededAdmin.email} / ${seededAdmin.password}`);
+  console.log(`Seeded admin user: ${seededAdmin.email}`);
 }
 
 main()

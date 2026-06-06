@@ -1,5 +1,6 @@
 import {
   Body,
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -22,6 +23,14 @@ import { PermissionGuard } from '../../common/guards/permission.guard';
 import { VideosGuard } from './videos.guard';
 import { parseWithSchema } from '../../common/utils/zod.utils';
 import { VideosService } from './videos.service';
+
+const allowedVideoMimeTypes = new Set([
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+  'video/x-msvideo',
+  'video/x-matroska',
+]);
 
 @Controller('videos')
 export class VideosController {
@@ -52,6 +61,14 @@ export class VideosController {
   @AuditLog(AuditAction.Create, 'Video')
   @UseInterceptors(FileInterceptor('video', {
     limits: { fileSize: 500 * 1024 * 1024 },
+    fileFilter: (_request, file, callback) => {
+      if (allowedVideoMimeTypes.has(file.mimetype)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new BadRequestException('Unsupported video file type'), false);
+    },
   }))
   async upload(
     @UploadedFile() file: Express.Multer.File,
