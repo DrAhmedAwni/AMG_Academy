@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import '@fontsource/montserrat/index.css';
+import '@fontsource/montserrat';
 import './globals.css';
 import { Providers } from './providers';
 
