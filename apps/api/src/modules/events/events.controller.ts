@@ -113,4 +113,12 @@ export class EventsController {
   async remove(@Param('id') id: string) {
     return this.eventsService.remove(parseWithSchema(uuidSchema, id));
   }
+
+  @Delete(':id/hard')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('events:delete')
+  @AuditLog(AuditAction.Delete, 'Event')
+  async hardDelete(@Param('id') id: string) {
+    return this.eventsService.hardDelete(parseWithSchema(uuidSchema, id));
+  }
 }

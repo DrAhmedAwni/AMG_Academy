@@ -18,6 +18,7 @@ import { PermissionGuard } from '../../common/guards/permission.guard';
 import { parseWithSchema } from '../../common/utils/zod.utils';
 import {
   caseModerationSchema,
+  createCaseCategorySchema,
   casePostFiltersSchema,
   createCaseCommentSchema,
   createCasePostSchema,
@@ -75,6 +76,19 @@ export class CaseDiscussionsController {
   ) {
     return this.caseDiscussionsService.create(
       parseWithSchema(createCasePostSchema, body),
+      user.sub,
+    );
+  }
+
+  @Post('case-categories')
+  @UseGuards(JwtAuthGuard)
+  @AuditLog(AuditAction.Create, 'CaseCategory')
+  async createCategory(
+    @Body() body: unknown,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.caseDiscussionsService.createCategory(
+      parseWithSchema(createCaseCategorySchema, body),
       user.sub,
     );
   }

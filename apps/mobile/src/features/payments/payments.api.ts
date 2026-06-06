@@ -119,8 +119,8 @@ export function getPaymentDisplayState(
     return {
       label: 'Payment pending',
       helper: canUseMockActions
-        ? 'Use the mock actions to update the backend payment record in development.'
-        : 'Payment actions are controlled by the backend payment provider.',
+        ? 'Choose a checkout result to continue.'
+        : 'Complete this payment with the selected provider.',
       canMockSuccess: canUseMockActions,
       canMockFail: canUseMockActions,
       canMockCancel: canUseMockActions,
@@ -132,7 +132,7 @@ export function getPaymentDisplayState(
   if (isSuccessfulPaymentStatus(payment.status)) {
     return {
       label: 'Payment complete',
-      helper: 'Backend payment state allows the related access or ticket flow to continue.',
+      helper: 'Your related ticket or course access can now continue.',
       canMockSuccess: false,
       canMockFail: false,
       canMockCancel: false,
@@ -144,7 +144,7 @@ export function getPaymentDisplayState(
   if (payment.status === PaymentStatus.Failed) {
     return {
       label: 'Payment failed',
-      helper: 'The backend rejected this payment attempt.',
+      helper: 'This payment attempt was not completed.',
       canMockSuccess: false,
       canMockFail: false,
       canMockCancel: false,
@@ -168,7 +168,7 @@ export function getPaymentDisplayState(
   if (payment.status === PaymentStatus.Cancelled) {
     return {
       label: 'Payment cancelled',
-      helper: 'The backend marks this payment as cancelled.',
+      helper: 'This payment was cancelled.',
       canMockSuccess: false,
       canMockFail: false,
       canMockCancel: false,
@@ -179,7 +179,7 @@ export function getPaymentDisplayState(
 
   return {
     label: 'Payment recorded',
-    helper: 'This payment state is managed by the backend.',
+    helper: 'This payment status has been recorded.',
     canMockSuccess: false,
     canMockFail: false,
     canMockCancel: false,

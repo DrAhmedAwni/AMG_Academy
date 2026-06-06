@@ -17,6 +17,10 @@ export const createCasePostSchema = z.object({
     .default([]),
 });
 
+export const createCaseCategorySchema = z.object({
+  name: z.string().trim().min(2).max(100),
+});
+
 export const casePostFiltersSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(25),
@@ -40,6 +44,10 @@ export interface CreateCasePostDto {
   categoryId: string;
   tags?: string[];
   images?: { storageKey: string; caption?: string; orderIndex?: number }[];
+}
+
+export interface CreateCaseCategoryDto {
+  name: string;
 }
 
 export interface CasePostFiltersDto {

@@ -13,9 +13,7 @@ import type { JwtPayload } from '@amg/shared';
 import { AuditAction, paginationQuerySchema, uuidSchema } from '@amg/shared';
 import { AuditLog } from '../../common/decorators/audit-log.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../common/guards/permission.guard';
 import { parseWithSchema } from '../../common/utils/zod.utils';
 import {
   createSessionSchema,
@@ -45,8 +43,7 @@ export class StudyGroupsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermission('study-groups:create')
+  @UseGuards(JwtAuthGuard)
   @AuditLog(AuditAction.Create, 'StudyGroup')
   async create(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
     return this.studyGroupsService.create(

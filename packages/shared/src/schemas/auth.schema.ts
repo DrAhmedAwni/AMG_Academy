@@ -16,12 +16,20 @@ export const registerSchema = z.object({
   specialty: optionalTrimmedString(100),
   clinic: optionalTrimmedString(100),
   city: optionalTrimmedString(100),
+  professionalTitle: optionalTrimmedString(100),
+  practiceType: optionalTrimmedString(100),
+  yearsOfExperience: z.coerce.number().int().min(0).max(80).optional(),
 });
 
 export const loginSchema = z.object({
   email: z.string().trim().email(),
   password: z.string().min(1),
   client: z.enum(['web', 'mobile']).optional(),
+});
+
+export const googleMobileAuthSchema = z.object({
+  idToken: z.string().min(10),
+  client: z.literal('mobile').optional(),
 });
 
 export const refreshSessionSchema = z.object({

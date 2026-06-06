@@ -5,8 +5,8 @@
 :root {
   color-scheme: dark;
   background: #020617;
-  --font-hanken-grotesk: 'Hanken Grotesk', sans-serif;
-  --font-inter: 'Inter', sans-serif;
+  --font-hanken-grotesk: 'Montserrat', sans-serif;
+  --font-inter: 'Montserrat', sans-serif;
   --glass-bg: rgba(15, 23, 42, 0.72);
   --glass-border: rgba(51, 65, 85, 0.48);
   --glass-shadow: 0 18px 48px rgba(0, 0, 0, 0.36);

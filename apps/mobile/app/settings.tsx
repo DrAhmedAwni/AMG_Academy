@@ -68,7 +68,7 @@ export default function SettingsScreen() {
 
         <View style={styles.logoutSection}>
           <Text style={styles.logoutHint}>
-            Logout clears SecureStore and private query cache.
+            You will be signed out from this device.
           </Text>
           <Button
             label="Log out"
@@ -80,8 +80,7 @@ export default function SettingsScreen() {
       </GlassCard>
 
       <Text style={styles.disclaimer}>
-        Push notification delivery requires a production Expo push token and
-        backend provider configuration. Preparation is included.
+        Push notifications are used for announcements, event updates, and course reminders.
       </Text>
     </Screen>
   );

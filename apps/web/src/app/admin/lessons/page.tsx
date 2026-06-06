@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DataTable } from '@/components/tables/DataTable';
@@ -8,8 +8,14 @@ import { Button, Input, Modal, Card } from '@/components/ui';
 import { LoadingSkeleton, EmptyState, ErrorState } from '@/components/states';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Plus, Pencil, Trash2, ArrowLeft, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, BookOpen, Link2, Upload, X, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+
+interface LessonVideo {
+  id: string;
+  duration: number;
+  originalName: string;
+}
 
 interface Lesson {
   id: string;
@@ -18,11 +24,34 @@ interface Lesson {
   duration: number;
   orderIndex: number;
   videoId: string | null;
+  video?: LessonVideo | null;
 }
 
 interface CourseOption {
   id: string;
   title: string;
+}
+
+type LessonFormState = {
+  title: string;
+  description: string;
+  courseId: string;
+  orderIndex: number;
+  duration: number;
+  videoId: string;
+};
+
+type VideoUploadResponse = {
+  id?: string;
+  originalName?: string | null;
+};
+
+function toControlledString(value: unknown) {
+  return typeof value === 'string' ? value : '';
+}
+
+function toControlledNumber(value: unknown, fallback: number) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
 async function fetchLessons(courseId: string) {
@@ -161,7 +190,7 @@ export default function AdminLessonsPage() {
     { id: 'orderIndex', header: '#', cell: (l: Lesson) => l.orderIndex },
     { id: 'title', header: 'Title', cell: (l: Lesson) => l.title },
     { id: 'duration', header: 'Duration', cell: (l: Lesson) => `${l.duration} min` },
-    { id: 'video', header: 'Video', cell: (l: Lesson) => (l.videoId ? 'Yes' : 'No') },
+    { id: 'video', header: 'Video', cell: (l: Lesson) => (l.video ? l.video.originalName : l.videoId ? 'Yes' : 'No') },
   ];
 
   return (
@@ -231,6 +260,14 @@ export default function AdminLessonsPage() {
   );
 }
 
+function extractGoogleDriveFileId(url: string): string | null {
+  const fileMatch = url.match(/\/file\/d\/([^/]+)\//);
+  if (fileMatch?.[1]) return fileMatch[1];
+  const idMatch = url.match(/[?&]id=([^&]+)/);
+  if (idMatch?.[1]) return idMatch[1];
+  return null;
+}
+
 function LessonFormModal({
   title,
   courseId,
@@ -246,17 +283,81 @@ function LessonFormModal({
   onSubmit: (body: Record<string, unknown>) => void;
   isSubmitting: boolean;
 }) {
-  const [form, setForm] = useState({
-    title: lesson?.title ?? '',
-    description: lesson?.description ?? '',
+  const [form, setForm] = useState<LessonFormState>({
+    title: toControlledString(lesson?.title),
+    description: toControlledString(lesson?.description),
     courseId,
-    orderIndex: lesson?.orderIndex ?? 1,
-    duration: lesson?.duration ?? 0,
-    videoId: lesson?.videoId ?? '',
+    orderIndex: toControlledNumber(lesson?.orderIndex, 1),
+    duration: toControlledNumber(lesson?.duration, 0),
+    videoId: toControlledString(lesson?.videoId),
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [videoSource, setVideoSource] = useState<'url' | 'upload'>('url');
+  const [driveUrl, setDriveUrl] = useState('');
+  const [attaching, setAttaching] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [videoName, setVideoName] = useState<string | null>(lesson?.video?.originalName ?? null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const attachedVideoId = form.videoId;
+  const hasVideo = !!attachedVideoId;
 
   const clearError = (field: string) => setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
+
+  const handleAttachDriveUrl = async () => {
+    if (!driveUrl.trim()) return;
+    setAttaching(true);
+    try {
+      const res = await api.post('/videos/from-url', { url: driveUrl.trim() });
+      const video = res.data.data as VideoUploadResponse;
+      if (!video.id) {
+        throw new Error('Video response did not include an id');
+      }
+      setForm((prev) => ({ ...prev, videoId: video.id ?? '' }));
+      setVideoName(video.originalName ?? 'Google Drive video');
+      setDriveUrl('');
+      toast.success('Video attached from Google Drive');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error?.message ?? 'Failed to attach video');
+    } finally {
+      setAttaching(false);
+    }
+  };
+
+  const handleUploadVideo = async () => {
+    if (!uploadFile) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('video', uploadFile);
+      const res = await api.post('/videos/upload', fd, {
+        timeout: 300000,
+      });
+      const video = res.data.data as VideoUploadResponse;
+      if (!video.id) {
+        throw new Error('Video response did not include an id');
+      }
+      setForm((prev) => ({ ...prev, videoId: video.id ?? '' }));
+      setVideoName(video.originalName ?? uploadFile.name);
+      setUploadFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      toast.success('Video uploaded and attached');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error?.message ?? 'Failed to upload video');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    setForm((prev) => ({ ...prev, videoId: '' }));
+    setVideoName(null);
+    setDriveUrl('');
+    setUploadFile(null);
+  };
 
   const handleSave = () => {
     const errors: Record<string, string> = {};
@@ -299,7 +400,7 @@ function LessonFormModal({
             min={1}
             value={form.orderIndex}
             error={fieldErrors.orderIndex}
-            onChange={(e) => { setForm({ ...form, orderIndex: Number(e.target.value) }); clearError('orderIndex'); }}
+            onChange={(e) => { setForm({ ...form, orderIndex: toControlledNumber(Number(e.target.value), 1) }); clearError('orderIndex'); }}
             required
           />
           <Input
@@ -307,14 +408,81 @@ function LessonFormModal({
             type="number"
             min={0}
             value={form.duration}
-            onChange={(e) => { setForm({ ...form, duration: Number(e.target.value) }); clearError('duration'); }}
+            onChange={(e) => { setForm({ ...form, duration: toControlledNumber(Number(e.target.value), 0) }); clearError('duration'); }}
           />
         </div>
-        <Input
-          label="Video ID (optional)"
-          value={form.videoId}
-          onChange={(e) => { setForm({ ...form, videoId: e.target.value }); clearError('videoId'); }}
-        />
+
+        <div className="space-y-3">
+          <span className="text-sm font-medium text-text-secondary">Lesson Video</span>
+
+          {hasVideo && (
+            <div className="flex items-center gap-2 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-600">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              <span className="flex-1 truncate">{videoName ?? 'Video attached'}</span>
+              <button type="button" onClick={handleRemoveVideo} className="shrink-0 text-text-muted hover:text-status-error">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
+          <div className="flex gap-1 rounded-xl border border-surface-border/70 bg-surface-elevated/50 p-1">
+            <button
+              type="button"
+              onClick={() => setVideoSource('url')}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                videoSource === 'url' ? 'bg-surface-card text-text-primary shadow-sm' : 'text-text-muted hover:text-text-primary'
+              }`}
+            >
+              <Link2 className="h-4 w-4" />
+              Google Drive Link
+            </button>
+            <button
+              type="button"
+              onClick={() => setVideoSource('upload')}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                videoSource === 'upload' ? 'bg-surface-card text-text-primary shadow-sm' : 'text-text-muted hover:text-text-primary'
+              }`}
+            >
+              <Upload className="h-4 w-4" />
+              Upload Video
+            </button>
+          </div>
+
+          {videoSource === 'url' ? (
+            <div key="drive-url-source" className="flex gap-2">
+              <input
+                type="text"
+                value={driveUrl}
+                onChange={(e) => setDriveUrl(e.target.value)}
+                placeholder="https://drive.google.com/file/d/..."
+                className="flex-1 rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 py-2 text-sm text-text-primary outline-none focus:border-cyan/60 focus:ring-2 focus:ring-cyan/20"
+              />
+              <Button size="sm" onClick={handleAttachDriveUrl} disabled={attaching || !driveUrl.trim()}>
+                {attaching ? 'Attaching...' : 'Attach'}
+              </Button>
+            </div>
+          ) : (
+            <div key="video-upload-source" className="space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime"
+                onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+                className="w-full text-sm text-text-primary file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan/10 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-cyan hover:file:bg-cyan/20"
+              />
+              <p className="text-xs text-text-muted">MP4, WebM, MOV up to 500MB</p>
+              {uploadFile && (
+                <div className="flex items-center gap-2">
+                  <span className="flex-1 truncate text-sm text-text-primary">{uploadFile.name}</span>
+                  <Button size="sm" onClick={handleUploadVideo} disabled={uploading}>
+                    {uploading ? 'Uploading...' : 'Upload & Attach'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button onClick={handleSave} disabled={isSubmitting}>

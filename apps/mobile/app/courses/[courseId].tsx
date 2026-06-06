@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { PaymentStatus } from '@amg/shared';
 import { Header, Screen, SectionHeader } from '../../src/components/layout';
@@ -16,7 +16,7 @@ import {
 } from '../../src/features/courses/courses.hooks';
 import type { LessonSummary } from '../../src/features/courses/courses.api';
 import { mapApiErrorToUi } from '../../src/lib/errors';
-import { colors, spacing, textStyles, typography } from '../../src/theme';
+import { colors, radius, spacing, textStyles, typography } from '../../src/theme';
 
 function resolveParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -86,7 +86,7 @@ export default function CourseDetailScreen() {
     <Screen>
       <Header
         title="Course"
-        subtitle="Enrollment and lesson state are backend-derived."
+        subtitle="Review lessons, enrollment, and course access."
         action={<Button label="Back" variant="secondary" onPress={() => router.back()} />}
       />
 
@@ -96,6 +96,14 @@ export default function CourseDetailScreen() {
           <Text style={styles.errorMessage}>{enrollmentError.message}</Text>
         </GlassCard>
       ) : null}
+
+      {course.thumbnailUrl ? (
+        <Image source={{ uri: course.thumbnailUrl }} resizeMode="cover" style={styles.hero} />
+      ) : (
+        <View style={styles.heroPlaceholder}>
+          <Text style={styles.heroPlaceholderText}>{course.title.slice(0, 1).toUpperCase()}</Text>
+        </View>
+      )}
 
       <GlassCard style={styles.card}>
         <View style={styles.titleRow}>
@@ -218,6 +226,26 @@ const styles = StyleSheet.create({
   },
   errorTitle: textStyles.label,
   errorMessage: textStyles.body,
+  hero: {
+    width: '100%',
+    height: 200,
+    borderRadius: radius.lg,
+  },
+  heroPlaceholder: {
+    width: '100%',
+    height: 200,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface.elevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.default,
+  },
+  heroPlaceholderText: {
+    ...textStyles.title,
+    color: colors.accent.primary,
+    fontSize: 48,
+  },
   list: {
     gap: spacing.sm,
     paddingBottom: spacing.xl,

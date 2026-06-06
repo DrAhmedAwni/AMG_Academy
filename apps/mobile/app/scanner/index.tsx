@@ -77,7 +77,7 @@ export default function ScannerEventSelectionScreen() {
       <Screen scroll={false} contentStyle={styles.screen}>
         <Header
           title="Scanner"
-          subtitle="Choose an event before camera validation."
+          subtitle="Choose an event before scanning tickets."
           action={
             <Button
               label="All recent"
@@ -96,7 +96,7 @@ export default function ScannerEventSelectionScreen() {
         />
 
         {state.status === 'loading' ? (
-          <LoadingState title="Loading scanner events" message="Fetching scannable events." />
+          <LoadingState title="Loading events" message="Finding events available for scanning." />
         ) : state.status === 'error' ? (
           <ErrorState
             title={state.error.title}
@@ -107,8 +107,9 @@ export default function ScannerEventSelectionScreen() {
           />
         ) : state.status === 'empty' ? (
           <EmptyState
+            icon="scan-outline"
             title="No events available"
-            message="Published events from the backend will appear here for scanner staff."
+            message="Events available for attendance scanning will appear here."
           />
         ) : (
           <FlatList

@@ -175,7 +175,7 @@ export function getEventActionState(event: MobileEvent): EventActionState {
       label: 'Registration rejected',
       disabled: true,
       paymentId: null,
-      helper: 'Backend registration status is rejected.',
+      helper: 'This registration was not approved.',
     };
   }
 
@@ -185,7 +185,7 @@ export function getEventActionState(event: MobileEvent): EventActionState {
       label: 'Continue payment',
       disabled: false,
       paymentId: event.paymentId,
-      helper: 'Payment status comes from the backend payment record.',
+      helper: 'Complete payment to confirm your seat.',
     };
   }
 
@@ -195,7 +195,7 @@ export function getEventActionState(event: MobileEvent): EventActionState {
       label: 'Pending approval',
       disabled: true,
       paymentId: null,
-      helper: 'Your reservation is waiting for backend approval.',
+      helper: 'Your reservation is waiting for approval.',
     };
   }
 
@@ -205,7 +205,7 @@ export function getEventActionState(event: MobileEvent): EventActionState {
       label: 'Registered',
       disabled: true,
       paymentId: null,
-      helper: 'Your registration state is confirmed by the backend.',
+      helper: 'Your registration is confirmed.',
     };
   }
 
@@ -215,7 +215,7 @@ export function getEventActionState(event: MobileEvent): EventActionState {
       label: 'Fully booked',
       disabled: true,
       paymentId: null,
-      helper: 'Capacity is managed by the backend.',
+      helper: 'This event has reached capacity.',
     };
   }
 
@@ -225,8 +225,8 @@ export function getEventActionState(event: MobileEvent): EventActionState {
     disabled: false,
     paymentId: null,
     helper: event.isFree
-      ? 'Free registration will be submitted to the backend.'
-      : 'Paid event registration will create a backend payment record.',
+      ? 'Reserve your seat for this free event.'
+      : 'Reserve your seat and continue to payment.',
   };
 }
 

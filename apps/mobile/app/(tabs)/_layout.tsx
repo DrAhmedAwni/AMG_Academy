@@ -3,14 +3,10 @@ import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabIcon } from '../../src/components/layout/BottomTabIcon';
 import { SessionGate } from '../../src/features/auth/SessionGate';
-import { canAccessScanner } from '../../src/features/auth/auth.types';
-import { useAuth } from '../../src/lib/auth';
 import { colors, layout, spacing, typography } from '../../src/theme';
 
 export default function TabsLayout() {
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const scannerVisible = canAccessScanner(user);
 
   return (
     <SessionGate>
@@ -19,17 +15,34 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarActiveTintColor: colors.accent.primary,
           tabBarInactiveTintColor: colors.text.muted,
+          tabBarHideOnKeyboard: true,
           tabBarLabelStyle: {
             fontSize: typography.size.xs,
             fontWeight: typography.weight.semibold,
-            paddingBottom: spacing.xxs,
+            paddingBottom: spacing.xs,
           },
           tabBarStyle: {
-            height: layout.bottomTabHeight + insets.bottom,
+            position: 'absolute',
+            left: spacing.lg,
+            right: spacing.lg,
+            bottom: Math.max(insets.bottom, spacing.sm),
+            height: layout.bottomTabHeight,
             paddingTop: spacing.xs,
-            paddingBottom: Math.max(insets.bottom, spacing.xs),
-            borderTopColor: colors.border.default,
-            backgroundColor: colors.surface.elevated,
+            paddingBottom: spacing.xs,
+            borderRadius: 28,
+            borderWidth: 1,
+            borderTopWidth: 1,
+            borderColor: colors.border.strong,
+            backgroundColor: colors.surface.glass,
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 14 },
+            shadowOpacity: 0.34,
+            shadowRadius: 26,
+            elevation: 10,
+          },
+          tabBarItemStyle: {
+            borderRadius: 22,
+            marginVertical: spacing.xs,
           },
         }}
       >
@@ -43,33 +56,6 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="events"
-          options={{
-            title: 'Events',
-            tabBarIcon: ({ focused }) => (
-              <BottomTabIcon label="Events" name={focused ? 'calendar' : 'calendar-outline'} focused={focused} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="tickets"
-          options={{
-            title: 'Tickets',
-            tabBarIcon: ({ focused }) => (
-              <BottomTabIcon label="Tickets" name={focused ? 'qr-code' : 'qr-code-outline'} focused={focused} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="cases"
-          options={{
-            title: 'Cases',
-            tabBarIcon: ({ focused }) => (
-              <BottomTabIcon label="Cases" name={focused ? 'chatbubbles' : 'chatbubbles-outline'} focused={focused} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="courses"
           options={{
             title: 'Courses',
@@ -79,11 +65,20 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="study-groups"
+          name="events"
           options={{
-            title: 'Groups',
+            title: 'Events',
             tabBarIcon: ({ focused }) => (
-              <BottomTabIcon label="Groups" name={focused ? 'people' : 'people-outline'} focused={focused} />
+              <BottomTabIcon label="Events" name={focused ? 'calendar' : 'calendar-outline'} focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="community"
+          options={{
+            title: 'Community',
+            tabBarIcon: ({ focused }) => (
+              <BottomTabIcon label="Community" name={focused ? 'people' : 'people-outline'} focused={focused} />
             ),
           }}
         />
@@ -97,13 +92,27 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
+          name="tickets"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="cases"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="study-groups"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
           name="staff"
           options={{
-            title: 'Scanner',
-            href: scannerVisible ? undefined : null,
-            tabBarIcon: ({ focused }) => (
-              <BottomTabIcon label="Scanner" name={focused ? 'scan' : 'scan-outline'} focused={focused} />
-            ),
+            href: null,
           }}
         />
       </Tabs>

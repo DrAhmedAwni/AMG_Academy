@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, type ButtonProps } from '../ui/Button';
-import { spacing, textStyles } from '../../theme';
+import { colors, radius, spacing, textStyles, typography } from '../../theme';
 
 export interface SectionHeaderProps {
   title: string;
@@ -13,7 +13,10 @@ export function SectionHeader({ title, subtitle, action }: SectionHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.copy}>
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.titleRow}>
+          <View style={styles.marker} />
+          <Text style={styles.title}>{title}</Text>
+        </View>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
       {action ? <Button variant="ghost" {...action} /> : null}
@@ -32,6 +35,25 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xxs,
   },
-  title: textStyles.label,
-  subtitle: textStyles.caption,
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  marker: {
+    width: 8,
+    height: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent.gold,
+  },
+  title: {
+    ...textStyles.label,
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    lineHeight: typography.lineHeight.md,
+  },
+  subtitle: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
+  },
 });

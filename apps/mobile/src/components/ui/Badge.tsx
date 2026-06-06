@@ -34,7 +34,7 @@ export function Badge({
 
 const styles = StyleSheet.create({
   badge: {
-    minHeight: 28,
+    minHeight: 30,
     alignSelf: 'flex-start',
     justifyContent: 'center',
     borderRadius: radius.pill,
@@ -46,5 +46,6 @@ const styles = StyleSheet.create({
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     fontWeight: typography.weight.bold,
+    letterSpacing: 0,
   },
 });

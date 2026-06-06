@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
-import '@fontsource/hanken-grotesk/index.css';
-import '@fontsource/inter/index.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/500.css';
+import '@fontsource/montserrat/600.css';
+import '@fontsource/montserrat/700.css';
 import './globals.css';
 import { Providers } from './providers';
 

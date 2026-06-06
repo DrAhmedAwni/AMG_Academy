@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -34,7 +35,7 @@ export class QrTicketsService {
     const limit = query.limit ?? 25;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.QRTicketWhereInput = { userId };
+    const where: Prisma.QRTicketWhereInput = { userId, deletedByUserAt: null };
     if (query.status) where.status = this.toPrismaQRTicketStatus(query.status);
 
     const [tickets, total] = await Promise.all([
@@ -142,6 +143,35 @@ export class QrTicketsService {
     );
 
     return this.mapTicket(updated);
+  }
+
+  async deleteMine(userId: string, id: string) {
+    const ticket = await this.prisma.qRTicket.findUnique({
+      where: { id },
+      include: { event: true, registration: { include: { payment: true } } },
+    });
+
+    if (!ticket || ticket.userId !== userId) {
+      throw new NotFoundException('QR ticket not found');
+    }
+
+    if (ticket.deletedByUserAt) {
+      return { id: ticket.id, deleted: true };
+    }
+
+    if (!this.canUserDeleteTicket(ticket)) {
+      throw new BadRequestException(
+        'Only revoked, expired, ended, or cancelled QR tickets can be deleted',
+      );
+    }
+
+    const updated = await this.prisma.qRTicket.update({
+      where: { id },
+      data: { deletedByUserAt: new Date() },
+      select: { id: true },
+    });
+
+    return { id: updated.id, deleted: true };
   }
 
   async scan(userId: string, data: QrScanDto) {
@@ -360,6 +390,18 @@ export class QrTicketsService {
     }
 
     return ticket.status;
+  }
+
+  private canUserDeleteTicket(ticket: {
+    status: QRTicketStatus;
+    event: { status: string; endDate: Date };
+  }) {
+    const effectiveStatus = this.getEffectiveTicketStatus(ticket);
+    if (effectiveStatus === QRTicketStatus.REVOKED || effectiveStatus === QRTicketStatus.EXPIRED) {
+      return true;
+    }
+
+    return Boolean(this.getEventBlockReason(ticket.event));
   }
 
   private async persistBlockedTicketStatus(ticketId: string, reason: string) {

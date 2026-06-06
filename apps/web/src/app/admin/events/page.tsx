@@ -16,6 +16,7 @@ import {
   Users,
   Pencil,
   Archive,
+  Trash2,
   Eye,
   CalendarDays,
   MapPin,
@@ -58,6 +59,7 @@ export default function AdminEventsPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [confirmArchive, setConfirmArchive] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['admin-events', search],
@@ -90,6 +92,21 @@ export default function AdminEventsPage() {
       refetch();
     },
     onError: () => toast.error('Failed to archive event'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.delete(`/events/${id}/hard`);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success('Event deleted permanently');
+      setConfirmDelete(null);
+      refetch();
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error?.message ?? 'Failed to delete event');
+    },
   });
 
   const events: EventItem[] = data?.data?.data ?? data?.data ?? [];
@@ -341,6 +358,30 @@ export default function AdminEventsPage() {
                         <Archive className="h-4 w-4 text-status-error/70 hover:text-status-error" />
                       </Button>
                     )}
+                    {(event.registrationsCount ?? 0) === 0 && confirmDelete === event.id ? (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => deleteMutation.mutate(event.id)}
+                          loading={deleteMutation.isPending}
+                        >
+                          Delete
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(null)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (event.registrationsCount ?? 0) === 0 ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon
+                        onClick={() => setConfirmDelete(event.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-status-error/70 hover:text-status-error" />
+                      </Button>
+                    ) : null}
                   </div>
                 </div>
               </div>

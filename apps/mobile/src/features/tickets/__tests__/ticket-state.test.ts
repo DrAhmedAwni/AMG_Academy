@@ -1,5 +1,6 @@
 import { PaymentStatus, QRTicketStatus, RegistrationStatus } from '@amg/shared';
 import {
+  canDeleteTicket,
   getTicketWalletState,
   isTicketDisplayable,
   normalizeTicket,
@@ -78,5 +79,13 @@ describe('QR ticket wallet state', () => {
       state: 'not_issued',
       canDisplayQr: false,
     });
+  });
+
+  it('only allows users to remove revoked, expired, ended, or cancelled tickets', () => {
+    expect(canDeleteTicket(ticket())).toBe(false);
+    expect(canDeleteTicket(ticket({ status: QRTicketStatus.Revoked }))).toBe(true);
+    expect(canDeleteTicket(ticket({ status: QRTicketStatus.Expired }))).toBe(true);
+    expect(canDeleteTicket(ticket({ event: { ...ticket().event, status: 'finished' } }))).toBe(true);
+    expect(canDeleteTicket(ticket({ event: { ...ticket().event, status: 'cancelled' } }))).toBe(true);
   });
 });

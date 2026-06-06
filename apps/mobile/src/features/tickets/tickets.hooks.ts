@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { TicketFilters } from './tickets.api';
 import * as ticketsApi from './tickets.api';
 
@@ -14,5 +14,17 @@ export function useTicketsQuery(filters: TicketFilters = {}) {
   });
 }
 
+export function useDeleteTicketMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (ticketId: string) => ticketsApi.deleteTicket(ticketId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ticketQueryKeys.all });
+    },
+  });
+}
+
+export const canDeleteTicket = ticketsApi.canDeleteTicket;
 export const getTicketWalletState = ticketsApi.getTicketWalletState;
 export const isTicketDisplayable = ticketsApi.isTicketDisplayable;

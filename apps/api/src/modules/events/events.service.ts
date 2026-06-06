@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationType } from '@amg/shared';
 import { PaymentStatus, Prisma, QRTicketStatus, RegistrationStatus } from '@prisma/client';
 import { CacheStoreService } from '../../common/interceptors/cache.interceptor';
@@ -375,6 +375,21 @@ export class EventsService {
   async remove(id: string) {
     await this.archive(id);
     return { id, archived: true };
+  }
+
+  async hardDelete(id: string) {
+    const registrationsCount = await this.prisma.eventRegistration.count({ where: { eventId: id } });
+    if (registrationsCount > 0) {
+      throw new BadRequestException('Cannot delete event with existing registrations');
+    }
+    await this.prisma.$transaction([
+      this.prisma.qRTicket.deleteMany({ where: { eventId: id } }),
+      this.prisma.attendanceCheckIn.deleteMany({ where: { eventId: id } }),
+      this.prisma.certificate.deleteMany({ where: { eventId: id } }),
+      this.prisma.event.delete({ where: { id } }),
+    ]);
+    await this.cacheStore.invalidatePrefix('events:public');
+    return { id, deleted: true };
   }
 
   async sendEventReminders() {

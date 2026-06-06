@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotificationChannelType } from '@amg/shared';
+import { NotificationChannelType, NotificationType } from '@amg/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EXPO_PUSH_TOKEN_REGEX } from '../notifications.constants';
 import {
@@ -15,11 +15,22 @@ export class PushChannel implements NotificationChannel {
   constructor(private readonly prisma: PrismaService) {}
 
   async send(payload: NotificationPayload) {
-    const devices = await this.prisma.pushDevice.findMany({
-      where: { userId: payload.userId, enabled: true },
-      select: { id: true, expoPushToken: true },
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: {
+        notificationPreferences: true,
+        pushDevices: {
+          where: { enabled: true },
+          select: { id: true, expoPushToken: true },
+        },
+      },
     });
 
+    if (!user || !this.canReceivePush(user.notificationPreferences, payload.type)) {
+      return;
+    }
+
+    const devices = user.pushDevices;
     const validDevices = devices.filter((device) => this.isExpoPushToken(device.expoPushToken));
     if (validDevices.length === 0) {
       return;
@@ -71,5 +82,40 @@ export class PushChannel implements NotificationChannel {
 
   private isExpoPushToken(token: string) {
     return EXPO_PUSH_TOKEN_REGEX.test(token);
+  }
+
+  private canReceivePush(preferences: unknown, type: NotificationType) {
+    const prefs = preferences && typeof preferences === 'object'
+      ? (preferences as Record<string, unknown>)
+      : {};
+
+    if (prefs.push === false) {
+      return false;
+    }
+
+    const preferenceKey = this.preferenceKeyForType(type);
+    return preferenceKey ? prefs[preferenceKey] !== false : true;
+  }
+
+  private preferenceKeyForType(type: NotificationType) {
+    switch (type) {
+      case NotificationType.RegistrationSubmitted:
+      case NotificationType.RegistrationApproved:
+      case NotificationType.RegistrationRejected:
+      case NotificationType.QrIssued:
+        return 'registrationUpdates';
+      case NotificationType.PaymentSuccessful:
+      case NotificationType.PaymentFailed:
+        return 'paymentUpdates';
+      case NotificationType.NewCoursePublished:
+      case NotificationType.NewEnrollment:
+      case NotificationType.CourseCompleted:
+        return 'courseUpdates';
+      case NotificationType.EventReminder:
+      case NotificationType.EventCancelled:
+        return 'eventReminders';
+      default:
+        return null;
+    }
   }
 }

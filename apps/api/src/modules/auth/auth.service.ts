@@ -9,7 +9,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserStatus as PrismaUserStatus } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
+import { randomUUID } from 'crypto';
 import type { Response } from 'express';
+import { google } from 'googleapis';
 import type { StringValue } from 'ms';
 import type { AuthTokenPair, AuthUser, JwtPayload } from '@amg/shared';
 import { PrismaService } from '../prisma/prisma.service';
@@ -18,6 +20,7 @@ import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '../../common/constant
 import type {
   ChangePasswordDto,
   ForgotPasswordDto,
+  GoogleMobileAuthDto,
   LoginDto,
   RegisterDto,
   ResetPasswordDto,
@@ -102,6 +105,9 @@ export class AuthService {
         specialty: input.specialty,
         clinic: input.clinic,
         city: input.city,
+        professionalTitle: input.professionalTitle,
+        practiceType: input.practiceType,
+        yearsOfExperience: input.yearsOfExperience,
         roleId: defaultRole.id,
       },
     });
@@ -161,6 +167,78 @@ export class AuthService {
     return {
       user: this.mapAuthUser(user),
       ...(input.client === 'mobile' ? { tokens: this.toMobileTokenPair(tokens) } : {}),
+    };
+  }
+
+  async loginWithGoogleMobile(input: GoogleMobileAuthDto, response: Response) {
+    const clientIds = [
+      this.configService.get<string>('auth.googleWebClientId'),
+      this.configService.get<string>('auth.googleAndroidClientId'),
+      this.configService.get<string>('auth.googleIosClientId'),
+    ].filter((value): value is string => Boolean(value));
+
+    if (clientIds.length === 0) {
+      throw new InternalServerErrorException('Google sign-in is not configured');
+    }
+
+    let payload:
+      | { email?: string; email_verified?: boolean; name?: string; picture?: string }
+      | undefined;
+    try {
+      const ticket = await new google.auth.OAuth2().verifyIdToken({
+        idToken: input.idToken,
+        audience: clientIds,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Google sign-in could not be verified');
+    }
+
+    if (!payload?.email || !payload.email_verified) {
+      throw new UnauthorizedException('Google account email is not verified');
+    }
+    const googleProfile = payload;
+    const email = (googleProfile.email as string).trim().toLowerCase();
+    const displayName = googleProfile.name?.trim() || email.split('@')[0] || 'AMG Learner';
+
+    let user = await this.getUserWithRoleAndPermissions({ email });
+    if (!user) {
+      const defaultRole = await this.prisma.role.findUnique({ where: { slug: 'user' } });
+      if (!defaultRole) {
+        throw new InternalServerErrorException('Default user role is not configured');
+      }
+
+      const created = await this.prisma.user.create({
+        data: {
+          name: displayName,
+          email,
+          password: await hash(randomUUID(), 12),
+          avatarUrl: googleProfile.picture ?? null,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+          roleId: defaultRole.id,
+        },
+      });
+      user = await this.getUserWithRoleAndPermissions({ id: created.id });
+    } else if (!user.emailVerified) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerifiedAt: new Date() },
+      });
+      user = await this.getUserWithRoleAndPermissions({ id: user.id });
+    }
+
+    if (!user) {
+      throw new UnauthorizedException('Google sign-in could not create a session');
+    }
+
+    this.ensureAccountIsActive(user);
+    const tokens = await this.createAuthTokens(user);
+    this.writeAuthCookies(response, tokens);
+
+    return {
+      user: this.mapAuthUser(user),
+      tokens: this.toMobileTokenPair(tokens),
     };
   }
 

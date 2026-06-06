@@ -102,7 +102,9 @@ export class UsersService {
           }
         : {}),
       ...(filters.role ? { role: { slug: filters.role } } : {}),
-      ...(filters.status ? { status: statusMap[filters.status.toLowerCase()] } : {}),
+      ...(filters.status
+        ? { status: statusMap[filters.status.toLowerCase()] }
+        : { status: { not: PrismaUserStatus.DELETED } }),
     };
 
     const [items, total] = await this.prisma.$transaction([
@@ -243,13 +245,17 @@ export class UsersService {
       );
     }
 
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data: { status: PrismaUserStatus.DELETED },
-      include: { role: true },
-    });
-
-    return this.mapAdminUser(user);
+    try {
+      await this.prisma.user.delete({ where: { id: userId } });
+      return { id: userId, deleted: true };
+    } catch {
+      const user = await this.prisma.user.update({
+        where: { id: userId },
+        data: { status: PrismaUserStatus.DELETED },
+        include: { role: true },
+      });
+      return this.mapAdminUser(user);
+    }
   }
 
   private mapStatus(status: 'active' | 'disabled' | 'deleted') {

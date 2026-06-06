@@ -161,6 +161,8 @@ enum NotificationType {
   EVENT_CANCELLED
   NEW_ANNOUNCEMENT
   NEW_COURSE_PUBLISHED
+  NEW_ENROLLMENT
+  COURSE_COMPLETED
   CASE_COMMENT_REPLY
   CASE_APPROVED
   STUDY_GROUP_NEW_MESSAGE
@@ -210,6 +212,9 @@ model User {
   specialty                   String?
   clinic                      String?
   city                        String?
+  professionalTitle           String?
+  practiceType                String?
+  yearsOfExperience           Int?
   avatarUrl                   String?
   notificationPreferences     Json?
   emailVerified               Boolean               @default(false)
@@ -415,23 +420,25 @@ model PaymentAttempt {
 }
 
 model QRTicket {
-  id             String              @id @default(uuid()) @db.Uuid
-  registrationId String              @unique @db.Uuid
-  userId         String              @db.Uuid
-  eventId        String              @db.Uuid
-  tokenHash      String              @unique
-  status         QRTicketStatus      @default(NOT_ISSUED)
-  issuedAt       DateTime?
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
-  registration   EventRegistration   @relation(fields: [registrationId], references: [id])
-  user           User                @relation(fields: [userId], references: [id])
-  event          Event               @relation(fields: [eventId], references: [id])
-  attendance     AttendanceCheckIn[]
+  id              String              @id @default(uuid()) @db.Uuid
+  registrationId  String              @unique @db.Uuid
+  userId          String              @db.Uuid
+  eventId         String              @db.Uuid
+  tokenHash       String              @unique
+  status          QRTicketStatus      @default(NOT_ISSUED)
+  issuedAt        DateTime?
+  deletedByUserAt DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  registration    EventRegistration   @relation(fields: [registrationId], references: [id])
+  user            User                @relation(fields: [userId], references: [id])
+  event           Event               @relation(fields: [eventId], references: [id])
+  attendance      AttendanceCheckIn[]
 
   @@index([tokenHash])
   @@index([eventId])
   @@index([status])
+  @@index([userId, deletedByUserAt])
 }
 
 model AttendanceCheckIn {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Header, Screen } from '../../src/components/layout';
@@ -15,8 +15,8 @@ export default function CreateStudyGroupScreen() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<StudyGroupType>('student');
-  const [joinMode, setJoinMode] = useState<JoinMode>('open');
+  const [type, setType] = useState<StudyGroupType>('STUDENT');
+  const [joinMode, setJoinMode] = useState<JoinMode>('OPEN');
   const [courseId, setCourseId] = useState('');
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [showJoinPicker, setShowJoinPicker] = useState(false);
@@ -26,13 +26,14 @@ export default function CreateStudyGroupScreen() {
   const descriptionError = fieldError(createMutation.error, 'description');
 
   const typeOptions: { key: StudyGroupType; label: string }[] = [
-    { key: 'student', label: 'Student-led' },
-    { key: 'instructor_led', label: 'Instructor-led' },
+    { key: 'STUDENT', label: 'Student-led' },
+    { key: 'INSTRUCTOR_LED', label: 'Instructor-led' },
   ];
 
   const joinOptions: { key: JoinMode; label: string }[] = [
-    { key: 'open', label: 'Open (anyone can join)' },
-    { key: 'approval', label: 'Approval required' },
+    { key: 'OPEN', label: 'Open (anyone can join)' },
+    { key: 'REQUEST', label: 'Approval required' },
+    { key: 'INVITE_ONLY', label: 'Invite only' },
   ];
 
   const handleSubmit = () => {
@@ -42,7 +43,7 @@ export default function CreateStudyGroupScreen() {
         description: description.trim(),
         type,
         joinMode,
-        ...(type === 'instructor_led' && courseId.trim() ? { courseId: courseId.trim() } : {}),
+        ...(type === 'INSTRUCTOR_LED' && courseId.trim() ? { courseId: courseId.trim() } : {}),
       },
       {
         onSuccess: () => {
@@ -62,97 +63,104 @@ export default function CreateStudyGroupScreen() {
         action={<Button label="Cancel" variant="secondary" size="sm" onPress={() => router.back()} />}
       />
 
-      <TextField
-        label="Title"
-        value={title}
-        onChangeText={setTitle}
-        placeholder="e.g., Endodontic Study Circle"
-        error={titleError}
-      />
+      <View style={styles.formPanel}>
+        <View style={styles.formHeading}>
+          <Text style={styles.formTitle}>Group setup</Text>
+          <Text style={styles.formSubtitle}>Create a focused space for shared learning.</Text>
+        </View>
 
-      <TextField
-        label="Description"
-        value={description}
-        onChangeText={setDescription}
-        placeholder="What will this group focus on?"
-        multiline
-        numberOfLines={4}
-        error={descriptionError}
-      />
-
-      <TextField
-        label="Type"
-        value={typeOptions.find((t) => t.key === type)?.label ?? 'Select type'}
-        placeholder="Select group type"
-        editable={false}
-        onPress={() => setShowTypePicker(!showTypePicker)}
-        rightAction={
-          <Ionicons
-            name={showTypePicker ? 'chevron-up' : 'chevron-down'}
-            size={20}
-            color={colors.text.muted}
-          />
-        }
-      />
-
-      {showTypePicker ? (
-        <GlassCard style={styles.pickerList}>
-          {typeOptions.map((opt) => (
-            <Button
-              key={opt.key}
-              label={opt.label}
-              variant={type === opt.key ? 'primary' : 'ghost'}
-              size="sm"
-              onPress={() => {
-                setType(opt.key);
-                setShowTypePicker(false);
-              }}
-            />
-          ))}
-        </GlassCard>
-      ) : null}
-
-      <TextField
-        label="Join mode"
-        value={joinOptions.find((j) => j.key === joinMode)?.label ?? 'Select join mode'}
-        placeholder="Select how members join"
-        editable={false}
-        onPress={() => setShowJoinPicker(!showJoinPicker)}
-        rightAction={
-          <Ionicons
-            name={showJoinPicker ? 'chevron-up' : 'chevron-down'}
-            size={20}
-            color={colors.text.muted}
-          />
-        }
-      />
-
-      {showJoinPicker ? (
-        <GlassCard style={styles.pickerList}>
-          {joinOptions.map((opt) => (
-            <Button
-              key={opt.key}
-              label={opt.label}
-              variant={joinMode === opt.key ? 'primary' : 'ghost'}
-              size="sm"
-              onPress={() => {
-                setJoinMode(opt.key);
-                setShowJoinPicker(false);
-              }}
-            />
-          ))}
-        </GlassCard>
-      ) : null}
-
-      {type === 'instructor_led' ? (
         <TextField
-          label="Course ID (optional)"
-          value={courseId}
-          onChangeText={setCourseId}
-          placeholder="Link this group to a course"
-          helperText="Only required for instructor-led course groups"
+          label="Group name *"
+          value={title}
+          onChangeText={setTitle}
+          placeholder="e.g., Endodontic Study Circle"
+          error={titleError}
         />
-      ) : null}
+
+        <TextField
+          label="Description *"
+          value={description}
+          onChangeText={setDescription}
+          placeholder="What will this group focus on?"
+          multiline
+          numberOfLines={4}
+          error={descriptionError}
+        />
+
+        <TextField
+          label="Group type"
+          value={typeOptions.find((t) => t.key === type)?.label ?? 'Select type'}
+          placeholder="Select group type"
+          editable={false}
+          onPress={() => setShowTypePicker(!showTypePicker)}
+          rightAction={
+            <Ionicons
+              name={showTypePicker ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.text.muted}
+            />
+          }
+        />
+
+        {showTypePicker ? (
+          <GlassCard style={styles.pickerList}>
+            {typeOptions.map((opt) => (
+              <Button
+                key={opt.key}
+                label={opt.label}
+                variant={type === opt.key ? 'primary' : 'ghost'}
+                size="sm"
+                onPress={() => {
+                  setType(opt.key);
+                  setShowTypePicker(false);
+                }}
+              />
+            ))}
+          </GlassCard>
+        ) : null}
+
+        <TextField
+          label="Join mode"
+          value={joinOptions.find((j) => j.key === joinMode)?.label ?? 'Select join mode'}
+          placeholder="Select how members join"
+          editable={false}
+          onPress={() => setShowJoinPicker(!showJoinPicker)}
+          rightAction={
+            <Ionicons
+              name={showJoinPicker ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.text.muted}
+            />
+          }
+        />
+
+        {showJoinPicker ? (
+          <GlassCard style={styles.pickerList}>
+            {joinOptions.map((opt) => (
+              <Button
+                key={opt.key}
+                label={opt.label}
+                variant={joinMode === opt.key ? 'primary' : 'ghost'}
+                size="sm"
+                onPress={() => {
+                  setJoinMode(opt.key);
+                  setShowJoinPicker(false);
+                }}
+              />
+            ))}
+          </GlassCard>
+        ) : null}
+
+        {type === 'INSTRUCTOR_LED' ? (
+          <TextField
+            label="Course ID (optional)"
+            value={courseId}
+            onChangeText={setCourseId}
+            placeholder="Link this group to a course"
+            helperText="Only required for instructor-led course groups"
+          />
+        ) : null}
+      </View>
 
       {error && error.kind !== 'validation' ? (
         <Text style={styles.formError}>{error.message}</Text>
@@ -173,6 +181,19 @@ const styles = StyleSheet.create({
   pickerList: {
     gap: spacing.xs,
   },
+  formPanel: {
+    gap: spacing.md,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.glass,
+    padding: spacing.lg,
+  },
+  formHeading: {
+    gap: spacing.xxs,
+  },
+  formTitle: textStyles.heading,
+  formSubtitle: textStyles.body,
   formError: {
     ...textStyles.caption,
     color: colors.status.error,

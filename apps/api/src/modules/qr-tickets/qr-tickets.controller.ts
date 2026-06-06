@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -56,6 +57,12 @@ export class QrTicketsController {
   @AuditLog(AuditAction.Revoke, 'QRTicket')
   async revoke(@Param('id') id: string) {
     return this.qrTicketsService.revoke(parseWithSchema(uuidSchema, id));
+  }
+
+  @Delete(':id')
+  @AuditLog(AuditAction.Delete, 'QRTicket')
+  async deleteMine(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.qrTicketsService.deleteMine(user.sub, parseWithSchema(uuidSchema, id));
   }
 }
 

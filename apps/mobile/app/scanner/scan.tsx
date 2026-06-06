@@ -157,7 +157,7 @@ export default function ScannerCameraScreen() {
           </View>
           {scanMutation.isPending ? (
             <View style={styles.pendingOverlay}>
-              <Text style={styles.pendingText}>Validating with backend...</Text>
+              <Text style={styles.pendingText}>Checking ticket...</Text>
             </View>
           ) : null}
         </View>
@@ -165,13 +165,13 @@ export default function ScannerCameraScreen() {
         <GlassCard style={styles.manualCard}>
           <Text style={styles.manualTitle}>Fallback entry</Text>
           <Text style={styles.manualMessage}>
-            Use this only when the camera cannot read the QR payload.
+            Use this only when the camera cannot read the QR code.
           </Text>
           <TextField
-            label="QR payload"
+            label="QR code"
             value={manualToken}
             onChangeText={setManualToken}
-            placeholder="Paste or type QR payload"
+            placeholder="Paste or type the QR code"
             autoCapitalize="none"
             autoCorrect={false}
           />

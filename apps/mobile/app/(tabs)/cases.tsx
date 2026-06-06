@@ -9,9 +9,11 @@ import { Badge, Button, GlassCard, TextField } from '../../src/components/ui';
 import { useCasesQuery, useCaseCategoriesQuery } from '../../src/features/cases/cases.hooks';
 import type { CaseFilters, CaseItem } from '../../src/features/cases/cases.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
+import { useAuth } from '../../src/lib/auth';
 import { colors, layout, radius, spacing, textStyles, typography } from '../../src/theme';
 
 const pageSize = 10;
+type ViewFilter = 'latest' | 'popular' | 'unanswered' | 'mine';
 
 function CaseCard({ item, onPress }: { item: CaseItem; onPress: () => void }) {
   return (
@@ -64,7 +66,8 @@ const cardStyles = StyleSheet.create({
     transform: [{ scale: 0.995 }],
   },
   card: {
-    gap: spacing.sm,
+    gap: spacing.md,
+    borderColor: colors.border.strong,
   },
   headerRow: {
     flexDirection: 'row',
@@ -104,6 +107,7 @@ const cardStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
     gap: spacing.sm,
   },
   author: {
@@ -113,6 +117,7 @@ const cardStyles = StyleSheet.create({
   stats: {
     flexDirection: 'row',
     gap: spacing.md,
+    flexShrink: 0,
   },
   stat: {
     flexDirection: 'row',
@@ -128,13 +133,15 @@ const cardStyles = StyleSheet.create({
 export default function CasesTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
+  const [viewFilter, setViewFilter] = useState<ViewFilter>('latest');
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedCategory]);
+  }, [search, selectedCategory, viewFilter]);
 
   const filters = useMemo<CaseFilters>(
     () => ({
@@ -153,6 +160,24 @@ export default function CasesTab() {
   });
   const meta = casesQuery.data?.meta;
   const categories = categoriesQuery.data ?? [];
+  const visibleCases = useMemo(() => {
+    const data = casesQuery.data?.data ?? [];
+
+    if (viewFilter === 'popular') {
+      return [...data].sort((left, right) => right.upvoteCount - left.upvoteCount);
+    }
+
+    if (viewFilter === 'unanswered') {
+      return data.filter((item) => item.commentCount === 0);
+    }
+
+    if (viewFilter === 'mine') {
+      return data.filter((item) => item.authorId === user?.id);
+    }
+
+    return data;
+  }, [casesQuery.data?.data, user?.id, viewFilter]);
+  const listData = state.status === 'success' ? visibleCases : [];
 
   const renderCase = ({ item }: { item: CaseItem }) => (
     <CaseCard
@@ -166,8 +191,8 @@ export default function CasesTab() {
     />
   );
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
         title="Case Discussion"
         subtitle="Explore clinical cases and join the conversation."
@@ -190,6 +215,24 @@ export default function CasesTab() {
       />
 
       <View style={styles.filters}>
+        {([
+          ['latest', 'Latest'],
+          ['popular', 'Popular'],
+          ['unanswered', 'Unanswered'],
+          ['mine', 'My Cases'],
+        ] as const).map(([key, label]) => (
+          <Button
+            key={key}
+            label={label}
+            variant={viewFilter === key ? 'primary' : 'secondary'}
+            onPress={() => setViewFilter(key)}
+            size="sm"
+            style={styles.filterButton}
+          />
+        ))}
+      </View>
+
+      <View style={styles.filters}>
         <Button
           label="All"
           variant={selectedCategory === undefined ? 'primary' : 'secondary'}
@@ -208,10 +251,16 @@ export default function CasesTab() {
           />
         ))}
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading cases" message="Fetching the latest case discussions." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading cases" message="Fetching the latest case discussions." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
@@ -219,56 +268,82 @@ export default function CasesTab() {
             void casesQuery.refetch();
           }}
         />
-      ) : state.status === 'empty' ? (
+      );
+    }
+
+    if (state.status === 'empty') {
+      return (
         <EmptyState
-          title="No cases found"
-          message="No case discussions match your filters. Submit a new case or adjust your search."
+          icon="chatbubbles-outline"
+          title="No cases yet"
+          message="Approved case discussions will appear here. Submit a case for admin review or adjust your filters."
           action={{
             label: 'Submit a case',
             onPress: () => router.push('/cases/submit' as never),
           }}
         />
-      ) : (
-        <FlatList
-          data={state.data.data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCase}
-          refreshControl={
-            <RefreshControl
-              tintColor={colors.accent.primary}
-              refreshing={state.isRefreshing}
-              onRefresh={() => {
-                void casesQuery.refetch();
-              }}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListFooterComponent={
-            meta && meta.totalPages > 1 ? (
-              <View style={styles.pagination}>
-                <Button
-                  label="Previous"
-                  variant="secondary"
-                  disabled={page <= 1}
-                  onPress={() => setPage((current) => Math.max(1, current - 1))}
-                  style={styles.pageButton}
-                />
-                <Button
-                  label="Next"
-                  variant="secondary"
-                  disabled={page >= meta.totalPages}
-                  onPress={() => setPage((current) => current + 1)}
-                  style={styles.pageButton}
-                />
-              </View>
-            ) : null
-          }
-        />
-      )}
+      );
+    }
+
+    return (
+      <EmptyState
+        icon="filter-outline"
+        title="No cases in this view"
+        message="Try another view, category, or search term."
+        action={{
+          label: 'Submit a case',
+          onPress: () => router.push('/cases/submit' as never),
+        }}
+      />
+    );
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={renderCase}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.accent.primary}
+            refreshing={state.isRefreshing}
+            onRefresh={() => {
+              void casesQuery.refetch();
+            }}
+          />
+        }
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListFooterComponent={
+          state.status === 'success' && meta && meta.totalPages > 1 ? (
+            <View style={styles.pagination}>
+              <Button
+                label="Previous"
+                variant="secondary"
+                disabled={page <= 1}
+                onPress={() => setPage((current) => Math.max(1, current - 1))}
+                style={styles.pageButton}
+              />
+              <Button
+                label="Next"
+                variant="secondary"
+                disabled={page >= meta.totalPages}
+                onPress={() => setPage((current) => current + 1)}
+                style={styles.pageButton}
+              />
+            </View>
+          ) : null
+        }
+      />
     </Screen>
   );
 }
@@ -276,17 +351,27 @@ export default function CasesTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
     gap: spacing.sm,
   },
   filters: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.xs,
     paddingBottom: spacing.xs,
   },
   filterButton: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: 92,
   },
-  listContent: {},
+  listContent: {
+    gap: spacing.md,
+  },
   separator: {
     height: spacing.md,
   },

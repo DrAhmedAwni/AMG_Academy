@@ -49,11 +49,18 @@ export interface TicketWalletState {
   canDisplayQr: boolean;
 }
 
+export interface DeleteTicketResponse {
+  id: string;
+  deleted: boolean;
+}
+
 const paymentSatisfiedStatuses = [
   PaymentStatus.NotRequired,
   PaymentStatus.Successful,
   PaymentStatus.ManuallyVerified,
 ] as const;
+const deletableTicketStatuses = [QRTicketStatus.Revoked, QRTicketStatus.Expired] as const;
+const deletableEventStatuses = ['cancelled', 'archived', 'ended', 'finished'] as const;
 
 export function normalizeTicket(raw: MobileTicket): MobileTicket {
   return {
@@ -80,7 +87,7 @@ export function getTicketWalletState(ticket: Pick<MobileTicket,
     return {
       state: 'revoked',
       label: 'Revoked',
-      message: 'This QR ticket was revoked by the backend.',
+      message: 'This QR ticket is no longer valid.',
       canDisplayQr: false,
     };
   }
@@ -125,7 +132,7 @@ export function getTicketWalletState(ticket: Pick<MobileTicket,
     return {
       state: 'not_issued',
       label: 'Not issued',
-      message: 'The backend has not issued a displayable QR payload yet.',
+      message: 'Your QR ticket is not ready yet.',
       canDisplayQr: false,
     };
   }
@@ -142,6 +149,23 @@ export function isTicketDisplayable(ticket: MobileTicket) {
   return getTicketWalletState(ticket).canDisplayQr;
 }
 
+export function canDeleteTicket(ticket: MobileTicket) {
+  if (
+    deletableTicketStatuses.includes(
+      ticket.status as (typeof deletableTicketStatuses)[number],
+    )
+  ) {
+    return true;
+  }
+
+  const eventStatus = ticket.event.status?.toLowerCase();
+  return eventStatus
+    ? deletableEventStatuses.includes(
+      eventStatus as (typeof deletableEventStatuses)[number],
+    )
+    : false;
+}
+
 export async function listTickets(filters: TicketFilters = {}) {
   const response = await apiRequest<ApiPage<MobileTicket>>('/qr-tickets', {
     method: 'GET',
@@ -152,4 +176,10 @@ export async function listTickets(filters: TicketFilters = {}) {
     ...response,
     data: response.data.map(normalizeTicket),
   };
+}
+
+export function deleteTicket(ticketId: string) {
+  return apiRequest<DeleteTicketResponse>(`/qr-tickets/${ticketId}`, {
+    method: 'DELETE',
+  });
 }

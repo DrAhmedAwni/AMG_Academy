@@ -11,7 +11,7 @@ export class LessonsService {
     const lessons = await this.prisma.lesson.findMany({
       where: { courseId },
       orderBy: { orderIndex: 'asc' },
-      include: { video: { select: { id: true, duration: true } } },
+      include: { video: { select: { id: true, duration: true, originalName: true } } },
     });
     return { data: lessons };
   }
@@ -34,7 +34,7 @@ export class LessonsService {
         duration: data.duration ?? 0,
         ...(data.videoId && { video: { connect: { id: data.videoId } } }),
       },
-      include: { video: { select: { id: true, duration: true } } },
+      include: { video: { select: { id: true, duration: true, originalName: true } } },
     });
     return lesson;
   }
@@ -70,7 +70,7 @@ export class LessonsService {
     const lesson = await this.prisma.lesson.update({
       where: { id },
       data: updateData,
-      include: { video: { select: { id: true, duration: true } } },
+      include: { video: { select: { id: true, duration: true, originalName: true } } },
     });
     return lesson;
   }

@@ -1,17 +1,19 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TicketCard } from '../../src/components/cards/TicketCard';
 import { Header, Screen } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
-import { Button } from '../../src/components/ui';
+import { Button, GlassCard } from '../../src/components/ui';
 import {
+  canDeleteTicket,
   getTicketWalletState,
+  useDeleteTicketMutation,
   useTicketsQuery,
 } from '../../src/features/tickets/tickets.hooks';
 import type { MobileTicket } from '../../src/features/tickets/tickets.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
-import { colors, layout, spacing } from '../../src/theme';
+import { colors, layout, spacing, textStyles, typography } from '../../src/theme';
 
 type TicketFilter = 'all' | 'active' | 'attention' | 'history';
 
@@ -37,6 +39,7 @@ export default function TicketsTab() {
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<TicketFilter>('all');
   const ticketsQuery = useTicketsQuery({ page: 1, limit: 50 });
+  const deleteTicketMutation = useDeleteTicketMutation();
   const state = useQueryState(ticketsQuery, {
     isEmpty: (data) => data.data.length === 0,
   });
@@ -48,13 +51,49 @@ export default function TicketsTab() {
 
     return ticketsQuery.data.data.filter((ticket) => matchesFilter(ticket, filter));
   }, [filter, ticketsQuery.data]);
+  const activeTicketCount = ticketsQuery.data?.data.filter(
+    (ticket) => getTicketWalletState(ticket).state === 'active',
+  ).length ?? 0;
+  const listData = state.status === 'success' ? filteredTickets : [];
+  const confirmDeleteTicket = (ticket: MobileTicket) => {
+    Alert.alert(
+      'Remove QR ticket?',
+      'This removes the QR from your wallet. AMG keeps the attendance record if it is needed later.',
+      [
+        { text: 'Keep', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            void deleteTicketMutation.mutateAsync(ticket.id).catch((error) => {
+              Alert.alert(
+                'Could not remove ticket',
+                error instanceof Error ? error.message : 'Please try again.',
+              );
+            });
+          },
+        },
+      ],
+    );
+  };
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
-        title="QR Tickets"
-        subtitle="Display only backend-valid QR ticket payloads."
+        title="My Tickets"
+        subtitle="View your event tickets and entry QR codes."
       />
+
+      <GlassCard style={styles.walletHero}>
+        <View style={styles.walletMetric}>
+          <Text style={styles.walletNumber}>{activeTicketCount}</Text>
+          <Text style={styles.walletLabel}>Active tickets</Text>
+        </View>
+        <View style={styles.walletCopy}>
+          <Text style={styles.walletTitle}>Event wallet</Text>
+          <Text style={styles.walletText}>Keep confirmed tickets ready for check-in.</Text>
+        </View>
+      </GlassCard>
 
       <View style={styles.filters}>
         <Button
@@ -72,7 +111,7 @@ export default function TicketsTab() {
           style={styles.filterButton}
         />
         <Button
-          label="Needs"
+          label="Needs action"
           variant={filter === 'attention' ? 'primary' : 'secondary'}
           onPress={() => setFilter('attention')}
           size="sm"
@@ -86,10 +125,16 @@ export default function TicketsTab() {
           style={styles.filterButton}
         />
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading tickets" message="Fetching your QR wallet." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading tickets" message="Opening your event wallet." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
@@ -97,37 +142,63 @@ export default function TicketsTab() {
             void ticketsQuery.refetch();
           }}
         />
-      ) : state.status === 'empty' ? (
+      );
+    }
+
+    if (state.status === 'empty') {
+      return (
         <EmptyState
-          title="No QR tickets"
-          message="Tickets appear only after backend registration, approval, and payment rules allow them."
+          icon="qr-code-outline"
+          title="No tickets yet"
+          message="Your event tickets will appear here after you register and your seat is confirmed."
         />
-      ) : filteredTickets.length === 0 ? (
-        <EmptyState
-          title="No tickets in this view"
-          message="Switch filters to see active, pending, used, expired, or revoked QR tickets."
-        />
-      ) : (
-        <FlatList
-          data={filteredTickets}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <TicketCard ticket={item} />}
-          refreshControl={
-            <RefreshControl
-              tintColor={colors.accent.primary}
-              refreshing={state.isRefreshing}
-              onRefresh={() => {
-                void ticketsQuery.refetch();
-              }}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
-      )}
+      );
+    }
+
+    return (
+      <EmptyState
+        icon="filter-outline"
+        title="No tickets in this view"
+        message="Switch filters to see active, pending, used, expired, or revoked QR tickets."
+      />
+    );
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TicketCard
+            ticket={item}
+            canDelete={canDeleteTicket(item)}
+            deleteLoading={
+              deleteTicketMutation.isPending && deleteTicketMutation.variables === item.id
+            }
+            onDelete={() => confirmDeleteTicket(item)}
+          />
+        )}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.accent.primary}
+            refreshing={state.isRefreshing}
+            onRefresh={() => {
+              void ticketsQuery.refetch();
+            }}
+          />
+        }
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+      />
     </Screen>
   );
 }
@@ -135,18 +206,71 @@ export default function TicketsTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    gap: spacing.sm,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
+    gap: spacing.md,
+  },
+  walletHero: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+    borderColor: 'rgba(94, 234, 212, 0.3)',
+    backgroundColor: 'rgba(13, 34, 48, 0.92)',
+  },
+  walletMetric: {
+    width: 78,
+    height: 78,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 24,
+    backgroundColor: colors.accent.primary,
+  },
+  walletNumber: {
+    color: colors.text.inverse,
+    fontSize: 30,
+    lineHeight: 34,
+    fontWeight: typography.weight.bold,
+  },
+  walletLabel: {
+    color: colors.text.inverse,
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: typography.weight.bold,
+    textAlign: 'center',
+  },
+  walletCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: spacing.xxs,
+  },
+  walletTitle: {
+    color: colors.text.primary,
+    fontSize: typography.size.lg,
+    lineHeight: typography.lineHeight.lg,
+    fontWeight: typography.weight.bold,
+  },
+  walletText: {
+    ...textStyles.body,
+    fontSize: typography.size.sm,
   },
   filters: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.xs,
     paddingBottom: spacing.xs,
   },
   filterButton: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: 78,
     paddingHorizontal: spacing.xs,
   },
-  listContent: {},
+  listContent: {
+    gap: spacing.md,
+  },
   separator: {
     height: spacing.md,
   },

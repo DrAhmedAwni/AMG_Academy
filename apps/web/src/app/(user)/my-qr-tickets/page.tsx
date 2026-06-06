@@ -1,26 +1,51 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { QRTicketCard } from '@/components/cards/QRTicketCard';
 import { PageHeader } from '@/components/ui';
 import { LoadingSkeleton, EmptyState, ErrorState } from '@/components/states';
 import { api } from '@/lib/api';
 import { QrCode } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface QRTicketItem {
   id: string;
-  event: { id: string; title: string; startDate: string };
+  event: { id: string; title: string; startDate: string; endDate?: string; status?: string };
   status: string;
+  qrPayload?: string | null;
   fallbackCode: string;
   issuedAt: string | null;
 }
 
+const deletableTicketStatuses = new Set(['revoked', 'expired']);
+const deletableEventStatuses = new Set(['cancelled', 'archived', 'ended', 'finished']);
+
+function canDeleteTicket(ticket: QRTicketItem) {
+  const ticketStatus = ticket.status.toLowerCase();
+  const eventStatus = ticket.event.status?.toLowerCase();
+
+  return (
+    deletableTicketStatuses.has(ticketStatus) ||
+    (eventStatus ? deletableEventStatuses.has(eventStatus) : false)
+  );
+}
+
 export default function MyQRTicketsPage() {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['my-qr-tickets'],
     queryFn: async () => {
       const { data } = await api.get('/qr-tickets');
       return data;
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: async (ticketId: string) => {
+      await api.delete(`/qr-tickets/${ticketId}`);
+    },
+    onSuccess: async () => {
+      toast.success('QR ticket removed from your wallet.');
+      await queryClient.invalidateQueries({ queryKey: ['my-qr-tickets'] });
     },
   });
 
@@ -46,7 +71,17 @@ export default function MyQRTicketsPage() {
       ) : (
         <div className="grid gap-4">
           {tickets.map((ticket) => (
-            <QRTicketCard key={ticket.id} ticket={ticket} />
+            <QRTicketCard
+              key={ticket.id}
+              ticket={ticket}
+              canDelete={canDeleteTicket(ticket)}
+              deleteLoading={deleteMutation.isPending && deleteMutation.variables === ticket.id}
+              onDelete={() => {
+                if (confirm('Remove this QR ticket from your wallet?')) {
+                  deleteMutation.mutate(ticket.id);
+                }
+              }}
+            />
           ))}
         </div>
       )}

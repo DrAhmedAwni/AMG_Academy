@@ -63,6 +63,10 @@ export interface AddCommentData {
   content: string;
 }
 
+export interface CreateCaseCategoryData {
+  name: string;
+}
+
 export async function fetchCases(filters: CaseFilters = {}): Promise<ApiPage<CaseItem>> {
   return apiRequest<ApiPage<CaseItem>>('/cases', {
     method: 'GET',
@@ -88,6 +92,13 @@ export async function fetchCaseCategories(): Promise<CaseCategory[]> {
     method: 'GET',
   });
   return response.data;
+}
+
+export async function createCaseCategory(data: CreateCaseCategoryData): Promise<CaseCategory> {
+  return apiRequest<CaseCategory>('/case-categories', {
+    method: 'POST',
+    body: data,
+  });
 }
 
 export async function toggleCaseUpvote(id: string): Promise<{ upvoted: boolean; upvoteCount: number }> {

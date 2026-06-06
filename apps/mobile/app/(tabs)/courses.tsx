@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CourseCard } from '../../src/components/cards/CourseCard';
-import { Header, Screen } from '../../src/components/layout';
+import { Header, Screen, SectionHeader } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
-import { Button, TextField } from '../../src/components/ui';
-import { useCoursesQuery } from '../../src/features/courses/courses.hooks';
+import { Button, GlassCard, TextField } from '../../src/components/ui';
+import { useCoursesQuery, useEnrollmentsQuery } from '../../src/features/courses/courses.hooks';
 import type { CourseFilters, MobileCourse } from '../../src/features/courses/courses.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
-import { colors, layout, spacing } from '../../src/theme';
+import { colors, layout, radius, spacing, textStyles, typography } from '../../src/theme';
 
 type FreeFilter = 'all' | 'free' | 'paid';
 
@@ -21,6 +21,7 @@ export default function CoursesTab() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [freeFilter, setFreeFilter] = useState<FreeFilter>('all');
+  const enrollmentsQuery = useEnrollmentsQuery();
 
   useEffect(() => {
     setPage(1);
@@ -42,6 +43,8 @@ export default function CoursesTab() {
     isEmpty: (data) => data.data.length === 0,
   });
   const meta = coursesQuery.data?.meta;
+  const firstEnrollment = enrollmentsQuery.data?.data?.[0];
+  const listData = state.status === 'success' ? state.data.data : [];
 
   const renderCourse = ({ item }: { item: MobileCourse }) => (
     <CourseCard
@@ -55,11 +58,11 @@ export default function CoursesTab() {
     />
   );
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
         title="Courses"
-        subtitle="Browse courses using backend catalog state."
+        subtitle="Explore dental courses, workshops, and clinical learning programs."
         action={
           <Button
             label="My Courses"
@@ -69,6 +72,41 @@ export default function CoursesTab() {
           />
         }
       />
+
+      {firstEnrollment ? (
+        <View style={styles.continueSection}>
+          <SectionHeader title="Continue learning" />
+          <GlassCard style={styles.continueCard}>
+            <View style={styles.continueCopy}>
+              <Text numberOfLines={1} style={styles.continueKicker}>In progress</Text>
+              <Text numberOfLines={2} style={styles.continueTitle}>{firstEnrollment.course.title}</Text>
+              <Text style={styles.continueMeta}>
+                {firstEnrollment.course.lessonCount} lessons · {firstEnrollment.progressPercent}% complete
+              </Text>
+              <View style={styles.progressBar}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${Math.min(100, Math.max(0, firstEnrollment.progressPercent))}%` },
+                  ]}
+                />
+              </View>
+            </View>
+            <Button
+              label="Continue"
+              size="sm"
+              onPress={() => {
+                router.push({
+                  pathname: '/courses/[courseId]',
+                  params: { courseId: firstEnrollment.course.slug },
+                } as never);
+              }}
+            />
+          </GlassCard>
+        </View>
+      ) : null}
+
+      <SectionHeader title="All Courses" subtitle="Find courses by topic, price, or clinical focus." />
 
       <TextField
         label="Search courses"
@@ -90,41 +128,66 @@ export default function CoursesTab() {
           />
         ))}
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading courses" message="Fetching course catalog from AMG Academy." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading courses" message="Opening the AMG Academy course catalog." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
           onRetry={() => coursesQuery.refetch()}
         />
-      ) : state.status === 'empty' ? (
-        <EmptyState title="No courses" message="No courses match your current filters." />
-      ) : (
-        <FlatList
-          data={state.data.data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderCourse}
-          contentContainerStyle={[
-            styles.list,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          refreshControl={
-            <RefreshControl
-              refreshing={state.isRefreshing}
-              onRefresh={() => coursesQuery.refetch()}
-              tintColor={colors.accent.primary}
-            />
-          }
-          onEndReached={() => {
-            if (meta && page < meta.totalPages) {
-              setPage((p) => p + 1);
-            }
-          }}
-          onEndReachedThreshold={0.5}
+      );
+    }
+
+    if (state.status === 'empty') {
+      return (
+        <EmptyState
+          icon="school-outline"
+          title="No courses found"
+          message="Try another search or filter. New courses will appear here when they are available."
         />
-      )}
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={renderCourse}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        contentContainerStyle={[
+          styles.list,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        refreshControl={
+          <RefreshControl
+            refreshing={state.isRefreshing}
+            onRefresh={() => coursesQuery.refetch()}
+            tintColor={colors.accent.primary}
+          />
+        }
+        onEndReached={() => {
+          if (state.status === 'success' && meta && page < meta.totalPages) {
+            setPage((p) => p + 1);
+          }
+        }}
+        onEndReachedThreshold={0.5}
+      />
     </Screen>
   );
 }
@@ -132,7 +195,54 @@ export default function CoursesTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
+    gap: spacing.md,
+  },
+  continueSection: {
     gap: spacing.sm,
+  },
+  continueCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderColor: 'rgba(248, 198, 109, 0.26)',
+    backgroundColor: 'rgba(31, 32, 43, 0.92)',
+  },
+  continueCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: spacing.xs,
+  },
+  continueKicker: {
+    ...textStyles.caption,
+    color: colors.accent.gold,
+    textTransform: 'uppercase',
+  },
+  continueTitle: {
+    color: colors.text.primary,
+    fontSize: typography.size.lg,
+    lineHeight: typography.lineHeight.lg,
+    fontWeight: typography.weight.bold,
+  },
+  continueMeta: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
+  },
+  progressBar: {
+    height: 7,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface.raised,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent.gold,
   },
   filters: {
     flexDirection: 'row',

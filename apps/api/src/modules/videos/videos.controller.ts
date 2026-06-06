@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -36,20 +37,21 @@ export class VideosController {
     return this.videosService.stream(parseWithSchema(uuidSchema, id), range, res);
   }
 
+  @Post('from-url')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('courses:create')
+  @AuditLog(AuditAction.Create, 'Video')
+  async createFromUrl(@Body() body: Record<string, unknown>) {
+    const url = typeof body?.url === 'string' ? body.url : '';
+    return this.videosService.createFromGoogleDriveUrl(url);
+  }
+
   @Post('upload')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermission('courses:create')
   @AuditLog(AuditAction.Create, 'Video')
   @UseInterceptors(FileInterceptor('video', {
     limits: { fileSize: 500 * 1024 * 1024 },
-    fileFilter: (_req, file, cb) => {
-      const allowed = ['video/mp4', 'video/webm', 'video/mov'];
-      if (allowed.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Only MP4, WebM, and MOV videos are allowed'), false);
-      }
-    },
   }))
   async upload(
     @UploadedFile() file: Express.Multer.File,

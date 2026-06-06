@@ -16,11 +16,13 @@ const pageSize = 10;
 type TypeFilter = 'all' | StudyGroupType;
 
 function getTypeLabel(type: StudyGroupType): string {
-  return type === 'student' ? 'Student-led' : 'Instructor-led';
+  return type === 'STUDENT' ? 'Student-led' : 'Instructor-led';
 }
 
 function getJoinModeLabel(mode: string): string {
-  return mode === 'open' ? 'Open' : 'Approval required';
+  if (mode === 'OPEN') return 'Open';
+  if (mode === 'INVITE_ONLY') return 'Invite only';
+  return 'Approval required';
 }
 
 function GroupCard({ item, onPress }: { item: StudyGroup; onPress: () => void }) {
@@ -43,7 +45,7 @@ function GroupCard({ item, onPress }: { item: StudyGroup; onPress: () => void })
           <Badge label={getTypeLabel(item.type)} />
           <Badge
             label={getJoinModeLabel(item.joinMode)}
-            foreground={item.joinMode === 'open' ? colors.status.success : colors.status.warning}
+            foreground={item.joinMode === 'OPEN' ? colors.status.success : colors.status.warning}
           />
           <View style={cardStyles.memberCount}>
             <Ionicons name="people-outline" size={14} color={colors.text.muted} />
@@ -64,7 +66,8 @@ const cardStyles = StyleSheet.create({
     transform: [{ scale: 0.995 }],
   },
   card: {
-    gap: spacing.sm,
+    gap: spacing.md,
+    borderColor: colors.border.strong,
   },
   headerRow: {
     flexDirection: 'row',
@@ -89,13 +92,17 @@ const cardStyles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: spacing.xs,
   },
   memberCount: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxs,
-    marginLeft: 'auto',
+    borderRadius: 999,
+    backgroundColor: colors.surface.soft,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
   },
   memberText: {
     ...textStyles.caption,
@@ -133,6 +140,7 @@ export default function StudyGroupsTab() {
     isEmpty: (data) => data.data.length === 0,
   });
   const meta = groupsQuery.data?.meta;
+  const listData = state.status === 'success' ? state.data.data : [];
 
   const renderGroup = ({ item }: { item: StudyGroup }) => (
     <GroupCard
@@ -146,14 +154,14 @@ export default function StudyGroupsTab() {
     />
   );
 
-  return (
-    <Screen scroll={false} contentStyle={styles.screen}>
+  const renderListHeader = () => (
+    <View style={styles.listHeader}>
       <Header
         title="Study Groups"
-        subtitle="Join or create peer learning groups."
+        subtitle="Join live peer groups and instructor-led course circles."
         action={
           <Button
-            label="Create Group"
+            label="Create"
             variant="secondary"
             size="sm"
             onPress={() => router.push('/study-groups/create' as never)}
@@ -179,23 +187,29 @@ export default function StudyGroupsTab() {
         />
         <Button
           label="Student"
-          variant={typeFilter === 'student' ? 'primary' : 'secondary'}
-          onPress={() => setTypeFilter('student')}
+          variant={typeFilter === 'STUDENT' ? 'primary' : 'secondary'}
+          onPress={() => setTypeFilter('STUDENT')}
           size="sm"
           style={styles.filterButton}
         />
         <Button
           label="Instructor"
-          variant={typeFilter === 'instructor_led' ? 'primary' : 'secondary'}
-          onPress={() => setTypeFilter('instructor_led')}
+          variant={typeFilter === 'INSTRUCTOR_LED' ? 'primary' : 'secondary'}
+          onPress={() => setTypeFilter('INSTRUCTOR_LED')}
           size="sm"
           style={styles.filterButton}
         />
       </View>
+    </View>
+  );
 
-      {state.status === 'loading' ? (
-        <LoadingState title="Loading groups" message="Fetching available study groups." />
-      ) : state.status === 'error' ? (
+  const renderListEmpty = () => {
+    if (state.status === 'loading') {
+      return <LoadingState title="Loading groups" message="Finding active study groups." />;
+    }
+
+    if (state.status === 'error') {
+      return (
         <ErrorState
           title={state.error.title}
           message={state.error.message}
@@ -203,56 +217,68 @@ export default function StudyGroupsTab() {
             void groupsQuery.refetch();
           }}
         />
-      ) : state.status === 'empty' ? (
-        <EmptyState
-          title="No study groups found"
-          message="No groups match your filters. Create a new group to get started."
-          action={{
-            label: 'Create a group',
-            onPress: () => router.push('/study-groups/create' as never),
-          }}
-        />
-      ) : (
-        <FlatList
-          data={state.data.data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderGroup}
-          refreshControl={
-            <RefreshControl
-              tintColor={colors.accent.primary}
-              refreshing={state.isRefreshing}
-              onRefresh={() => {
-                void groupsQuery.refetch();
-              }}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
-          ]}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListFooterComponent={
-            meta && meta.totalPages > 1 ? (
-              <View style={styles.pagination}>
-                <Button
-                  label="Previous"
-                  variant="secondary"
-                  disabled={page <= 1}
-                  onPress={() => setPage((current) => Math.max(1, current - 1))}
-                  style={styles.pageButton}
-                />
-                <Button
-                  label="Next"
-                  variant="secondary"
-                  disabled={page >= meta.totalPages}
-                  onPress={() => setPage((current) => current + 1)}
-                  style={styles.pageButton}
-                />
-              </View>
-            ) : null
-          }
-        />
-      )}
+      );
+    }
+
+    return (
+      <EmptyState
+        icon="people-outline"
+        title="No study groups yet"
+        message="Create a group or adjust your filters to find student-led and instructor-led circles."
+        action={{
+          label: 'Create a group',
+          onPress: () => router.push('/study-groups/create' as never),
+        }}
+      />
+    );
+  };
+
+  return (
+    <Screen scroll={false} contentStyle={styles.screen}>
+      <FlatList
+        data={listData}
+        keyExtractor={(item) => item.id}
+        renderItem={renderGroup}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        style={styles.listSurface}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.accent.primary}
+            refreshing={state.isRefreshing}
+            onRefresh={() => {
+              void groupsQuery.refetch();
+            }}
+          />
+        }
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: layout.bottomTabContentPadding + insets.bottom },
+        ]}
+        scrollIndicatorInsets={{ bottom: layout.bottomTabContentPadding + insets.bottom }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListFooterComponent={
+          state.status === 'success' && meta && meta.totalPages > 1 ? (
+            <View style={styles.pagination}>
+              <Button
+                label="Previous"
+                variant="secondary"
+                disabled={page <= 1}
+                onPress={() => setPage((current) => Math.max(1, current - 1))}
+                style={styles.pageButton}
+              />
+              <Button
+                label="Next"
+                variant="secondary"
+                disabled={page >= meta.totalPages}
+                onPress={() => setPage((current) => current + 1)}
+                style={styles.pageButton}
+              />
+            </View>
+          ) : null
+        }
+      />
     </Screen>
   );
 }
@@ -260,17 +286,27 @@ export default function StudyGroupsTab() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    paddingBottom: 0,
+  },
+  listSurface: {
+    flex: 1,
+  },
+  listHeader: {
     gap: spacing.sm,
   },
   filters: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.xs,
     paddingBottom: spacing.xs,
   },
   filterButton: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: 92,
   },
-  listContent: {},
+  listContent: {
+    gap: spacing.md,
+  },
   separator: {
     height: spacing.md,
   },

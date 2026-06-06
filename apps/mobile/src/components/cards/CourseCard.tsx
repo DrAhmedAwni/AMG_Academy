@@ -18,13 +18,14 @@ export interface CourseCardProps {
 
 export function CourseCard({ course, onPress }: CourseCardProps) {
   return (
-    <Pressable
+  <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Open ${course.title}`}
       onPress={onPress}
       style={({ pressed }) => [pressed ? styles.pressed : null]}
     >
       <GlassCard style={styles.card}>
+        <View style={styles.mediaFrame}>
         {course.thumbnailUrl ? (
           <Image
             source={{ uri: course.thumbnailUrl }}
@@ -34,17 +35,21 @@ export function CourseCard({ course, onPress }: CourseCardProps) {
         ) : (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>{course.title[0]}</Text>
+            <Text style={styles.placeholderLabel}>AMG Course</Text>
           </View>
         )}
+          <View style={styles.pricePill}>
+            <Text style={styles.priceText}>
+              {course.isFree ? 'Free' : `${course.price.toLocaleString()} ${course.currency}`}
+            </Text>
+          </View>
+        </View>
         <View style={styles.content}>
           <View style={styles.headerRow}>
             <View style={styles.titleGroup}>
               <Text style={styles.kicker}>{course.category.name}</Text>
               <Text numberOfLines={2} style={styles.title}>{course.title}</Text>
             </View>
-            <Text numberOfLines={2} style={styles.price}>
-              {course.isFree ? 'Free' : `${course.price.toLocaleString()} ${course.currency}`}
-            </Text>
           </View>
 
           <Text numberOfLines={1} style={styles.instructor}>By {course.instructor.name}</Text>
@@ -74,12 +79,19 @@ export function CourseCard({ course, onPress }: CourseCardProps) {
           </View>
 
           <View style={styles.footerRow}>
-            <Text numberOfLines={1} style={styles.lessons}>
-              {course.lessonCount} lessons · {Math.round(course.totalDuration / 60)}h
-            </Text>
+            <View style={styles.metaPill}>
+              <Text numberOfLines={1} style={styles.lessons}>
+                {course.lessonCount} lessons
+              </Text>
+            </View>
+            <View style={styles.metaPill}>
+              <Text numberOfLines={1} style={styles.lessons}>
+                {Math.round(course.totalDuration / 60)}h
+              </Text>
+            </View>
             {course.isEnrolled ? (
               <View style={styles.enrolledBadge}>
-                <Text style={styles.enrolledText}>Enrolled</Text>
+                <Text style={styles.enrolledText}>Continue</Text>
               </View>
             ) : null}
           </View>
@@ -95,32 +107,65 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.995 }],
   },
   card: {
-    gap: spacing.md,
     overflow: 'hidden',
     padding: 0,
+    borderColor: colors.border.strong,
+  },
+  mediaFrame: {
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: colors.surface.elevated,
   },
   thumbnail: {
     width: '100%',
-    height: 136,
+    height: 156,
     backgroundColor: colors.surface.elevated,
   },
   placeholder: {
     width: '100%',
-    height: 136,
-    backgroundColor: colors.surface.elevated,
+    height: 156,
+    backgroundColor: colors.background.raised,
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomWidth: 1,
     borderBottomColor: colors.border.default,
+    gap: spacing.xs,
   },
   placeholderText: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    backgroundColor: colors.accent.goldMuted,
     fontSize: typography.size.xxl,
     fontWeight: typography.weight.bold,
-    color: colors.text.muted,
+    color: colors.accent.gold,
+  },
+  placeholderLabel: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
+    textTransform: 'uppercase',
+  },
+  pricePill: {
+    position: 'absolute',
+    right: spacing.md,
+    bottom: spacing.md,
+    minHeight: 34,
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border.highlight,
+    backgroundColor: colors.background.overlay,
+    paddingHorizontal: spacing.md,
+  },
+  priceText: {
+    ...textStyles.label,
+    color: colors.text.primary,
   },
   content: {
-    gap: spacing.sm,
-    padding: spacing.md,
+    gap: spacing.md,
+    padding: spacing.lg,
   },
   headerRow: {
     flexDirection: 'row',
@@ -143,12 +188,6 @@ const styles = StyleSheet.create({
     fontSize: typography.size.lg,
     lineHeight: typography.lineHeight.lg,
   },
-  price: {
-    ...textStyles.label,
-    maxWidth: 96,
-    color: colors.text.primary,
-    textAlign: 'right',
-  },
   instructor: {
     ...textStyles.caption,
     color: colors.text.secondary,
@@ -163,22 +202,29 @@ const styles = StyleSheet.create({
     minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  metaPill: {
+    minHeight: 32,
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface.soft,
+    paddingHorizontal: spacing.sm,
   },
   lessons: {
     ...textStyles.caption,
-    flex: 1,
+    color: colors.text.secondary,
   },
   enrolledBadge: {
-    minHeight: 28,
+    minHeight: 32,
     justifyContent: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.primary + '22',
-    paddingHorizontal: spacing.sm,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent.primary,
+    paddingHorizontal: spacing.md,
   },
   enrolledText: {
-    color: colors.accent.primary,
+    color: colors.text.inverse,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.bold,
   },

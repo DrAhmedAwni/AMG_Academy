@@ -1,14 +1,18 @@
-import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { loginSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
 import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
-import { useLoginMutation } from '../../src/features/auth/auth.hooks';
+import { useGoogleLoginMutation, useLoginMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, LoginFormValues } from '../../src/features/auth/auth.types';
 import { mapApiErrorToUi } from '../../src/lib/errors';
-import { colors, spacing, textStyles } from '../../src/theme';
+import { colors, radius, spacing, textStyles, typography } from '../../src/theme';
+
+WebBrowser.maybeCompleteAuthSession();
 
 function getLoginErrors(values: LoginFormValues): AuthFormErrors {
   const result = loginSchema.safeParse({
@@ -32,13 +36,32 @@ function getLoginErrors(values: LoginFormValues): AuthFormErrors {
 export default function LoginScreen() {
   const router = useRouter();
   const loginMutation = useLoginMutation();
+  const googleMutation = useGoogleLoginMutation();
+  const [googleRequest, googleResponse, promptGoogle] = Google.useIdTokenAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
+  });
   const [values, setValues] = useState<LoginFormValues>({ email: '', password: '' });
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const uiError = useMemo(
-    () => (loginMutation.error ? mapApiErrorToUi(loginMutation.error) : null),
-    [loginMutation.error],
+    () => (loginMutation.error || googleMutation.error
+      ? mapApiErrorToUi(loginMutation.error ?? googleMutation.error)
+      : null),
+    [googleMutation.error, loginMutation.error],
   );
+
+  useEffect(() => {
+    const idToken = googleResponse?.type === 'success'
+      ? googleResponse.authentication?.idToken
+      : undefined;
+    if (!idToken) return;
+
+    void googleMutation.mutateAsync(idToken).then(() => {
+      router.replace('/(tabs)/home' as never);
+    });
+  }, [googleMutation, googleResponse, router]);
 
   const submit = async () => {
     const nextErrors = getLoginErrors(values);
@@ -54,14 +77,31 @@ export default function LoginScreen() {
   return (
     <Screen contentStyle={styles.screen}>
       <View style={styles.hero}>
-        <Text style={styles.eyebrow}>AMG Academy</Text>
+        <Image source={require('../../assets/logo-horizontal.png')} style={styles.logo} resizeMode="contain" />
+        <View style={styles.brandPill}>
+          <Text style={styles.brandPillText}>Premium dental learning</Text>
+        </View>
         <Text style={styles.title}>Sign in</Text>
         <Text style={styles.subtitle}>
-          Access your events, tickets, courses, and AMG Academy profile.
+          Continue your courses, events, and clinical discussions.
         </Text>
       </View>
 
       <GlassCard style={styles.card}>
+        <Button
+          label="Continue with Google"
+          variant="secondary"
+          loading={googleMutation.isPending}
+          disabled={!googleRequest}
+          onPress={() => {
+            void promptGoogle();
+          }}
+        />
+        <View style={styles.dividerRow}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.divider} />
+        </View>
         <TextField
           label="Email"
           value={values.email}
@@ -96,16 +136,20 @@ export default function LoginScreen() {
             void submit();
           }}
         />
-        <Button
-          label="Create account"
-          variant="ghost"
-          onPress={() => router.push('/(auth)/register' as never)}
-        />
-        <Button
-          label="Forgot password"
-          variant="ghost"
-          onPress={() => router.push('/(auth)/forgot-password' as never)}
-        />
+        <View style={styles.actionRow}>
+          <Button
+            label="Create account"
+            variant="ghost"
+            onPress={() => router.push('/(auth)/register' as never)}
+            style={styles.actionButton}
+          />
+          <Button
+            label="Forgot password"
+            variant="ghost"
+            onPress={() => router.push('/(auth)/forgot-password' as never)}
+            style={styles.actionButton}
+          />
+        </View>
       </GlassCard>
     </Screen>
   );
@@ -114,18 +158,63 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     justifyContent: 'center',
+    gap: spacing.lg,
   },
   hero: {
-    gap: spacing.xs,
+    alignItems: 'center',
+    gap: spacing.sm,
   },
-  eyebrow: {
+  logo: {
+    width: 216,
+    height: 58,
+  },
+  brandPill: {
+    minHeight: 32,
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(248, 198, 109, 0.32)',
+    backgroundColor: colors.accent.goldMuted,
+    paddingHorizontal: spacing.md,
+  },
+  brandPillText: {
     ...textStyles.caption,
-    color: colors.accent.primary,
+    color: colors.accent.gold,
     textTransform: 'uppercase',
+    fontWeight: typography.weight.bold,
   },
-  title: textStyles.title,
-  subtitle: textStyles.body,
+  title: {
+    ...textStyles.title,
+    marginTop: spacing.sm,
+  },
+  subtitle: {
+    ...textStyles.body,
+    textAlign: 'center',
+  },
   card: {
     gap: spacing.md,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border.default,
+  },
+  dividerText: {
+    ...textStyles.caption,
+    color: colors.text.muted,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  actionButton: {
+    flex: 1,
   },
 });

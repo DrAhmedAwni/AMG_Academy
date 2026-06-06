@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { createReadStream, existsSync, mkdirSync, statSync } from 'fs';
 import { isAbsolute, join, normalize, sep } from 'path';
 import { Readable } from 'stream';
@@ -36,7 +36,16 @@ export class VideosService {
     return resolved;
   }
 
-  async upload(file: Express.Multer.File, _userId: string) {
+  async upload(file: Express.Multer.File | undefined, _userId: string) {
+    if (!file) {
+      throw new BadRequestException('No video file provided. Use a field named "video".');
+    }
+    const allowedMime = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
+    const allowedExt = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+    const ext = '.' + (file.originalname.split('.').pop()?.toLowerCase() ?? '');
+    if (!allowedMime.includes(file.mimetype) && !allowedExt.includes(ext)) {
+      throw new BadRequestException('Only video files (MP4, WebM, MOV, AVI, MKV) are allowed');
+    }
     const safeName = this.sanitizeFileName(file.originalname);
 
     if (this.getStorageProvider() === 'google_drive') {
@@ -88,6 +97,62 @@ export class VideosService {
       mimeType: video.mimeType,
       createdAt: video.createdAt.toISOString(),
     };
+  }
+
+  async createFromGoogleDriveUrl(url: string) {
+    const fileId = this.extractGoogleDriveFileId(url);
+    if (!fileId) {
+      throw new BadRequestException('Invalid Google Drive URL. Use a shared link like https://drive.google.com/file/d/FILE_ID/view');
+    }
+
+    const metadata = await this.getGoogleDriveFileMetadata(fileId);
+    await this.assertGoogleDriveMediaReadable(fileId);
+
+    const existing = await this.prisma.video.findFirst({
+      where: { provider: 'google_drive', providerVideoId: fileId },
+    });
+
+    if (existing) {
+      return {
+        id: existing.id,
+        provider: existing.provider,
+        originalName: existing.originalName,
+        duration: existing.duration,
+        mimeType: existing.mimeType,
+        sizeBytes: existing.sizeBytes,
+        createdAt: existing.createdAt.toISOString(),
+      };
+    }
+
+    const video = await this.prisma.video.create({
+      data: {
+        provider: 'google_drive',
+        providerVideoId: fileId,
+        originalName: metadata.name ?? `google-drive-video-${fileId}`,
+        mimeType: metadata.mimeType ?? 'video/mp4',
+        sizeBytes: Number(metadata.size ?? 0),
+      },
+    });
+
+    return {
+      id: video.id,
+      provider: video.provider,
+      originalName: video.originalName,
+      duration: video.duration,
+      sizeBytes: video.sizeBytes,
+      mimeType: video.mimeType,
+      createdAt: video.createdAt.toISOString(),
+    };
+  }
+
+  private extractGoogleDriveFileId(url: string): string | null {
+    const fileMatch = url.match(/\/file\/d\/([^/]+)\//);
+    if (fileMatch?.[1]) return fileMatch[1];
+
+    const idMatch = url.match(/[?&]id=([^&]+)/);
+    if (idMatch?.[1]) return idMatch[1];
+
+    return null;
   }
 
   async stream(id: string, range: string | undefined, res: Response) {
@@ -169,7 +234,15 @@ export class VideosService {
 
   private async getGoogleDriveClient() {
     const { google } = await import('googleapis');
-    const scopes = ['https://www.googleapis.com/auth/drive.file'];
+    const scopes =
+      this.configService
+        .get<string>('GOOGLE_DRIVE_SCOPES')
+        ?.split(',')
+        .map((scope) => scope.trim())
+        .filter(Boolean) ?? [
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive.readonly',
+      ];
     const serviceAccountJson = this.configService.get<string>('GOOGLE_SERVICE_ACCOUNT_JSON');
     const keyFile = this.configService.get<string>('GOOGLE_APPLICATION_CREDENTIALS');
 
@@ -203,6 +276,7 @@ export class VideosService {
         mimeType: file.mimetype,
         body: Readable.from(file.buffer),
       },
+      supportsAllDrives: true,
       fields: 'id',
     });
 
@@ -211,6 +285,39 @@ export class VideosService {
     }
 
     return response.data.id;
+  }
+
+  private async getGoogleDriveFileMetadata(fileId: string) {
+    const drive = await this.getGoogleDriveClient();
+
+    try {
+      const response = await drive.files.get({
+        fileId,
+        fields: 'id,name,mimeType,size',
+        supportsAllDrives: true,
+      });
+
+      return response.data;
+    } catch (error) {
+      throw this.toGoogleDriveHttpException(error);
+    }
+  }
+
+  private async assertGoogleDriveMediaReadable(fileId: string) {
+    const drive = await this.getGoogleDriveClient();
+
+    try {
+      const response = await drive.files.get(
+        { fileId, alt: 'media', supportsAllDrives: true },
+        {
+          responseType: 'stream',
+          headers: { Range: 'bytes=0-0' },
+        },
+      );
+      response.data.destroy();
+    } catch (error) {
+      throw this.toGoogleDriveHttpException(error);
+    }
   }
 
   private async streamGoogleDrive(
@@ -223,13 +330,18 @@ export class VideosService {
     }
 
     const drive = await this.getGoogleDriveClient();
-    const response = await drive.files.get(
-      { fileId: video.providerVideoId, alt: 'media' },
-      {
-        responseType: 'stream',
-        headers: range ? { Range: range } : undefined,
-      },
-    );
+    let response;
+    try {
+      response = await drive.files.get(
+        { fileId: video.providerVideoId, alt: 'media', supportsAllDrives: true },
+        {
+          responseType: 'stream',
+          headers: range ? { Range: range } : undefined,
+        },
+      );
+    } catch (error) {
+      throw this.toGoogleDriveHttpException(error);
+    }
 
     const headers = response.headers as Record<string, string | undefined>;
     const responseHeaders: Record<string, string> = {
@@ -247,6 +359,25 @@ export class VideosService {
 
   private async deleteFromGoogleDrive(fileId: string) {
     const drive = await this.getGoogleDriveClient();
-    await drive.files.delete({ fileId });
+    await drive.files.delete({ fileId, supportsAllDrives: true });
+  }
+
+  private toGoogleDriveHttpException(error: unknown) {
+    const response = (error as { response?: { status?: number } }).response;
+    const code = Number((error as { code?: unknown }).code ?? response?.status);
+
+    if (code === 404) {
+      return new NotFoundException(
+        'Google Drive file was not found or is not shared with AMG Academy.',
+      );
+    }
+
+    if (code === 401 || code === 403) {
+      return new ForbiddenException(
+        'Google Drive file is not accessible. Share the file with the configured AMG Academy service account.',
+      );
+    }
+
+    return new BadRequestException('Google Drive video could not be accessed.');
   }
 }

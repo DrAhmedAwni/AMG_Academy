@@ -12,6 +12,10 @@ const contentSecurityPolicy = [
   "connect-src 'self' https: http: ws: wss:",
 ].join('; ');
 
+const apiRewriteBaseUrl =
+  process.env.API_INTERNAL_URL ??
+  (process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'http://api:4000');
+
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
@@ -28,7 +32,7 @@ const nextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: 'http://localhost:4000/api/v1/:path*',
+        destination: `${apiRewriteBaseUrl}/api/v1/:path*`,
       },
     ];
   },

@@ -31,7 +31,6 @@ export default function AdminUsersPage() {
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
-  const [roleDrafts, setRoleDrafts] = useState<Record<string, string>>({});
 
   const rolesQuery = useQuery({
     queryKey: ['admin-roles-options'],
@@ -181,15 +180,16 @@ export default function AdminUsersPage() {
             sortable: true,
             sortValue: (row) => row.role,
             cell: (row) => (
-              <div className="space-y-2">
-                <p className="text-text-primary">{row.role}</p>
-                <div className="flex gap-2">
+              <div className="flex items-center gap-1.5">
                   <select
-                    value={roleDrafts[row.id] ?? roles.find((item) => item.slug === row.role)?.id ?? ''}
-                    onChange={(event) =>
-                      setRoleDrafts((current) => ({ ...current, [row.id]: event.target.value }))
-                    }
-                    className="h-9 rounded-md border border-surface-border bg-surface px-2 text-sm text-text-primary"
+                    value={roles.find((item) => item.slug === row.role)?.id ?? ''}
+                    onChange={(event) => {
+                      const roleId = event.target.value;
+                      if (roleId) {
+                        void assignRoleMutation.mutateAsync({ userId: row.id, roleId });
+                      }
+                    }}
+                    className="h-8 max-w-[130px] truncate rounded-md border border-surface-border bg-surface px-1.5 text-xs text-text-primary"
                   >
                     {roles.map((item) => (
                       <option key={item.id} value={item.id}>
@@ -197,20 +197,6 @@ export default function AdminUsersPage() {
                       </option>
                     ))}
                   </select>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => {
-                      const roleId = roleDrafts[row.id] ?? roles.find((item) => item.slug === row.role)?.id;
-                      if (!roleId) {
-                        return;
-                      }
-                      void assignRoleMutation.mutateAsync({ userId: row.id, roleId });
-                    }}
-                  >
-                    Apply
-                  </Button>
-                </div>
               </div>
             ),
           },

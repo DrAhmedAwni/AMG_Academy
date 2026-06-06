@@ -15,10 +15,10 @@ export default function StaffTab() {
         <Header title="Scanner" subtitle="Authorized staff scanner entry point." />
         <GlassCard style={styles.card}>
           <Text style={styles.kicker}>Camera-first validation</Text>
-          <Text style={styles.title}>Scan event QR tickets with backend authorization.</Text>
+          <Text style={styles.title}>Scan event QR tickets for attendance.</Text>
           <Text style={styles.body}>
-            Select an event, open the camera, and let the API decide success, duplicate,
-            wrong-event, unpaid, unapproved, expired, revoked, or invalid states.
+            Select an event, open the camera, and confirm each attendee with a clear success
+            or action-needed result.
           </Text>
           <View style={styles.actions}>
             <Button

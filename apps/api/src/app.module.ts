@@ -49,7 +49,7 @@ import { StudyGroupsModule } from './modules/study-groups/study-groups.module';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: ['.env'],
       load: [appConfig, authConfig, queuesConfig],
     }),
     CacheModule,
