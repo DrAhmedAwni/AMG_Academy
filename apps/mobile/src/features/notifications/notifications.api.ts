@@ -6,6 +6,26 @@ export interface ApiPage<T> {
   meta: PaginationMeta;
 }
 
+type ListEnvelope<T> = {
+  data?: T[];
+  items?: T[];
+  meta: PaginationMeta;
+};
+
+type PreferencesEnvelope = Record<string, boolean> | { data: Record<string, boolean> };
+
+function unwrapPreferences(response: PreferencesEnvelope): Record<string, boolean> {
+  if (
+    'data' in response &&
+    typeof response.data === 'object' &&
+    response.data !== null
+  ) {
+    return response.data;
+  }
+
+  return response as Record<string, boolean>;
+}
+
 export interface MobileNotification {
   id: string;
   type: string;
@@ -47,12 +67,13 @@ export async function listNotifications(filters: NotificationFilters = {}): Prom
     Object.entries(params).filter(([, v]) => v !== undefined) as [string, string][],
   ).toString();
 
-  const response = await apiRequest<{ items: MobileNotification[]; meta: PaginationMeta }>(
+  const response = await apiRequest<ListEnvelope<MobileNotification>>(
     `/notifications${query ? `?${query}` : ''}`,
   );
+  const data = response.data ?? response.items ?? [];
 
   return {
-    data: response.items.map(normalizeNotification),
+    data: data.map(normalizeNotification),
     meta: response.meta,
   };
 }
@@ -68,17 +89,19 @@ export async function markAllNotificationsRead(): Promise<void> {
 }
 
 export async function getNotificationPreferences(): Promise<Record<string, boolean>> {
-  return apiRequest<Record<string, boolean>>('/notifications/preferences');
+  const response = await apiRequest<PreferencesEnvelope>('/notifications/preferences');
+  return unwrapPreferences(response);
 }
 
 export async function updateNotificationPreferences(
   preferences: Record<string, boolean>,
 ): Promise<Record<string, boolean>> {
-  return apiRequest<Record<string, boolean>>('/notifications/preferences', {
+  await apiRequest<unknown>('/notifications/preferences', {
     method: 'PATCH',
     body: JSON.stringify(preferences),
     headers: { 'Content-Type': 'application/json' },
   });
+  return preferences;
 }
 
 export async function listPublishedAnnouncements(
