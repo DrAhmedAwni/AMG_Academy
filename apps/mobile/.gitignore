@@ -18,6 +18,11 @@ node_modules/
 .env.*
 !.env.example
 
+# Firebase / push notification credentials
+google-services.json
+GoogleService-Info.plist
+firebase-service-account*.json
+
 # Logs
 *.log
 npm-debug.log*

@@ -119,6 +119,32 @@ EXPO_PUBLIC_ENABLE_PUSH_PREP=true
 No private secrets may use `EXPO_PUBLIC_*`; those values are bundled into the
 app.
 
+## Push Notifications
+
+Android push tokens require Firebase Cloud Messaging in the native build.
+Download `google-services.json` from Firebase for Android package
+`com.amgacademy.mobile` and place it at:
+
+```bash
+apps/mobile/google-services.json
+```
+
+`app.config.js` automatically adds this file as `android.googleServicesFile`
+when it exists. Without it, Android builds can install, but
+`getExpoPushTokenAsync` fails with "Default FirebaseApp is not initialized" and
+the API will have zero `PushDevice` rows.
+
+For Expo Push Service delivery, also upload the Firebase service account key to
+EAS credentials for Android FCM V1:
+
+```bash
+cd apps/mobile
+eas credentials
+```
+
+Choose Android, then manage the Google Service Account / FCM V1 key. Keep the
+service account JSON out of Git.
+
 ## Android And iOS Development Builds
 
 Start the existing backend first:

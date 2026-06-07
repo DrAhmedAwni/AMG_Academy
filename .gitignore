@@ -26,6 +26,14 @@ apps/mobile/.env*
 !apps/web/.env.example
 !apps/mobile/.env.example
 
+# Firebase / push notification credentials
+google-services.json
+GoogleService-Info.plist
+apps/mobile/google-services.json
+apps/mobile/GoogleService-Info.plist
+firebase-service-account*.json
+apps/mobile/firebase-service-account*.json
+
 # Upload/runtime data
 uploads/
 tmp/
