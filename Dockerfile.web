@@ -4,16 +4,16 @@ COPY package.json package-lock.json* ./
 COPY apps/web/package.json apps/web/package.json
 COPY packages/shared/package.json packages/shared/package.json
 COPY packages/config/package.json packages/config/package.json
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+RUN if [ -f package-lock.json ]; then npm ci --include=dev; else npm install --include=dev; fi
 
 FROM node:20-alpine AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID
 ARG GOOGLE_OAUTH_WEB_CLIENT_ID
-ENV NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID:-$GOOGLE_OAUTH_WEB_CLIENT_ID}
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY . .
-RUN npm run build:web
+RUN NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID="${NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID:-$GOOGLE_OAUTH_WEB_CLIENT_ID}" npm run build:web
 
 FROM node:20-alpine AS runner
 WORKDIR /app
