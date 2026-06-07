@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Header, Screen } from '../src/components/layout';
@@ -8,6 +8,7 @@ import {
   useNotificationPreferencesQuery,
   useUpdateNotificationPreferencesMutation,
 } from '../src/features/notifications/notifications.hooks';
+import { registerPushTokenForCurrentUser } from '../src/features/notifications/pushRegistration';
 import { colors, spacing, textStyles, typography } from '../src/theme';
 
 const preferenceLabels: Record<string, string> = {
@@ -26,12 +27,24 @@ export default function SettingsScreen() {
   const logoutMutation = useLogoutMutation();
   const prefsQuery = useNotificationPreferencesQuery();
   const updatePrefsMutation = useUpdateNotificationPreferencesMutation();
+  const [pushRegistrationStatus, setPushRegistrationStatus] = useState<string | null>(null);
+  const [registeringPush, setRegisteringPush] = useState(false);
 
   const preferences = prefsQuery.data ?? {};
 
   const togglePreference = (key: string) => {
     const current = preferences[key] ?? false;
     void updatePrefsMutation.mutateAsync({ ...preferences, [key]: !current }).catch(() => {});
+  };
+
+  const enablePushNotifications = async () => {
+    setRegisteringPush(true);
+    try {
+      const result = await registerPushTokenForCurrentUser();
+      setPushRegistrationStatus(result.message);
+    } finally {
+      setRegisteringPush(false);
+    }
   };
 
   return (
@@ -62,6 +75,18 @@ export default function SettingsScreen() {
             </View>
           ))
         )}
+
+        <Button
+          label="Enable push notifications"
+          variant="secondary"
+          loading={registeringPush}
+          onPress={() => {
+            void enablePushNotifications();
+          }}
+        />
+        {pushRegistrationStatus ? (
+          <Text style={styles.statusText}>{pushRegistrationStatus}</Text>
+        ) : null}
       </GlassCard>
 
       <GlassCard style={styles.card}>
@@ -121,6 +146,10 @@ const styles = StyleSheet.create({
   emptyText: {
     ...textStyles.caption,
     color: colors.text.muted,
+  },
+  statusText: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
   },
   logoutSection: {
     gap: spacing.sm,

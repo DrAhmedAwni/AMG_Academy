@@ -8,6 +8,10 @@ export interface PushRegistrationResult {
   message: string;
 }
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Unknown error';
+}
+
 export async function preparePushRegistration(
   expoPushToken: string,
   metadata: { platform?: string; deviceId?: string } = {},
@@ -18,10 +22,10 @@ export async function preparePushRegistration(
       body: { token: expoPushToken, ...metadata },
     });
     return { registered: true, message: 'Notifications are ready.' };
-  } catch {
+  } catch (error) {
     return {
       registered: false,
-      message: 'Push registration endpoint not yet available. Preparation only.',
+      message: `Push token could not be registered: ${errorMessage(error)}`,
     };
   }
 }
@@ -55,7 +59,7 @@ export async function unregisterPushToken(expoPushToken: string): Promise<void> 
   }).catch(() => undefined);
 }
 
-export async function requestPushPermission(): Promise<{ granted: boolean; token?: string }> {
+export async function requestPushPermission(): Promise<{ granted: boolean; token?: string; message?: string }> {
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -66,7 +70,7 @@ export async function requestPushPermission(): Promise<{ granted: boolean; token
     }
 
     if (finalStatus !== 'granted') {
-      return { granted: false };
+      return { granted: false, message: 'Push permission was not granted.' };
     }
 
     await ensureAndroidNotificationChannel();
@@ -76,8 +80,8 @@ export async function requestPushPermission(): Promise<{ granted: boolean; token
       projectId ? { projectId } : undefined,
     );
     return { granted: true, token: expoPushTokenData.data };
-  } catch {
-    return { granted: false };
+  } catch (error) {
+    return { granted: false, message: `Push token could not be created: ${errorMessage(error)}` };
   }
 }
 
@@ -88,7 +92,7 @@ export async function registerPushTokenForCurrentUser(): Promise<PushRegistratio
 
   const permission = await requestPushPermission();
   if (!permission.granted || !permission.token) {
-    return { registered: false, message: 'Push permission was not granted.' };
+    return { registered: false, message: permission.message ?? 'Push permission was not granted.' };
   }
 
   return preparePushRegistration(permission.token, { platform: Platform.OS });
