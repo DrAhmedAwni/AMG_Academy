@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Montserrat_400Regular, Montserrat_500Medium, Montserrat_600SemiBold, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { AuthProvider } from '../src/lib/auth';
 import { queryClient } from '../src/lib/queryClient';
+import { GoogleAuthProvider } from '../src/features/auth/googleAuth';
 import { colors, ThemeProvider } from '../src/theme';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -43,16 +44,18 @@ export default function RootLayout() {
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <View style={styles.root}>
-              <StatusBar barStyle="light-content" backgroundColor={colors.background.main} />
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.background.main },
-                  animation: 'fade',
-                }}
-              />
-            </View>
+            <GoogleAuthProvider>
+              <View style={styles.root}>
+                <StatusBar barStyle="light-content" backgroundColor={colors.background.main} />
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: colors.background.main },
+                    animation: 'fade',
+                  }}
+                />
+              </View>
+            </GoogleAuthProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ThemeProvider>

@@ -1,19 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
 import { registerSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
 import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
 import { SuccessState } from '../../src/components/states/SuccessState';
-import {
-  useCompleteGoogleProfileMutation,
-  useGoogleLoginMutation,
-  useRegisterMutation,
-} from '../../src/features/auth/auth.hooks';
-import type { AuthFormErrors, GoogleProfileSeed, RegisterFormValues } from '../../src/features/auth/auth.types';
-import { GoogleProfileCompletion } from '../../src/features/auth/GoogleProfileCompletion';
+import { useRegisterMutation } from '../../src/features/auth/auth.hooks';
+import type { AuthFormErrors, RegisterFormValues } from '../../src/features/auth/auth.types';
+import { useGoogleAuth } from '../../src/features/auth/googleAuth';
 import { mapApiErrorToUi } from '../../src/lib/errors';
 import { colors, spacing, textStyles } from '../../src/theme';
 
@@ -35,15 +30,7 @@ function getRegisterErrors(values: RegisterFormValues): AuthFormErrors {
 export default function RegisterScreen() {
   const router = useRouter();
   const registerMutation = useRegisterMutation();
-  const googleMutation = useGoogleLoginMutation();
-  const googleProfileMutation = useCompleteGoogleProfileMutation();
-  const [googleRequest, googleResponse, promptGoogle] = Google.useIdTokenAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
-  }, {
-    native: 'com.amgacademy.mobile:/oauthredirect',
-  });
+  const googleAuth = useGoogleAuth();
   const [values, setValues] = useState<RegisterFormValues>({
     name: '',
     email: '',
@@ -58,31 +45,12 @@ export default function RegisterScreen() {
   const [yearsText, setYearsText] = useState('');
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [googleProfileStep, setGoogleProfileStep] = useState<{
-    idToken: string;
-    profile: GoogleProfileSeed;
-  } | null>(null);
   const uiError = useMemo(
-    () => (registerMutation.error || googleMutation.error || googleProfileMutation.error
-      ? mapApiErrorToUi(registerMutation.error ?? googleMutation.error ?? googleProfileMutation.error)
+    () => (registerMutation.error
+      ? mapApiErrorToUi(registerMutation.error)
       : null),
-    [googleMutation.error, googleProfileMutation.error, registerMutation.error],
+    [registerMutation.error],
   );
-
-  useEffect(() => {
-    const idToken = googleResponse?.type === 'success'
-      ? googleResponse.authentication?.idToken
-      : undefined;
-    if (!idToken) return;
-
-    void googleMutation.mutateAsync(idToken).then((response) => {
-      if ('needsProfile' in response) {
-        setGoogleProfileStep({ idToken, profile: response.profile });
-        return;
-      }
-      router.replace('/(tabs)/home' as never);
-    });
-  }, [googleMutation, googleResponse, router]);
 
   const submit = async () => {
     const payload: RegisterFormValues = {
@@ -124,27 +92,13 @@ export default function RegisterScreen() {
       </View>
 
       <GlassCard style={styles.card}>
-        {googleProfileStep ? (
-          <GoogleProfileCompletion
-            idToken={googleProfileStep.idToken}
-            profile={googleProfileStep.profile}
-            loading={googleProfileMutation.isPending}
-            error={uiError}
-            onCancel={() => setGoogleProfileStep(null)}
-            onSubmit={async (profileValues) => {
-              await googleProfileMutation.mutateAsync(profileValues);
-              router.replace('/(tabs)/home' as never);
-            }}
-          />
-        ) : (
-          <>
         <Button
           label="Continue with Google"
           variant="secondary"
-          loading={googleMutation.isPending}
-          disabled={!googleRequest}
+          loading={googleAuth.loading}
+          disabled={!googleAuth.requestReady}
           onPress={() => {
-            void promptGoogle();
+            void googleAuth.start();
           }}
         />
         <View style={styles.dividerRow}>
@@ -244,8 +198,6 @@ export default function RegisterScreen() {
           variant="ghost"
           onPress={() => router.replace('/(auth)/login' as never)}
         />
-          </>
-        )}
       </GlassCard>
     </Screen>
   );

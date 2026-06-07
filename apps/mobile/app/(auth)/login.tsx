@@ -1,18 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
 import { loginSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
 import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
-import {
-  useCompleteGoogleProfileMutation,
-  useGoogleLoginMutation,
-  useLoginMutation,
-} from '../../src/features/auth/auth.hooks';
-import type { AuthFormErrors, GoogleProfileSeed, LoginFormValues } from '../../src/features/auth/auth.types';
-import { GoogleProfileCompletion } from '../../src/features/auth/GoogleProfileCompletion';
+import { useLoginMutation } from '../../src/features/auth/auth.hooks';
+import type { AuthFormErrors, LoginFormValues } from '../../src/features/auth/auth.types';
+import { useGoogleAuth } from '../../src/features/auth/googleAuth';
 import { mapApiErrorToUi } from '../../src/lib/errors';
 import { colors, radius, spacing, textStyles, typography } from '../../src/theme';
 
@@ -38,43 +33,16 @@ function getLoginErrors(values: LoginFormValues): AuthFormErrors {
 export default function LoginScreen() {
   const router = useRouter();
   const loginMutation = useLoginMutation();
-  const googleMutation = useGoogleLoginMutation();
-  const googleProfileMutation = useCompleteGoogleProfileMutation();
-  const [googleRequest, googleResponse, promptGoogle] = Google.useIdTokenAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
-  }, {
-    native: 'com.amgacademy.mobile:/oauthredirect',
-  });
+  const googleAuth = useGoogleAuth();
   const [values, setValues] = useState<LoginFormValues>({ email: '', password: '' });
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [googleProfileStep, setGoogleProfileStep] = useState<{
-    idToken: string;
-    profile: GoogleProfileSeed;
-  } | null>(null);
   const uiError = useMemo(
-    () => (loginMutation.error || googleMutation.error || googleProfileMutation.error
-      ? mapApiErrorToUi(loginMutation.error ?? googleMutation.error ?? googleProfileMutation.error)
+    () => (loginMutation.error
+      ? mapApiErrorToUi(loginMutation.error)
       : null),
-    [googleMutation.error, googleProfileMutation.error, loginMutation.error],
+    [loginMutation.error],
   );
-
-  useEffect(() => {
-    const idToken = googleResponse?.type === 'success'
-      ? googleResponse.authentication?.idToken
-      : undefined;
-    if (!idToken) return;
-
-    void googleMutation.mutateAsync(idToken).then((response) => {
-      if ('needsProfile' in response) {
-        setGoogleProfileStep({ idToken, profile: response.profile });
-        return;
-      }
-      router.replace('/(tabs)/home' as never);
-    });
-  }, [googleMutation, googleResponse, router]);
 
   const submit = async () => {
     const nextErrors = getLoginErrors(values);
@@ -101,27 +69,13 @@ export default function LoginScreen() {
       </View>
 
       <GlassCard style={styles.card}>
-        {googleProfileStep ? (
-          <GoogleProfileCompletion
-            idToken={googleProfileStep.idToken}
-            profile={googleProfileStep.profile}
-            loading={googleProfileMutation.isPending}
-            error={uiError}
-            onCancel={() => setGoogleProfileStep(null)}
-            onSubmit={async (profileValues) => {
-              await googleProfileMutation.mutateAsync(profileValues);
-              router.replace('/(tabs)/home' as never);
-            }}
-          />
-        ) : (
-          <>
         <Button
           label="Continue with Google"
           variant="secondary"
-          loading={googleMutation.isPending}
-          disabled={!googleRequest}
+          loading={googleAuth.loading}
+          disabled={!googleAuth.requestReady}
           onPress={() => {
-            void promptGoogle();
+            void googleAuth.start();
           }}
         />
         <View style={styles.dividerRow}>
@@ -177,8 +131,6 @@ export default function LoginScreen() {
             style={styles.actionButton}
           />
         </View>
-          </>
-        )}
       </GlassCard>
     </Screen>
   );
