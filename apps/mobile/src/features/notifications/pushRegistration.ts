@@ -20,6 +20,7 @@ export async function preparePushRegistration(
     await apiRequest('/notifications/push-token', {
       method: 'POST',
       body: { token: expoPushToken, ...metadata },
+      authFailureMode: 'ignore',
     });
     return { registered: true, message: 'Notifications are ready.' };
   } catch (error) {

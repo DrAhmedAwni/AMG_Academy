@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../lib/auth';
+import { ApiClientError } from '../../lib/api';
 import { getSessionMaterial } from '../../lib/storage';
 import type {
   ForgotPasswordFormValues,
@@ -8,6 +9,7 @@ import type {
   RegisterFormValues,
 } from './auth.types';
 import * as authApi from './auth.api';
+import type { MobileAuthResponse } from '../../types/api';
 
 export const authQueryKeys = {
   me: ['auth', 'me'] as const,
@@ -27,6 +29,7 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: (values: LoginFormValues) => authApi.login(values),
     onSuccess: async (response) => {
+      ensureMobileTokens(response);
       await auth.setAuthenticatedSession(response);
     },
   });
@@ -39,6 +42,7 @@ export function useGoogleLoginMutation() {
     mutationFn: (idToken: string) => authApi.loginWithGoogle(idToken),
     onSuccess: async (response) => {
       if ('user' in response) {
+        ensureMobileTokens(response);
         await auth.setAuthenticatedSession(response);
       }
     },
@@ -51,9 +55,20 @@ export function useCompleteGoogleProfileMutation() {
   return useMutation({
     mutationFn: (values: GoogleProfileCompletionValues) => authApi.completeGoogleProfile(values),
     onSuccess: async (response) => {
+      ensureMobileTokens(response);
       await auth.setAuthenticatedSession(response);
     },
   });
+}
+
+function ensureMobileTokens(response: MobileAuthResponse) {
+  if (!response.tokens?.accessToken) {
+    throw new ApiClientError({
+      code: 'MOBILE_TOKENS_MISSING',
+      message: 'The server did not return a mobile session token. Please redeploy the API and try again.',
+      status: 0,
+    });
+  }
 }
 
 export function useRegisterMutation() {
