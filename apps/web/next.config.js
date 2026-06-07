@@ -10,7 +10,10 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https: http:",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  isDevelopment ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'",
+  isDevelopment
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com"
+    : "script-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "frame-src 'self' https://accounts.google.com",
   "connect-src 'self' https: http: ws: wss:",
 ].join('; ');
 
