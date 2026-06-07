@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EXPO_PUSH_TOKEN_REGEX } from './notifications.constants';
 import { z } from 'zod';
@@ -29,6 +29,8 @@ const storedNotificationPreferencesSchema = notificationPreferencesSchema.partia
 
 @Injectable()
 export class NotificationsService {
+  private readonly logger = new Logger(NotificationsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findMine(userId: string, query: Record<string, string | undefined>) {
@@ -155,6 +157,10 @@ export class NotificationsService {
         deviceId: input.deviceId,
       },
     });
+
+    this.logger.log(
+      `Registered push device for user ${userId} on ${device.platform ?? 'unknown'}; enabled=${device.enabled}`,
+    );
 
     return {
       id: device.id,

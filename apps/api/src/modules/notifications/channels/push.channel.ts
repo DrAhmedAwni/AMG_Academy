@@ -26,13 +26,20 @@ export class PushChannel implements NotificationChannel {
       },
     });
 
-    if (!user || !this.canReceivePush(user.notificationPreferences, payload.type)) {
+    if (!user) {
+      this.logger.warn(`Push skipped for missing user ${payload.userId}`);
+      return;
+    }
+
+    if (!this.canReceivePush(user.notificationPreferences, payload.type)) {
+      this.logger.log(`Push skipped by preferences for user ${payload.userId} and type ${payload.type}`);
       return;
     }
 
     const devices = user.pushDevices;
     const validDevices = devices.filter((device) => this.isExpoPushToken(device.expoPushToken));
     if (validDevices.length === 0) {
+      this.logger.log(`Push skipped for user ${payload.userId}: no enabled Expo push devices`);
       return;
     }
 
@@ -74,6 +81,8 @@ export class PushChannel implements NotificationChannel {
       this.logger.warn(
         `Expo push returned ${failedTickets.length} failed ticket(s): ${JSON.stringify(failedTickets).slice(0, 500)}`,
       );
+    } else {
+      this.logger.log(`Expo push accepted ${validDevices.length} ticket(s) for user ${payload.userId}`);
     }
 
     const disabledDeviceIds = validDevices

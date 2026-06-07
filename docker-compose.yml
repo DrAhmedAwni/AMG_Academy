@@ -50,6 +50,7 @@ services:
       dockerfile: Dockerfile.web
       args:
         NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID:-}
+        GOOGLE_OAUTH_WEB_CLIENT_ID: ${GOOGLE_OAUTH_WEB_CLIENT_ID:-}
     container_name: amg-web
     restart: unless-stopped
     env_file:
