@@ -47,6 +47,8 @@ export default function LoginScreen() {
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
+  }, {
+    native: 'com.amgacademy.mobile:/oauthredirect',
   });
   const [values, setValues] = useState<LoginFormValues>({ email: '', password: '' });
   const [errors, setErrors] = useState<AuthFormErrors>({});
