@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { registerSchema } from '@amg/shared';
 import { Screen } from '../../src/components/layout/Screen';
@@ -17,8 +16,6 @@ import type { AuthFormErrors, GoogleProfileSeed, RegisterFormValues } from '../.
 import { GoogleProfileCompletion } from '../../src/features/auth/GoogleProfileCompletion';
 import { mapApiErrorToUi } from '../../src/lib/errors';
 import { colors, spacing, textStyles } from '../../src/theme';
-
-WebBrowser.maybeCompleteAuthSession();
 
 function getRegisterErrors(values: RegisterFormValues): AuthFormErrors {
   const result = registerSchema.safeParse(values);

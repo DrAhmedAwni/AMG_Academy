@@ -2,12 +2,15 @@ import React from 'react';
 import { StatusBar, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
 import * as Notifications from 'expo-notifications';
+import * as WebBrowser from 'expo-web-browser';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Montserrat_400Regular, Montserrat_500Medium, Montserrat_600SemiBold, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { AuthProvider } from '../src/lib/auth';
 import { queryClient } from '../src/lib/queryClient';
 import { colors, ThemeProvider } from '../src/theme';
+
+WebBrowser.maybeCompleteAuthSession();
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
