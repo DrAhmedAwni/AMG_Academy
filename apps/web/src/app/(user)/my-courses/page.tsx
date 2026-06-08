@@ -77,7 +77,7 @@ export default function MyCoursesPage() {
                     loading="lazy"
                     placeholder="blur"
                     blurDataURL={getBlurDataUrl()}
-                    className="object-cover transition-transform group-hover:scale-105"
+                    className="object-contain transition-transform group-hover:scale-105"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-text-muted">

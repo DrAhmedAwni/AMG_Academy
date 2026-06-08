@@ -62,16 +62,19 @@ export default function CourseDetailScreen() {
 
   const course = courseQuery.data;
   const lessonsLocked = isLessonLocked(course);
+  const firstLessonId = course.lessons[0]?.id;
 
   const renderLesson = ({ item: lesson }: { item: LessonSummary }) => {
     const isCompleted = false;
+    const isPreviewLesson = lesson.id === firstLessonId;
+    const isLocked = lessonsLocked && !isPreviewLesson;
     return (
       <LessonRow
         lesson={lesson}
-        isLocked={lessonsLocked}
+        isLocked={isLocked}
         isCompleted={isCompleted}
         onPress={() => {
-          if (!lessonsLocked && lesson.videoId) {
+          if (!isLocked && lesson.videoId) {
             router.push({
               pathname: '/courses/lesson/[lessonId]',
               params: { lessonId: lesson.videoId },
@@ -98,7 +101,7 @@ export default function CourseDetailScreen() {
       ) : null}
 
       {course.thumbnailUrl ? (
-        <Image source={{ uri: course.thumbnailUrl }} resizeMode="cover" style={styles.hero} />
+        <Image source={{ uri: course.thumbnailUrl }} resizeMode="contain" style={styles.hero} />
       ) : (
         <View style={styles.heroPlaceholder}>
           <Text style={styles.heroPlaceholderText}>{course.title.slice(0, 1).toUpperCase()}</Text>
@@ -171,19 +174,22 @@ export default function CourseDetailScreen() {
 
       <SectionHeader
         title={`Course Content (${course.lessonCount} lessons)`}
+        subtitle={lessonsLocked ? 'The first lesson is available as a preview. Enroll to unlock the full course.' : undefined}
       />
 
       {lessonsLocked ? (
-        <LockedLesson lessonCount={course.lessonCount} />
-      ) : (
-        <FlatList
-          data={course.lessons}
-          keyExtractor={(item) => item.id}
-          renderItem={renderLesson}
-          contentContainerStyle={styles.list}
-          scrollEnabled={false}
+        <LockedLesson
+          lessonCount={course.lessonCount}
+          message="The first lesson is open to preview. Enroll or complete payment to unlock the remaining lessons."
         />
-      )}
+      ) : null}
+      <FlatList
+        data={course.lessons}
+        keyExtractor={(item) => item.id}
+        renderItem={renderLesson}
+        contentContainerStyle={styles.list}
+        scrollEnabled={false}
+      />
     </Screen>
   );
 }

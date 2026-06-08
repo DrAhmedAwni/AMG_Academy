@@ -190,7 +190,7 @@ export default function EditCoursePage() {
             {imagePreview && (
               <div className="relative overflow-hidden rounded-md border border-surface-border">
                 {imageError ? <div className="flex h-40 items-center justify-center bg-surface-secondary"><p className="text-sm text-text-muted">Could not load image</p></div> :
-                  <img src={imagePreview} alt="" className="max-h-40 w-full object-cover" onError={() => setImageError(true)} />}
+                  <img src={imagePreview} alt="" className="max-h-40 w-full object-contain" onError={() => setImageError(true)} />}
               </div>
             )}
           </label>

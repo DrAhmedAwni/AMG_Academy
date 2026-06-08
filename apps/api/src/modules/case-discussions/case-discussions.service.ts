@@ -91,7 +91,7 @@ export class CaseDiscussionsService {
     }
 
     const isAuthor = currentUserId === post.authorId;
-    const isAdmin = currentUserId && this.hasAdminAccess(currentUserId);
+    const isAdmin = currentUserId ? await this.hasAdminAccess(currentUserId) : false;
 
     if (post.status !== PrismaCasePostStatus.APPROVED && !isAuthor && !isAdmin) {
       throw new NotFoundException('Case post not found');

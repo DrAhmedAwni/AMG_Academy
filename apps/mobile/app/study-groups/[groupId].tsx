@@ -214,6 +214,9 @@ export default function StudyGroupDetailScreen() {
   const group = groupQuery.data;
   const joinError = joinMutation.error ? mapApiErrorToUi(joinMutation.error) : null;
   const messageError = sendMessageMutation.error ? mapApiErrorToUi(sendMessageMutation.error) : null;
+  const filesCount = filesQuery.data?.length ?? 0;
+  const sessionsCount = sessionsQuery.data?.length ?? 0;
+  const canSendMessage = messageText.trim().length > 0;
 
   const handleSendMessage = () => {
     const trimmed = messageText.trim();
@@ -253,6 +256,26 @@ export default function StudyGroupDetailScreen() {
             <Text style={styles.memberText}>{group.memberCount} members</Text>
           </View>
         </View>
+        <View style={styles.quickStats}>
+          <View style={styles.quickStat}>
+            <Ionicons name="document-outline" size={18} color={colors.accent.primary} />
+            <View>
+              <Text style={styles.quickStatValue}>
+                {filesQuery.isLoading ? 'Loading' : filesCount}
+              </Text>
+              <Text style={styles.quickStatLabel}>Files</Text>
+            </View>
+          </View>
+          <View style={styles.quickStat}>
+            <Ionicons name="calendar-outline" size={18} color={colors.accent.primary} />
+            <View>
+              <Text style={styles.quickStatValue}>
+                {sessionsQuery.isLoading ? 'Loading' : sessionsCount}
+              </Text>
+              <Text style={styles.quickStatLabel}>Sessions</Text>
+            </View>
+          </View>
+        </View>
         <Button
           label="Join Group"
           variant="primary"
@@ -280,11 +303,11 @@ export default function StudyGroupDetailScreen() {
             onSubmitEditing={handleSendMessage}
           />
           <Button
-            label="Send"
-            variant="primary"
+            label={canSendMessage ? 'Send' : 'Write a message'}
+            variant={canSendMessage ? 'primary' : 'secondary'}
             size="sm"
             loading={sendMessageMutation.isPending}
-            disabled={messageText.trim().length === 0}
+            disabled={!canSendMessage}
             onPress={handleSendMessage}
           />
         </View>
@@ -360,6 +383,30 @@ const styles = StyleSheet.create({
   memberText: {
     ...textStyles.caption,
     color: colors.text.muted,
+  },
+  quickStats: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  quickStat: {
+    flex: 1,
+    minHeight: 64,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.elevated,
+    paddingHorizontal: spacing.md,
+  },
+  quickStatValue: {
+    ...textStyles.label,
+    color: colors.text.primary,
+  },
+  quickStatLabel: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
   },
   errorText: {
     ...textStyles.caption,

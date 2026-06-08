@@ -51,7 +51,7 @@ export function EventDetailContent({
   return (
     <View style={styles.container}>
       {event.thumbnailUrl ? (
-        <Image source={{ uri: event.thumbnailUrl }} resizeMode="cover" style={styles.hero} />
+        <Image source={{ uri: event.thumbnailUrl }} resizeMode="contain" style={styles.hero} />
       ) : (
         <View style={styles.heroPlaceholder}>
           <Text style={styles.heroPlaceholderText}>{event.title.slice(0, 1).toUpperCase()}</Text>

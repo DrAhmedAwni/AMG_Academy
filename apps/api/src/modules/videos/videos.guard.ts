@@ -43,8 +43,10 @@ export class VideosGuard implements CanActivate {
       throw new ForbiddenException('This course is archived or no longer available');
     }
 
-    // Free courses: any authenticated user can watch
-    if (lesson.course.isFree) {
+    const isPreviewLesson = lesson.orderIndex === 1;
+
+    // Free courses and first lessons: any authenticated user can watch
+    if (lesson.course.isFree || isPreviewLesson) {
       return true;
     }
 

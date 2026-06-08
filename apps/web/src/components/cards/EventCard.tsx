@@ -58,7 +58,7 @@ export function EventCard({ event }: EventCardProps) {
               loading="lazy"
               placeholder="blur"
               blurDataURL={getBlurDataUrl(640, 360)}
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-contain transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-elevated to-surface-main">

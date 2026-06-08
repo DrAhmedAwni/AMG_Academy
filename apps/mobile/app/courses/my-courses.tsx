@@ -23,7 +23,7 @@ export default function MyCoursesScreen() {
         {item.course.thumbnailUrl ? (
           <Image
             source={{ uri: item.course.thumbnailUrl }}
-            resizeMode="cover"
+            resizeMode="contain"
             style={styles.thumbnail}
           />
         ) : (

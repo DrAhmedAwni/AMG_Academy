@@ -47,7 +47,7 @@ export function Screen({ children, scroll = true, contentStyle, ...props }: Scre
       <View pointerEvents="none" style={styles.backdropBand} />
       <KeyboardAvoidingView
         style={styles.avoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : undefined}
       >
         {inner}

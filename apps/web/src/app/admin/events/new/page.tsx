@@ -484,7 +484,7 @@ export default function NewAdminEventPage() {
                 <img
                   src={imagePreview}
                   alt="Event preview"
-                  className="max-h-48 w-full object-cover"
+                  className="max-h-48 w-full object-contain"
                   onError={() => setImageError(true)}
                 />
               )}

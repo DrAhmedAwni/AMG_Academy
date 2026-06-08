@@ -289,7 +289,7 @@ export default function NewCoursePage() {
                     <p className="text-sm text-text-muted">Could not load image — check the URL</p>
                   </div>
                 ) : (
-                  <img src={imagePreview} alt="Course preview" className="max-h-40 w-full object-cover"
+                  <img src={imagePreview} alt="Course preview" className="max-h-40 w-full object-contain"
                     onError={() => setImageError(true)} />
                 )}
               </div>

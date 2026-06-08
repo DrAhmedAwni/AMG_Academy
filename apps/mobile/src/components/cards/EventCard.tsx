@@ -44,7 +44,7 @@ export function EventCard({ event, onPress }: EventCardProps) {
       <GlassCard style={styles.card}>
         <View style={styles.mediaFrame}>
         {event.thumbnailUrl ? (
-          <Image source={{ uri: event.thumbnailUrl }} resizeMode="cover" style={styles.thumbnail} />
+          <Image source={{ uri: event.thumbnailUrl }} resizeMode="contain" style={styles.thumbnail} />
         ) : (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>{event.title.slice(0, 1).toUpperCase()}</Text>

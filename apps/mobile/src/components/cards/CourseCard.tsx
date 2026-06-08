@@ -29,7 +29,7 @@ export function CourseCard({ course, onPress }: CourseCardProps) {
         {course.thumbnailUrl ? (
           <Image
             source={{ uri: course.thumbnailUrl }}
-            resizeMode="cover"
+            resizeMode="contain"
             style={styles.thumbnail}
           />
         ) : (

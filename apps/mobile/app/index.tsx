@@ -4,35 +4,13 @@ import { LoadingState } from '../src/components/states/LoadingState';
 import { Screen } from '../src/components/layout/Screen';
 import { SplashVideo } from '../src/components/layout/SplashVideo';
 import { useAuth } from '../src/lib/auth';
-import { getSecureItem, setSecureItem } from '../src/lib/storage';
 
 const splashVideo = require('../assets/splash-video.mp4');
-const splashSeenKey = 'intro.splashVideoSeen';
 
 export default function BootstrapRoute() {
   const router = useRouter();
   const { status } = useAuth();
-  const [splashState, setSplashState] = useState<'checking' | 'showing' | 'done'>('checking');
-
-  useEffect(() => {
-    let mounted = true;
-
-    void getSecureItem(splashSeenKey)
-      .then((value) => {
-        if (mounted) {
-          setSplashState(value === 'true' ? 'done' : 'showing');
-        }
-      })
-      .catch(() => {
-        if (mounted) {
-          setSplashState('showing');
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const [splashState, setSplashState] = useState<'showing' | 'done'>('showing');
 
   useEffect(() => {
     if (splashState !== 'done') return;
@@ -48,7 +26,6 @@ export default function BootstrapRoute() {
 
   const finishSplash = () => {
     setSplashState('done');
-    void setSecureItem(splashSeenKey, 'true');
   };
 
   if (splashState === 'showing') {

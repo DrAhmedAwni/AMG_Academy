@@ -129,7 +129,7 @@ export default function EventDetailPage() {
               alt={event.title}
               fill
               sizes="(max-width: 1024px) 100vw, 72rem"
-              className="object-cover"
+              className="object-contain"
               placeholder="blur"
               blurDataURL={getBlurDataUrl(1280, 720)}
             />

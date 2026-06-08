@@ -19,11 +19,11 @@ interface AdminCase {
   tags: string[];
 }
 
-type Filter = 'all' | 'pending' | 'approved' | 'rejected';
+type Filter = 'all' | 'pending_review' | 'approved' | 'rejected';
 
 const filters: { value: Filter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'pending_review', label: 'Pending' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
 ];
@@ -40,6 +40,7 @@ function statusVariant(status: string) {
     case 'approved':
       return 'success' as const;
     case 'pending':
+    case 'pending_review':
       return 'warning' as const;
     case 'rejected':
       return 'error' as const;
@@ -56,9 +57,17 @@ function formatDate(value: string) {
   });
 }
 
+function formatStatus(value: string) {
+  if (value === 'pending_review') return 'Pending Review';
+  return value
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 export default function AdminCasesPage() {
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<Filter>('pending');
+  const [filter, setFilter] = useState<Filter>('pending_review');
   const queryClient = useQueryClient();
 
   const casesQuery = useQuery({
@@ -192,13 +201,13 @@ export default function AdminCasesPage() {
                   <td className="px-4 py-3 text-text-secondary">{c.categoryName}</td>
                   <td className="px-4 py-3">
                     <Badge variant={statusVariant(c.status)}>
-                      {c.status.charAt(0).toUpperCase() + c.status.slice(1)}
+                      {formatStatus(c.status)}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-text-muted">{formatDate(c.createdAt)}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
-                      {c.status === 'pending' ? (
+                      {c.status === 'pending' || c.status === 'pending_review' ? (
                         <Button
                           size="sm"
                           onClick={() => approveMutation.mutate(c.id)}
@@ -208,13 +217,13 @@ export default function AdminCasesPage() {
                           Approve
                         </Button>
                       ) : null}
-                      {c.status === 'pending' || c.status === 'approved' ? (
+                      {c.status === 'pending' || c.status === 'pending_review' || c.status === 'approved' ? (
                         <Button
                           size="sm"
                           variant="danger"
                           onClick={() => {
                             const reason = requestReason(
-                              c.status === 'pending'
+                              c.status === 'pending' || c.status === 'pending_review'
                                 ? 'Contains PHI or does not meet guidelines'
                                 : 'No longer meets community standards',
                             );

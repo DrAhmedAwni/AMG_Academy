@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { useEventListener } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radius, spacing, typography } from '../../theme';
+import { colors } from '../../theme';
 
 interface SplashVideoProps {
   videoSource: number;
@@ -11,7 +10,6 @@ interface SplashVideoProps {
 }
 
 export function SplashVideo({ videoSource, onFinish }: SplashVideoProps) {
-  const insets = useSafeAreaInsets();
   const finishedRef = useRef(false);
   const [firstFrameRendered, setFirstFrameRendered] = useState(false);
 
@@ -46,10 +44,6 @@ export function SplashVideo({ videoSource, onFinish }: SplashVideoProps) {
     return () => clearTimeout(timeout);
   }, [finishOnce]);
 
-  const handleSkip = useCallback(() => {
-    finishOnce();
-  }, [finishOnce]);
-
   return (
     <View style={styles.container}>
       {!firstFrameRendered ? (
@@ -67,14 +61,6 @@ export function SplashVideo({ videoSource, onFinish }: SplashVideoProps) {
         surfaceType="textureView"
         onFirstFrameRender={() => setFirstFrameRendered(true)}
       />
-      <Pressable
-        onPress={handleSkip}
-        style={[styles.skipButton, { top: insets.top + spacing.md }]}
-        accessibilityLabel="Skip video"
-        accessibilityRole="button"
-      >
-        <Text style={styles.skipText}>Skip</Text>
-      </Pressable>
     </View>
   );
 }
@@ -96,20 +82,5 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: colors.background.main,
-  },
-  skipButton: {
-    position: 'absolute',
-    right: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  skipText: {
-    color: '#FFFFFF',
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
   },
 });

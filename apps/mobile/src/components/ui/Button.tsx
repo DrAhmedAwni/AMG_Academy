@@ -59,16 +59,15 @@ export function Button({
           color={variant === 'primary' || variant === 'google' ? colors.text.primary : colors.accent.primary}
           size="small"
         />
-      ) : (
-        <Text
-          adjustsFontSizeToFit
-          minimumFontScale={0.84}
-          numberOfLines={1}
-          style={[styles.text, selectedSize.text, selectedVariant.text]}
-        >
-          {label}
-        </Text>
-      )}
+      ) : null}
+      <Text
+        adjustsFontSizeToFit
+        minimumFontScale={0.84}
+        numberOfLines={1}
+        style={[styles.text, selectedSize.text, selectedVariant.text]}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -76,8 +75,10 @@ export function Button({
 const styles = StyleSheet.create({
   base: {
     minWidth: 48,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.sm,
     borderRadius: radius.pill,
     borderWidth: 1,
   },
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.99 }],
   },
   disabled: {
-    opacity: 0.48,
+    opacity: 0.72,
     backgroundColor: colors.surface.muted,
     borderColor: colors.border.default,
   },

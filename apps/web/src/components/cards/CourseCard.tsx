@@ -44,7 +44,7 @@ export function CourseCard({ course }: CourseCardProps) {
               loading="lazy"
               placeholder="blur"
               blurDataURL={getBlurDataUrl()}
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-contain transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-elevated to-surface-main">

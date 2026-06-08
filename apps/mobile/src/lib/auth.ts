@@ -7,6 +7,7 @@ import React, {
   useState,
   type PropsWithChildren,
 } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import type { AuthUser, LoginResponse } from '@amg/shared';
 import { apiRequest, setApiAuthFailureHandler, setApiAuthTokenProvider } from './api';
 import { clearPrivateQueryCache, queryClient } from './queryClient';
@@ -192,6 +193,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
       void registerPushTokenForCurrentUser();
     }
   }, [session.status, session.user?.id]);
+
+  useEffect(() => {
+    let currentState = AppState.currentState;
+
+    const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      const wasBackgrounded = currentState === 'background' || currentState === 'inactive';
+      currentState = nextState;
+
+      if (wasBackgrounded && nextState === 'active' && session.status === 'authenticated') {
+        void refresh().then((nextSession) => {
+          if (nextSession.status === 'authenticated') {
+            void registerPushTokenForCurrentUser();
+          }
+        });
+      }
+    });
+
+    return () => subscription.remove();
+  }, [refresh, session.status]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
