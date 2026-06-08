@@ -15,6 +15,7 @@ declare global {
             client_id: string;
             callback: (response: GoogleCredentialResponse) => void;
           }) => void;
+          prompt: () => void;
           renderButton: (
             element: HTMLElement,
             options: {
@@ -65,8 +66,9 @@ export function GoogleSignInButton({
   onCredential: (idToken: string) => void;
   text?: 'signin_with' | 'signup_with' | 'continue_with';
 }) {
-  const buttonRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [readyError, setReadyError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
   const clientId =
     process.env.NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID ??
     process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID;
@@ -93,15 +95,7 @@ export function GoogleSignInButton({
             }
           },
         });
-
-        buttonRef.current.innerHTML = '';
-        window.google.accounts.id.renderButton(buttonRef.current, {
-          theme: 'outline',
-          size: 'large',
-          text,
-          shape: 'pill',
-          width: 360,
-        });
+        setIsReady(true);
       })
       .catch(() => setReadyError('Google sign-in could not be loaded.'));
 
@@ -109,6 +103,12 @@ export function GoogleSignInButton({
       cancelled = true;
     };
   }, [clientId, onCredential, text]);
+
+  const label = text === 'signin_with'
+    ? 'Sign in with Google'
+    : text === 'signup_with'
+      ? 'Sign up with Google'
+      : 'Continue with Google';
 
   if (readyError) {
     return (
@@ -118,5 +118,18 @@ export function GoogleSignInButton({
     );
   }
 
-  return <div ref={buttonRef} className="flex min-h-11 justify-center" />;
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      disabled={!isReady}
+      onClick={() => window.google?.accounts?.id?.prompt()}
+      className="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl border border-[#DB4437] bg-[#DB4437] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#DB4437]/20 transition hover:bg-[#c23327] disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-base font-bold text-[#4285F4]">
+        G
+      </span>
+      {isReady ? label : 'Loading Google sign-in...'}
+    </button>
+  );
 }

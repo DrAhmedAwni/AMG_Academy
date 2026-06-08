@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { Card, Button, Badge } from '@/components/ui';
-import { LoadingSkeleton } from '@/components/states';
+import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/states';
 import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 import {
   CalendarDays,
   BookOpen,
@@ -17,23 +19,13 @@ import {
   User,
 } from 'lucide-react';
 
-const upcomingEvents = [
-  {
-    title: 'AMG Clinical Excellence Congress',
-    date: 'Jun 15, 2026',
-    status: 'upcoming',
-  },
-  {
-    title: 'Digital Dentistry Workshop',
-    date: 'Jul 8, 2026',
-    status: 'upcoming',
-  },
-  {
-    title: 'Practice Growth Roundtable',
-    date: 'Aug 22, 2026',
-    status: 'upcoming',
-  },
-];
+interface EventItem {
+  id: string;
+  title: string;
+  slug: string;
+  startDate: string;
+  status: string;
+}
 
 const recommendedCourses = [
   'Advanced Orthodontics',
@@ -43,10 +35,21 @@ const recommendedCourses = [
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
+  const eventsQuery = useQuery({
+    queryKey: ['dashboard', 'events'],
+    queryFn: async () => {
+      const { data } = await api.get('/events', {
+        params: { page: 1, limit: 3 },
+      });
+      return (data?.data?.data ?? data?.data ?? []) as EventItem[];
+    },
+  });
 
   if (isLoading) {
     return <LoadingSkeleton lines={4} variant="card" />;
   }
+
+  const upcomingEvents = eventsQuery.data ?? [];
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -147,27 +150,46 @@ export default function DashboardPage() {
               </Button>
             </Link>
           </div>
-          <div className="space-y-2">
-            {upcomingEvents.map((item) => (
-              <div
-                key={item.title}
-                className="flex items-center justify-between rounded-lg border border-surface-border/20 bg-surface-main/30 p-3.5 transition-colors hover:bg-surface-elevated/30"
-              >
-                <div className="flex items-center gap-3">
-                  <CalendarDays className="h-4 w-4 text-cyan" />
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-text-muted">{item.date}</p>
+          {eventsQuery.isLoading ? (
+            <LoadingSkeleton lines={3} variant="card" />
+          ) : eventsQuery.isError ? (
+            <ErrorState
+              title="Events unavailable"
+              description="Real events could not be loaded right now."
+              onRetry={() => void eventsQuery.refetch()}
+            />
+          ) : upcomingEvents.length === 0 ? (
+            <EmptyState title="No upcoming events" description="Published events will appear here." />
+          ) : (
+            <div className="space-y-2">
+              {upcomingEvents.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/events/${item.slug}`}
+                  className="flex items-center justify-between rounded-lg border border-surface-border/20 bg-surface-main/30 p-3.5 transition-colors hover:bg-surface-elevated/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <CalendarDays className="h-4 w-4 text-cyan" />
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {new Date(item.startDate).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <Badge variant="info" size="sm">
-                  {item.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
+                  <Badge variant="info" size="sm">
+                    {item.status}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* Recommended courses */}

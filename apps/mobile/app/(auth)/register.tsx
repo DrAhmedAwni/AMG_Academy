@@ -94,7 +94,7 @@ export default function RegisterScreen() {
       <GlassCard style={styles.card}>
         <Button
           label="Continue with Google"
-          variant="secondary"
+          variant="google"
           loading={googleAuth.loading}
           disabled={!googleAuth.requestReady}
           onPress={() => {

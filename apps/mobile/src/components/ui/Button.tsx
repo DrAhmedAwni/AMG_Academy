@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { colors, radius, shadows, spacing, typography } from '../../theme';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'google';
 export type ButtonSize = 'md' | 'sm';
 
 export interface ButtonProps {
@@ -56,7 +56,7 @@ export function Button({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'primary' ? colors.text.inverse : colors.accent.primary}
+          color={variant === 'primary' || variant === 'google' ? colors.text.primary : colors.accent.primary}
           size="small"
         />
       ) : (
@@ -132,6 +132,13 @@ const styles = StyleSheet.create({
   dangerText: {
     color: colors.status.error,
   },
+  google: {
+    backgroundColor: '#DB4437',
+    borderColor: '#DB4437',
+  },
+  googleText: {
+    color: colors.text.primary,
+  },
   pressed: {
     opacity: 0.86,
     transform: [{ scale: 0.99 }],
@@ -170,5 +177,9 @@ const variantStyles = {
   danger: {
     container: styles.danger,
     text: styles.dangerText,
+  },
+  google: {
+    container: styles.google,
+    text: styles.googleText,
   },
 } as const;
