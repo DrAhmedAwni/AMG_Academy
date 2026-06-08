@@ -9,7 +9,9 @@ module.exports = ({ config }) => {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? defaultApiUrl;
   const webUrl = process.env.EXPO_PUBLIC_WEB_URL ?? defaultWebUrl;
   const googleServicesFile =
-    process.env.GOOGLE_SERVICES_FILE ?? './google-services.json';
+    process.env.GOOGLE_SERVICES_JSON ??
+    process.env.GOOGLE_SERVICES_FILE ??
+    './google-services.json';
   const googleServicesPath = path.resolve(__dirname, googleServicesFile);
   const hasGoogleServicesFile = fs.existsSync(googleServicesPath);
   const allowLocalHttp =
