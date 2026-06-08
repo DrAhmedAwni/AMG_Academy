@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { countryDialCodes, type CountryDialCode } from '@amg/shared';
 import { Button, TextField } from '../../components/ui';
 import { ErrorState } from '../../components/states/ErrorState';
 import type {
@@ -14,6 +15,37 @@ const requiredFields: Array<keyof Pick<
   GoogleProfileCompletionValues,
   'name' | 'phone' | 'specialty' | 'clinic' | 'city'
 >> = ['name', 'phone', 'specialty', 'clinic', 'city'];
+
+const defaultCountry = countryDialCodes[0] ?? { country: 'Egypt', code: '+20', flag: 'EG' };
+
+function findCountryForPhone(phone?: string) {
+  const trimmed = phone?.trim() ?? '';
+  if (!trimmed.startsWith('+')) {
+    return defaultCountry;
+  }
+
+  return [...countryDialCodes]
+    .sort((a, b) => b.code.length - a.code.length)
+    .find((country) => trimmed.startsWith(country.code)) ?? defaultCountry;
+}
+
+function stripDialCode(phone: string | undefined, country: CountryDialCode) {
+  const trimmed = phone?.trim() ?? '';
+  if (!trimmed.startsWith(country.code)) {
+    return trimmed;
+  }
+
+  return trimmed.slice(country.code.length);
+}
+
+function formatPhone(country: CountryDialCode, phone: string) {
+  const trimmedPhone = phone.trim();
+  if (!trimmedPhone || trimmedPhone.startsWith('+')) {
+    return trimmedPhone;
+  }
+
+  return `${country.code}${trimmedPhone.replace(/^0+/, '')}`;
+}
 
 export function GoogleProfileCompletion({
   idToken,
@@ -30,9 +62,12 @@ export function GoogleProfileCompletion({
   onSubmit: (values: GoogleProfileCompletionValues) => Promise<void> | void;
   onCancel: () => void;
 }) {
+  const initialCountry = findCountryForPhone(profile.phone);
+  const [country, setCountry] = useState<CountryDialCode>(initialCountry);
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
   const [values, setValues] = useState<Omit<GoogleProfileCompletionValues, 'idToken'>>({
     name: profile.name ?? '',
-    phone: profile.phone ?? '',
+    phone: stripDialCode(profile.phone, initialCountry),
     specialty: profile.specialty ?? '',
     clinic: profile.clinic ?? '',
     city: profile.city ?? '',
@@ -66,6 +101,7 @@ export function GoogleProfileCompletion({
     await onSubmit({
       ...values,
       idToken,
+      phone: formatPhone(country, values.phone),
       yearsOfExperience: yearsText.trim() ? Number(yearsText.trim()) : undefined,
     });
   };
@@ -83,13 +119,30 @@ export function GoogleProfileCompletion({
         onChangeText={(name) => updateField('name', name)}
         error={errors.name}
       />
-      <TextField
-        label="Phone"
-        value={values.phone}
-        onChangeText={(phone) => updateField('phone', phone)}
-        keyboardType="phone-pad"
-        error={errors.phone}
-      />
+      <View style={styles.phoneGroup}>
+        <Text style={styles.phoneLabel}>Phone</Text>
+        <View style={styles.phoneRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Select country code"
+            onPress={() => setCountryPickerOpen(true)}
+            style={styles.countryButton}
+          >
+            <Text style={styles.countryFlag}>{country.flag}</Text>
+            <Text style={styles.countryCode}>{country.code}</Text>
+          </Pressable>
+          <View style={styles.phoneInput}>
+            <TextField
+              label="Phone number"
+              accessibilityLabel="Phone number"
+              value={values.phone}
+              onChangeText={(phone) => updateField('phone', phone)}
+              keyboardType="phone-pad"
+              error={errors.phone}
+            />
+          </View>
+        </View>
+      </View>
       <TextField
         label="Specialty"
         value={values.specialty}
@@ -136,6 +189,45 @@ export function GoogleProfileCompletion({
         }}
       />
       <Button label="Back" variant="ghost" onPress={onCancel} />
+
+      <Modal
+        visible={countryPickerOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setCountryPickerOpen(false)}
+      >
+        <View style={styles.countryModalBackdrop}>
+          <View style={styles.countryModal}>
+            <View style={styles.countryModalHeader}>
+              <Text style={styles.countryModalTitle}>Country code</Text>
+              <Button label="Close" variant="ghost" size="sm" onPress={() => setCountryPickerOpen(false)} />
+            </View>
+            <ScrollView contentContainerStyle={styles.countryList}>
+              {countryDialCodes.map((option) => (
+                <Pressable
+                  key={`${option.country}-${option.code}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${option.country} ${option.code}`}
+                  onPress={() => {
+                    setCountry(option);
+                    setCountryPickerOpen(false);
+                  }}
+                  style={[
+                    styles.countryOption,
+                    option.country === country.country && option.code === country.code
+                      ? styles.countryOptionSelected
+                      : null,
+                  ]}
+                >
+                  <Text style={styles.countryFlag}>{option.flag}</Text>
+                  <Text style={styles.countryOptionText}>{option.country}</Text>
+                  <Text style={styles.countryOptionCode}>{option.code}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -153,6 +245,89 @@ const styles = StyleSheet.create({
   },
   noticeText: {
     ...textStyles.caption,
+    color: colors.text.secondary,
+  },
+  phoneGroup: {
+    gap: spacing.xs,
+  },
+  phoneLabel: {
+    ...textStyles.label,
+    color: colors.text.primary,
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  countryButton: {
+    minHeight: 54,
+    minWidth: 112,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.glass,
+    paddingHorizontal: spacing.sm,
+  },
+  countryFlag: {
+    fontSize: 20,
+  },
+  countryCode: {
+    ...textStyles.label,
+    color: colors.text.primary,
+  },
+  phoneInput: {
+    flex: 1,
+  },
+  countryModalBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(2, 6, 23, 0.72)',
+  },
+  countryModal: {
+    maxHeight: '78%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.background.raised,
+    padding: spacing.md,
+  },
+  countryModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  countryModalTitle: {
+    ...textStyles.heading,
+    color: colors.text.primary,
+  },
+  countryList: {
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
+  },
+  countryOption: {
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: 14,
+    paddingHorizontal: spacing.md,
+  },
+  countryOptionSelected: {
+    backgroundColor: colors.accent.primary + '22',
+  },
+  countryOptionText: {
+    ...textStyles.body,
+    flex: 1,
+    color: colors.text.primary,
+  },
+  countryOptionCode: {
+    ...textStyles.label,
     color: colors.text.secondary,
   },
 });

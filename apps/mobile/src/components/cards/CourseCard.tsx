@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -8,6 +7,7 @@ import {
   type GestureResponderEvent,
 } from 'react-native';
 import { Badge, GlassCard, StatusBadge } from '../ui';
+import { ZoomableImage } from '../media';
 import type { MobileCourse } from '../../features/courses/courses.api';
 import { colors, radius, spacing, textStyles, typography } from '../../theme';
 
@@ -27,11 +27,7 @@ export function CourseCard({ course, onPress }: CourseCardProps) {
       <GlassCard style={styles.card}>
         <View style={styles.mediaFrame}>
         {course.thumbnailUrl ? (
-          <Image
-            source={{ uri: course.thumbnailUrl }}
-            resizeMode="contain"
-            style={styles.thumbnail}
-          />
+          <ZoomableImage uri={course.thumbnailUrl} title={course.title} resizeMode="contain" style={styles.thumbnail} />
         ) : (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>{course.title[0]}</Text>

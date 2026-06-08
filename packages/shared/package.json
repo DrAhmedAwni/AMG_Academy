@@ -20,6 +20,10 @@
     "./enums": {
       "types": "./dist/enums/index.d.ts",
       "import": "./dist/enums/index.js"
+    },
+    "./country-dial-codes": {
+      "types": "./dist/country-dial-codes.d.ts",
+      "import": "./dist/country-dial-codes.js"
     }
   },
   "scripts": {

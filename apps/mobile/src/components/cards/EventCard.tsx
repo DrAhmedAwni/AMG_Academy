@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 import { PaymentStatus, QRTicketStatus, RegistrationStatus } from '@amg/shared';
 import { GlassCard, StatusBadge } from '../ui';
+import { ZoomableImage } from '../media';
 import { getEventActionState, type MobileEvent } from '../../features/events/events.api';
 import { colors, radius, spacing, textStyles, typography } from '../../theme';
 
@@ -44,7 +44,7 @@ export function EventCard({ event, onPress }: EventCardProps) {
       <GlassCard style={styles.card}>
         <View style={styles.mediaFrame}>
         {event.thumbnailUrl ? (
-          <Image source={{ uri: event.thumbnailUrl }} resizeMode="contain" style={styles.thumbnail} />
+          <ZoomableImage uri={event.thumbnailUrl} title={event.title} resizeMode="contain" style={styles.thumbnail} />
         ) : (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>{event.title.slice(0, 1).toUpperCase()}</Text>

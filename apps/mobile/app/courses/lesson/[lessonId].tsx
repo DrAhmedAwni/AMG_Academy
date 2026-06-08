@@ -22,6 +22,7 @@ export default function LessonPlayerScreen() {
   const resolvedLessonId = resolveParam(lessonId);
   const enrollmentsQuery = useEnrollmentsQuery();
   const [playerState, setPlayerState] = useState<PlayerState>('loading');
+  const [playerMessage, setPlayerMessage] = useState<string | null>(null);
   const [streamSource, setStreamSource] = useState<StreamSource | null>(null);
   const player = useVideoPlayer(streamSource, (videoPlayer) => {
     videoPlayer.loop = false;
@@ -31,6 +32,7 @@ export default function LessonPlayerScreen() {
     if (!resolvedLessonId) return;
 
     setPlayerState('loading');
+    setPlayerMessage(null);
 
     try {
       const videoAccess = await getLessonVideoStreamUrl(resolvedLessonId);
@@ -43,10 +45,16 @@ export default function LessonPlayerScreen() {
         setPlayerState('ready');
       } else {
         setStreamSource(null);
+        setPlayerMessage(
+          videoAccess.status
+            ? `Server returned ${videoAccess.status}. ${videoAccess.message ?? ''}`.trim()
+            : videoAccess.message ?? null,
+        );
         setPlayerState('denied');
       }
     } catch {
       setStreamSource(null);
+      setPlayerMessage('The lesson stream could not be prepared on this device.');
       setPlayerState('error');
     }
   }, [resolvedLessonId]);
@@ -79,7 +87,7 @@ export default function LessonPlayerScreen() {
       <Screen>
         <PermissionDeniedState
           title="Lesson locked"
-          message="This lesson requires an active enrollment and completed payment."
+          message={playerMessage ?? 'This lesson requires an active enrollment and completed payment.'}
           action={{ label: 'Retry', onPress: () => {
             void enrollmentsQuery.refetch().finally(() => {
               void checkAccess();
@@ -95,7 +103,7 @@ export default function LessonPlayerScreen() {
       <Screen>
         <ErrorState
           title="Playback unavailable"
-          message="The lesson video could not be loaded right now."
+          message={playerMessage ?? 'The lesson video could not be loaded right now.'}
           onRetry={() => {
             void checkAccess();
           }}

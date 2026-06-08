@@ -1,10 +1,11 @@
 import React from 'react';
-import { FlatList, Image, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { PaymentStatus } from '@amg/shared';
 import { Header, Screen } from '../../src/components/layout';
 import { EmptyState, ErrorState, LoadingState } from '../../src/components/states';
 import { Badge, Button, GlassCard, StatusBadge } from '../../src/components/ui';
+import { ZoomableImage } from '../../src/components/media';
 import { useEnrollmentsQuery } from '../../src/features/courses/courses.hooks';
 import type { CourseEnrollmentSummary } from '../../src/features/courses/courses.api';
 import { useQueryState } from '../../src/hooks/useQueryState';
@@ -21,11 +22,7 @@ export default function MyCoursesScreen() {
     <GlassCard style={styles.card}>
       <View style={styles.cardRow}>
         {item.course.thumbnailUrl ? (
-          <Image
-            source={{ uri: item.course.thumbnailUrl }}
-            resizeMode="contain"
-            style={styles.thumbnail}
-          />
+          <ZoomableImage uri={item.course.thumbnailUrl} title={item.course.title} resizeMode="contain" style={styles.thumbnail} />
         ) : (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderText}>{item.course.title[0]}</Text>

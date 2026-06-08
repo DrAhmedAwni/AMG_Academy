@@ -1,7 +1,8 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { PaymentStatus, QRTicketStatus } from '@amg/shared';
 import { Button, GlassCard, StatusBadge } from '../../components/ui';
+import { ZoomableImage } from '../../components/media';
 import { colors, radius, spacing, textStyles, typography } from '../../theme';
 import {
   getEventActionState,
@@ -51,7 +52,7 @@ export function EventDetailContent({
   return (
     <View style={styles.container}>
       {event.thumbnailUrl ? (
-        <Image source={{ uri: event.thumbnailUrl }} resizeMode="contain" style={styles.hero} />
+        <ZoomableImage uri={event.thumbnailUrl} title={event.title} resizeMode="contain" style={styles.hero} />
       ) : (
         <View style={styles.heroPlaceholder}>
           <Text style={styles.heroPlaceholderText}>{event.title.slice(0, 1).toUpperCase()}</Text>

@@ -1,10 +1,11 @@
 import React from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { PaymentStatus } from '@amg/shared';
 import { Header, Screen, SectionHeader } from '../../src/components/layout';
 import { ErrorState, LoadingState } from '../../src/components/states';
 import { Badge, Button, GlassCard, StatusBadge } from '../../src/components/ui';
+import { ZoomableImage } from '../../src/components/media';
 import { LessonRow } from '../../src/features/courses/LessonRow';
 import { LockedLesson } from '../../src/features/courses/LockedLesson';
 import {
@@ -101,7 +102,7 @@ export default function CourseDetailScreen() {
       ) : null}
 
       {course.thumbnailUrl ? (
-        <Image source={{ uri: course.thumbnailUrl }} resizeMode="contain" style={styles.hero} />
+        <ZoomableImage uri={course.thumbnailUrl} title={course.title} resizeMode="contain" style={styles.hero} />
       ) : (
         <View style={styles.heroPlaceholder}>
           <Text style={styles.heroPlaceholderText}>{course.title.slice(0, 1).toUpperCase()}</Text>

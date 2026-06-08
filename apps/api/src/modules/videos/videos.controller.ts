@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Headers,
+  Logger,
   Param,
   Post,
   Res,
@@ -34,6 +35,8 @@ const allowedVideoMimeTypes = new Set([
 
 @Controller('videos')
 export class VideosController {
+  private readonly logger = new Logger(VideosController.name);
+
   constructor(private readonly videosService: VideosService) {}
 
   @Get(':id/stream')
@@ -43,6 +46,7 @@ export class VideosController {
     @Headers('range') range: string | undefined,
     @Res() res: Response,
   ) {
+    this.logger.log(`Video stream requested id=${id} range=${range ?? 'none'}`);
     return this.videosService.stream(parseWithSchema(uuidSchema, id), range, res);
   }
 

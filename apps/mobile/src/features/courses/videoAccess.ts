@@ -6,6 +6,8 @@ export interface VideoAccessResult {
   available: boolean;
   streamUrl: string;
   authorization?: string;
+  status?: number;
+  message?: string;
 }
 
 async function getAuthorizationHeader() {
@@ -32,17 +34,25 @@ export async function getLessonVideoStreamUrl(videoId: string): Promise<VideoAcc
       signal: controller.signal,
     });
 
+    let message: string | undefined;
+    if (!response.ok) {
+      message = await response.text().catch(() => undefined);
+    }
+
     return {
       provider: 'vps',
       available: response.ok,
       streamUrl,
       authorization,
+      status: response.status,
+      message,
     };
   } catch {
     return {
       provider: 'vps',
       available: false,
       streamUrl,
+      message: 'The app could not reach the video stream endpoint.',
     };
   } finally {
     clearTimeout(timeout);
