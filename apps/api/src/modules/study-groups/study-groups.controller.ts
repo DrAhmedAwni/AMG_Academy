@@ -13,7 +13,9 @@ import type { JwtPayload } from '@amg/shared';
 import { AuditAction, paginationQuerySchema, uuidSchema } from '@amg/shared';
 import { AuditLog } from '../../common/decorators/audit-log.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { RequirePermission } from '../../common/decorators/require-permission.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PermissionGuard } from '../../common/guards/permission.guard';
 import { parseWithSchema } from '../../common/utils/zod.utils';
 import {
   createSessionSchema,
@@ -50,6 +52,35 @@ export class StudyGroupsController {
       user.sub,
       parseWithSchema(createStudyGroupSchema, body),
     );
+  }
+
+  @Get('admin/review')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('study-groups:moderate')
+  async findAllAdmin(@Query() query: Record<string, string | undefined>) {
+    const pagination = parseWithSchema(paginationQuerySchema, query);
+    return this.studyGroupsService.findAllAdmin({
+      ...pagination,
+      type: query.type,
+      status: query.status,
+      search: query.search,
+    });
+  }
+
+  @Post('admin/:id/approve')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('study-groups:moderate')
+  @AuditLog(AuditAction.Approve, 'StudyGroup')
+  async approveGroup(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.studyGroupsService.approveGroup(parseWithSchema(uuidSchema, id), user.sub);
+  }
+
+  @Post('admin/:id/reject')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @RequirePermission('study-groups:moderate')
+  @AuditLog(AuditAction.Reject, 'StudyGroup')
+  async rejectGroup(@Param('id') id: string) {
+    return this.studyGroupsService.rejectGroup(parseWithSchema(uuidSchema, id));
   }
 
   @Get(':id')

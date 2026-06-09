@@ -23,10 +23,10 @@ export async function verifyAccessToken(token: string) {
   return payload as unknown as SessionUser;
 }
 
-export function hasPermission(user: SessionUser | null, permission: string) {
+export function hasPermission(user: { permissions?: string[] } | null, permission: string) {
   if (!user) {
     return false;
   }
 
-  return user.permissions.includes('*:*') || user.permissions.includes(permission);
+  return Boolean(user.permissions?.includes('*:*') || user.permissions?.includes(permission));
 }

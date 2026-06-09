@@ -40,12 +40,12 @@ export class StudyGroupsService {
         type: input.type,
         joinMode: input.joinMode ?? 'OPEN',
         courseId: input.courseId ?? null,
+        status: StudyGroupStatus.PENDING_REVIEW,
         members: {
           create: {
             userId,
             role: StudyGroupMemberRole.OWNER,
-            status: StudyGroupMemberStatus.ACTIVE,
-            joinedAt: new Date(),
+            status: StudyGroupMemberStatus.PENDING,
           },
         },
       },
@@ -56,10 +56,22 @@ export class StudyGroupsService {
   }
 
   async findAll(query: { page?: number; limit?: number; type?: string; search?: string }) {
+    return this.findGroups(query, { status: StudyGroupStatus.ACTIVE });
+  }
+
+  async findAllAdmin(query: { page?: number; limit?: number; type?: string; status?: string; search?: string }) {
+    const status = this.toStudyGroupStatus(query.status);
+    return this.findGroups(query, status ? { status } : {});
+  }
+
+  private async findGroups(
+    query: { page?: number; limit?: number; type?: string; search?: string },
+    baseWhere: Prisma.StudyGroupWhereInput,
+  ) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
     const skip = (page - 1) * limit;
-    const where: Prisma.StudyGroupWhereInput = { status: StudyGroupStatus.ACTIVE };
+    const where: Prisma.StudyGroupWhereInput = { ...baseWhere };
 
     if (query.type) {
       where.type = query.type as 'STUDENT' | 'INSTRUCTOR_LED';
@@ -100,6 +112,9 @@ export class StudyGroupsService {
     });
 
     if (!group) throw new NotFoundException('Study group not found');
+    if (group.status !== StudyGroupStatus.ACTIVE) {
+      throw new ForbiddenException('This study group is waiting for admin approval');
+    }
 
     return this.mapGroupDetail(group, membership);
   }
@@ -144,18 +159,72 @@ export class StudyGroupsService {
       throw new ForbiddenException('This group is invite-only');
     }
 
-    const isDirectJoin = group.joinMode === StudyGroupJoinMode.OPEN;
     const membership = await this.prisma.studyGroupMember.create({
       data: {
         groupId,
         userId,
         role: StudyGroupMemberRole.MEMBER,
-        status: isDirectJoin ? StudyGroupMemberStatus.ACTIVE : StudyGroupMemberStatus.PENDING,
-        joinedAt: isDirectJoin ? new Date() : null,
+        status: StudyGroupMemberStatus.PENDING,
       },
     });
 
     return { membershipId: membership.id, status: membership.status };
+  }
+
+  async approveGroup(groupId: string, adminId: string) {
+    const group = await this.prisma.studyGroup.findUnique({
+      where: { id: groupId },
+      include: this.groupInclude(),
+    });
+    if (!group) throw new NotFoundException('Study group not found');
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await tx.studyGroupMember.upsert({
+        where: { groupId_userId: { groupId, userId: group.ownerId } },
+        update: {
+          status: StudyGroupMemberStatus.ACTIVE,
+          role: StudyGroupMemberRole.OWNER,
+          approvedById: adminId,
+          joinedAt: new Date(),
+        },
+        create: {
+          groupId,
+          userId: group.ownerId,
+          role: StudyGroupMemberRole.OWNER,
+          status: StudyGroupMemberStatus.ACTIVE,
+          approvedById: adminId,
+          joinedAt: new Date(),
+        },
+      });
+
+      return tx.studyGroup.update({
+        where: { id: groupId },
+        data: { status: StudyGroupStatus.ACTIVE },
+        include: this.groupInclude(),
+      });
+    });
+
+    return this.mapGroup(updated);
+  }
+
+  async rejectGroup(groupId: string) {
+    const group = await this.prisma.studyGroup.findUnique({ where: { id: groupId } });
+    if (!group) throw new NotFoundException('Study group not found');
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await tx.studyGroupMember.updateMany({
+        where: { groupId, status: StudyGroupMemberStatus.PENDING },
+        data: { status: StudyGroupMemberStatus.REJECTED },
+      });
+
+      return tx.studyGroup.update({
+        where: { id: groupId },
+        data: { status: StudyGroupStatus.REJECTED },
+        include: this.groupInclude(),
+      });
+    });
+
+    return this.mapGroup(updated);
   }
 
   async approveMember(groupId: string, memberId: string, approverId: string) {
@@ -407,6 +476,15 @@ export class StudyGroupsService {
   }
 
   async ensureMembership(groupId: string, userId: string) {
+    const group = await this.prisma.studyGroup.findUnique({
+      where: { id: groupId },
+      select: { id: true, status: true },
+    });
+
+    if (!group || group.status !== StudyGroupStatus.ACTIVE) {
+      throw new ForbiddenException('This study group is waiting for admin approval');
+    }
+
     const membership = await this.prisma.studyGroupMember.findUnique({
       where: { groupId_userId: { groupId, userId } },
     });
@@ -419,6 +497,15 @@ export class StudyGroupsService {
   }
 
   private async ensureOwnerOrModerator(groupId: string, userId: string) {
+    const group = await this.prisma.studyGroup.findUnique({
+      where: { id: groupId },
+      select: { id: true, status: true },
+    });
+
+    if (!group || group.status !== StudyGroupStatus.ACTIVE) {
+      throw new ForbiddenException('This study group is waiting for admin approval');
+    }
+
     const membership = await this.prisma.studyGroupMember.findUnique({
       where: { groupId_userId: { groupId, userId } },
     });
@@ -466,6 +553,16 @@ export class StudyGroupsService {
       createdAt: group.createdAt.toISOString(),
       updatedAt: group.updatedAt.toISOString(),
     };
+  }
+
+  private toStudyGroupStatus(value?: string) {
+    if (!value) return undefined;
+    const normalized = value.toUpperCase();
+    if (normalized === 'PENDING_REVIEW') return StudyGroupStatus.PENDING_REVIEW;
+    if (normalized === 'ACTIVE') return StudyGroupStatus.ACTIVE;
+    if (normalized === 'REJECTED') return StudyGroupStatus.REJECTED;
+    if (normalized === 'ARCHIVED') return StudyGroupStatus.ARCHIVED;
+    return undefined;
   }
 
   private mapGroupDetail(group: any, membership: any) {

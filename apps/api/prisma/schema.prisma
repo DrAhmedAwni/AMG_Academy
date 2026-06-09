@@ -115,7 +115,9 @@ enum StudyGroupJoinMode {
 }
 
 enum StudyGroupStatus {
+  PENDING_REVIEW
   ACTIVE
+  REJECTED
   ARCHIVED
 }
 
@@ -788,7 +790,7 @@ model StudyGroup {
   joinMode    StudyGroupJoinMode  @default(OPEN)
   title       String
   description String?
-  status      StudyGroupStatus    @default(ACTIVE)
+  status      StudyGroupStatus    @default(PENDING_REVIEW)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   owner       User                @relation("StudyGroupOwner", fields: [ownerId], references: [id])

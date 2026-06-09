@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Header, Screen } from '../../src/components/layout';
@@ -47,7 +47,11 @@ export default function CreateStudyGroupScreen() {
       },
       {
         onSuccess: () => {
-          router.back();
+          Alert.alert(
+            'Waiting for admin approval',
+            'Your study group was submitted. It will become available after an admin approves it from the dashboard.',
+            [{ text: 'OK', onPress: () => router.back() }],
+          );
         },
       },
     );
@@ -59,7 +63,7 @@ export default function CreateStudyGroupScreen() {
     <Screen>
       <Header
         title="Create Study Group"
-        subtitle="Set up a new learning community."
+        subtitle="Submit a new learning community for admin review."
         action={<Button label="Cancel" variant="secondary" size="sm" onPress={() => router.back()} />}
       />
 

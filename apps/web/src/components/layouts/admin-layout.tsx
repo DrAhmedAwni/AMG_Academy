@@ -49,7 +49,7 @@ const menu = [
   { href: '/admin/qr-scanner', label: 'QR Scanner', icon: QrCode, permission: 'scanner:use' },
 ];
 
-function isAllowedForRole(item: (typeof menu)[number], user: SessionUser | null) {
+function isAllowedForRole(item: (typeof menu)[number], user: { role?: string } | null) {
   if (user?.role === 'scanner') {
     return ['/admin/attendance', '/admin/qr-scanner'].includes(item.href);
   }
@@ -69,9 +69,10 @@ export function AdminLayout({
   user: SessionUser | null;
 }) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user: clientUser } = useAuth();
+  const activeUser = user ?? clientUser;
   const filteredMenu = menu.filter(
-    (item) => isAllowedForRole(item, user) && (!item.permission || hasPermission(user, item.permission)),
+    (item) => isAllowedForRole(item, activeUser) && (!item.permission || hasPermission(activeUser, item.permission)),
   );
 
   return (
@@ -86,7 +87,7 @@ export function AdminLayout({
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full border border-cyan/25 bg-cyan/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-light">
-            {user?.role ?? 'guest'}
+            {activeUser?.role ?? 'guest'}
           </span>
           <button
             onClick={() => logout()}
@@ -111,7 +112,7 @@ export function AdminLayout({
               </h1>
             </div>
             <span className="rounded-full border border-cyan/30 bg-cyan/10 px-2.5 py-0.5 text-[11px] font-bold text-cyan-light shadow-glow-sm">
-              {user?.role ?? 'guest'}
+              {activeUser?.role ?? 'guest'}
             </span>
           </div>
 

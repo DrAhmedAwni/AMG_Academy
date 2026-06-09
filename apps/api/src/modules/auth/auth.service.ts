@@ -57,12 +57,12 @@ export class AuthService {
     this.jwtRefreshSecret = this.requireSecret('auth.jwtRefreshSecret');
     this.jwtResetSecret = this.requireSecret('auth.jwtResetSecret');
     this.accessTokenMs = this.parseDurationToMs(
-      this.configService.get<string>('auth.accessTokenTtl', '15m'),
-      15 * 60 * 1000,
+      this.configService.get<string>('auth.accessTokenTtl', '30d'),
+      30 * 24 * 60 * 60 * 1000,
     );
     this.refreshTokenMs = this.parseDurationToMs(
-      this.configService.get<string>('auth.refreshTokenTtl', '7d'),
-      7 * 24 * 60 * 60 * 1000,
+      this.configService.get<string>('auth.refreshTokenTtl', '365d'),
+      365 * 24 * 60 * 60 * 1000,
     );
     this.frontendUrl = this.configService.get<string>('app.frontendUrl', 'http://localhost:3000');
     this.apiPrefix = this.configService.get<string>('app.apiPrefix', 'api/v1');
@@ -130,6 +130,7 @@ export class AuthService {
       emailVerified: user.emailVerified,
       role: defaultRole.slug,
       createdAt: user.createdAt.toISOString(),
+      message: 'Account created. A verification link has been sent to your email.',
       ...(!this.isProduction ? { verificationUrl } : {}),
     };
   }
@@ -150,17 +151,22 @@ export class AuthService {
     this.ensureAccountIsActive(user);
 
     if (!user.emailVerified) {
+      const message = 'Waiting for email verification. Please check your email for the verification link.';
       if (!this.isProduction) {
         const verificationToken = await this.createEmailVerificationToken(user.id, user.email);
         throw new UnauthorizedException({
-          message: 'Please verify your email before signing in',
+          code: 'EMAIL_VERIFICATION_PENDING',
+          message,
           details: {
             verificationUrl: this.buildEmailVerificationUrl(verificationToken),
           },
         });
       }
 
-      throw new UnauthorizedException('Please verify your email before signing in');
+      throw new UnauthorizedException({
+        code: 'EMAIL_VERIFICATION_PENDING',
+        message,
+      });
     }
 
     const tokens = await this.createAuthTokens(user);
@@ -592,7 +598,7 @@ export class AuthService {
     const payload = this.buildJwtPayload(user);
     return this.jwtService.signAsync(payload, {
       secret: this.jwtSecret,
-      expiresIn: this.configService.get<string>('auth.accessTokenTtl', '15m') as StringValue,
+      expiresIn: this.configService.get<string>('auth.accessTokenTtl', '30d') as StringValue,
     });
   }
 
@@ -606,7 +612,7 @@ export class AuthService {
       },
       {
         secret: this.jwtRefreshSecret,
-        expiresIn: this.configService.get<string>('auth.refreshTokenTtl', '7d') as StringValue,
+        expiresIn: this.configService.get<string>('auth.refreshTokenTtl', '365d') as StringValue,
       },
     );
   }
@@ -631,7 +637,7 @@ export class AuthService {
       httpOnly: true,
       sameSite: 'lax',
       secure: this.isProduction,
-      path: `/${this.apiPrefix}/auth/refresh`,
+      path: '/',
       maxAge: this.refreshTokenMs,
     });
   }
@@ -650,6 +656,12 @@ export class AuthService {
 
   private clearAuthCookies(response: Response) {
     response.clearCookie(ACCESS_TOKEN_COOKIE, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: this.isProduction,
+      path: '/',
+    });
+    response.clearCookie(REFRESH_TOKEN_COOKIE, {
       httpOnly: true,
       sameSite: 'lax',
       secure: this.isProduction,

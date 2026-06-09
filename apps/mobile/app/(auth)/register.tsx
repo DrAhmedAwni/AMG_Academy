@@ -71,7 +71,7 @@ export default function RegisterScreen() {
       <Screen scroll={false}>
         <SuccessState
           title="Account created"
-          message="Check your email verification status before signing in."
+          message={registerMutation.data?.message ?? 'A verification link has been sent to your email.'}
           action={{
             label: 'Go to sign in',
             onPress: () => router.replace('/(auth)/login' as never),

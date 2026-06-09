@@ -90,10 +90,9 @@ export class CaseDiscussionsService {
       throw new NotFoundException('Case post not found');
     }
 
-    const isAuthor = currentUserId === post.authorId;
     const isAdmin = currentUserId ? await this.hasAdminAccess(currentUserId) : false;
 
-    if (post.status !== PrismaCasePostStatus.APPROVED && !isAuthor && !isAdmin) {
+    if (post.status !== PrismaCasePostStatus.APPROVED && !isAdmin) {
       throw new NotFoundException('Case post not found');
     }
 
@@ -103,10 +102,10 @@ export class CaseDiscussionsService {
   async findComments(casePostId: string) {
     const post = await this.prisma.casePost.findUnique({
       where: { id: casePostId },
-      select: { id: true },
+      select: { id: true, status: true },
     });
 
-    if (!post) {
+    if (!post || post.status !== PrismaCasePostStatus.APPROVED) {
       throw new NotFoundException('Case post not found');
     }
 
@@ -176,10 +175,10 @@ export class CaseDiscussionsService {
   async toggleUpvote(id: string, userId: string) {
     const post = await this.prisma.casePost.findUnique({
       where: { id },
-      select: { id: true, upvotedBy: true },
+      select: { id: true, status: true, upvotedBy: true },
     });
 
-    if (!post) {
+    if (!post || post.status !== PrismaCasePostStatus.APPROVED) {
       throw new NotFoundException('Case post not found');
     }
 
@@ -200,10 +199,10 @@ export class CaseDiscussionsService {
   async toggleBookmark(id: string, userId: string) {
     const post = await this.prisma.casePost.findUnique({
       where: { id },
-      select: { id: true, bookmarkedBy: true },
+      select: { id: true, status: true, bookmarkedBy: true },
     });
 
-    if (!post) {
+    if (!post || post.status !== PrismaCasePostStatus.APPROVED) {
       throw new NotFoundException('Case post not found');
     }
 
@@ -229,6 +228,9 @@ export class CaseDiscussionsService {
 
     if (!post) {
       throw new NotFoundException('Case post not found');
+    }
+    if (post.status !== PrismaCasePostStatus.APPROVED) {
+      throw new ForbiddenException('This case is waiting for admin approval');
     }
 
     if (input.parentCommentId) {

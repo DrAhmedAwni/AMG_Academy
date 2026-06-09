@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter } from 'next/navigation';
+import { AxiosError } from 'axios';
 import type { AuthUser } from '@amg/shared';
 import { api } from '@/lib/api';
 
@@ -63,10 +64,22 @@ export function useAuth() {
   const authQuery = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
-      const response = await api.get<ApiEnvelope<AuthUser>>('/auth/me', {
-        headers: { 'x-skip-auth-redirect': '1' },
-      });
-      return response.data.data;
+      try {
+        const response = await api.get<ApiEnvelope<AuthUser>>('/auth/me', {
+          headers: { 'x-skip-auth-redirect': '1' },
+        });
+        return response.data.data;
+      } catch (error) {
+        if (!(error instanceof AxiosError) || error.response?.status !== 401) {
+          throw error;
+        }
+
+        await api.post<ApiEnvelope<null>>('/auth/refresh');
+        const response = await api.get<ApiEnvelope<AuthUser>>('/auth/me', {
+          headers: { 'x-skip-auth-redirect': '1' },
+        });
+        return response.data.data;
+      }
     },
     retry: false,
     enabled: shouldCheckSession,
@@ -157,7 +170,8 @@ export function useAuth() {
       await api.post('/auth/logout');
     },
     onSuccess: async () => {
-      await queryClient.setQueryData(['auth', 'me'], null);
+      queryClient.setQueryData(['auth', 'me'], null);
+      await queryClient.clear();
       router.push('/login');
       router.refresh();
     },

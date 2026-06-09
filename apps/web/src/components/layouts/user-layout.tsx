@@ -18,13 +18,13 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/events', label: 'Events', icon: CalendarDays },
-  { href: '/courses', label: 'Courses', icon: BookOpen },
-  { href: '/my-reservations', label: 'My Events', icon: Ticket },
-  { href: '/my-courses', label: 'My Courses', icon: GraduationCap },
-  { href: '/notifications', label: 'Alerts', icon: Bell },
-  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/dashboard', label: 'Dashboard', mobileLabel: 'Home', icon: LayoutDashboard },
+  { href: '/events', label: 'Events', mobileLabel: 'Events', icon: CalendarDays },
+  { href: '/courses', label: 'Courses', mobileLabel: 'Courses', icon: BookOpen },
+  { href: '/my-reservations', label: 'My Events', mobileLabel: 'Tickets', icon: Ticket },
+  { href: '/my-courses', label: 'My Courses', mobileLabel: 'Learning', icon: GraduationCap },
+  { href: '/notifications', label: 'Alerts', mobileLabel: 'Alerts', icon: Bell },
+  { href: '/profile', label: 'Profile', mobileLabel: 'Profile', icon: User },
 ];
 
 const footerLinks = [
@@ -99,16 +99,16 @@ export function UserLayout({
 
       {/* Mobile header */}
       <header className="sticky top-0 z-20 border-b border-surface-border/45 bg-surface-card/85 px-4 py-3 shadow-card backdrop-blur-xl md:hidden">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
               AMG Academy
             </p>
-            <p className="text-sm font-semibold text-text-primary">
+            <p className="truncate text-sm font-semibold text-text-primary">
               {title ?? 'Dashboard'}
             </p>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5">
             <NotificationBadgeSlot />
             <button
               onClick={() => logout()}
@@ -122,7 +122,7 @@ export function UserLayout({
       </header>
 
       {/* Main content */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 md:pb-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28 md:pb-6">
         {children}
       </main>
 
@@ -141,8 +141,8 @@ export function UserLayout({
       </footer>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-surface-border/45 bg-surface-card/90 px-2 py-2 shadow-elevated backdrop-blur-xl md:hidden">
-        <div className="flex items-center justify-around">
+      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-surface-border/45 bg-surface-card/95 px-2 pt-2 shadow-elevated backdrop-blur-xl md:hidden">
+        <div className="grid grid-cols-5 items-stretch gap-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
           {navItems.slice(0, 5).map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -150,12 +150,14 @@ export function UserLayout({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition-all duration-200',
+                  'flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-center transition-all duration-200',
                   isActive ? 'bg-cyan/10 text-cyan-light' : 'text-text-muted',
                 )}
               >
-                <item.icon className="h-5 w-5" />
-                <span className="max-w-full truncate text-[10px] font-semibold">{item.label}</span>
+                <item.icon className="h-5 w-5 shrink-0" />
+                <span className="block max-w-full truncate text-[9px] font-semibold leading-none">
+                  {item.mobileLabel}
+                </span>
                 {isActive ? (
                   <span className="h-0.5 w-4 rounded-full bg-cyan" />
                 ) : null}

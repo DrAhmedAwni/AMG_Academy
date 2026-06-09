@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   ACCESS_TOKEN_COOKIE,
+  REFRESH_TOKEN_COOKIE,
   verifyAccessToken,
 } from '@/lib/auth';
 import {
@@ -36,12 +37,18 @@ const adminRoutePermissions: Array<{ prefix: string; permission: string }> = [
 const hasUserPermission = (user: { permissions?: string[] }, permission: string) =>
   Boolean(user.permissions?.includes('*:*') || user.permissions?.includes(permission));
 
+const getDefaultAuthenticatedPath = (role: string) =>
+  ['super_admin', 'amg_admin', 'scanner', 'instructor'].includes(role)
+    ? '/admin/dashboard'
+    : '/dashboard';
+
 const resolveAdminPermission = (pathname: string) =>
   adminRoutePermissions.find((item) => pathname === item.prefix || pathname.startsWith(`${item.prefix}/`))?.permission;
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
   const isAuthRoute = AUTH_ROUTES.includes(pathname);
   const needsUserAuth = matchesPrefix(pathname, USER_PROTECTED_PREFIXES);
@@ -54,6 +61,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!token) {
+    if (needsAuth && refreshToken) {
+      return NextResponse.next();
+    }
+
     if (needsAuth) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
@@ -71,7 +82,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAuthRoute) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL(getDefaultAuthenticatedPath(user.role), request.url));
     }
 
     if (needsAdminAuth) {

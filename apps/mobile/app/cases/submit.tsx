@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Header, Screen } from '../../src/components/layout';
@@ -53,7 +53,11 @@ export default function CaseSubmitScreen() {
       { title: title.trim(), description: description.trim(), categoryId, tags },
       {
         onSuccess: () => {
-          router.back();
+          Alert.alert(
+            'Waiting for admin approval',
+            'Your case was submitted for review. It will become available after an admin approves it from the dashboard.',
+            [{ text: 'OK', onPress: () => router.back() }],
+          );
         },
       },
     );

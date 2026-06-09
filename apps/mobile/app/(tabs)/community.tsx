@@ -151,7 +151,7 @@ export default function CommunityTab() {
       <CommunityCard
         icon="people-outline"
         title="Study Groups"
-        body="Join student-led groups or instructor-led course groups for focused learning."
+        body="Browse approved groups and submit new groups for admin review."
         primaryLabel="View groups"
         secondaryLabel="Create group"
         onPrimary={() => goTo('/(tabs)/study-groups')}

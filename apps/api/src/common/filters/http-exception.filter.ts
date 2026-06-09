@@ -29,11 +29,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const details =
       typeof payload === 'object' && payload && 'details' in payload ? payload.details : undefined;
+    const code =
+      typeof payload === 'object' && payload && 'code' in payload && typeof payload.code === 'string'
+        ? payload.code
+        : this.mapStatusToCode(status);
 
     response.status(status).json({
       success: false,
       error: {
-        code: this.mapStatusToCode(status),
+        code,
         message,
         details,
       },

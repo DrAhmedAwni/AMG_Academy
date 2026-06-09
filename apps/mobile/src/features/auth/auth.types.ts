@@ -71,6 +71,7 @@ export interface MobileRegisterResponse {
   emailVerified: boolean;
   role: string;
   createdAt: string;
+  message?: string;
   verificationUrl?: string;
 }
 

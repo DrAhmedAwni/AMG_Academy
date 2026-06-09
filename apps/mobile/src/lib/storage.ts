@@ -67,14 +67,14 @@ export async function getSessionMaterial(): Promise<MobileAuthTokens | null> {
     getSecureItem('refreshExpiresAt'),
   ]);
 
-  if (!accessToken) {
+  if (!accessToken && !refreshToken) {
     return null;
   }
 
-  if (expiresAt && Date.parse(expiresAt) <= Date.now()) {
+  if (!accessToken || (expiresAt && Date.parse(expiresAt) <= Date.now())) {
     return refreshToken
       ? {
-          accessToken,
+          accessToken: accessToken ?? '',
           refreshToken,
           tokenType: 'Bearer',
           refreshExpiresInSeconds: refreshExpiresAt

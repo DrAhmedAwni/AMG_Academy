@@ -15,6 +15,7 @@ export interface StudyGroup {
   description: string;
   type: StudyGroupType;
   joinMode: JoinMode;
+  status: 'PENDING_REVIEW' | 'ACTIVE' | 'REJECTED' | 'ARCHIVED';
   courseId: string | null;
   courseTitle: string | null;
   memberCount: number;
@@ -143,8 +144,8 @@ export async function fetchStudyGroupById(id: string): Promise<StudyGroup> {
   });
 }
 
-export async function joinStudyGroup(id: string): Promise<{ joined: boolean }> {
-  return apiRequest<{ joined: boolean }>(`/study-groups/${encodeURIComponent(id)}/join`, {
+export async function joinStudyGroup(id: string): Promise<{ membershipId: string; status: 'PENDING' | 'ACTIVE' }> {
+  return apiRequest<{ membershipId: string; status: 'PENDING' | 'ACTIVE' }>(`/study-groups/${encodeURIComponent(id)}/join`, {
     method: 'POST',
   });
 }

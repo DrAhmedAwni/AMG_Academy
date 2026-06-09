@@ -37,6 +37,15 @@ export function mapApiErrorToUi(error: unknown): UiErrorState {
     };
   }
 
+  if (error.code === 'EMAIL_VERIFICATION_PENDING') {
+    return {
+      kind: 'permission-denied',
+      title: 'Waiting for verification',
+      message: error.message,
+      retryable: false,
+    };
+  }
+
   if (error.status === 401 || error.code === 'UNAUTHORIZED') {
     return {
       kind: 'session-expired',
