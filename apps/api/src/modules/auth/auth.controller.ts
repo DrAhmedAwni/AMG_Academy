@@ -9,7 +9,7 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
   changePasswordSchema,
@@ -131,6 +131,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ApiCacheInterceptor)
   @CacheConfig({ keyPrefix: 'auth:me', ttlSeconds: 30, varyByUser: true })
