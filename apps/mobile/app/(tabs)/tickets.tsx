@@ -218,8 +218,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.lg,
-    borderColor: 'rgba(94, 234, 212, 0.3)',
-    backgroundColor: 'rgba(13, 34, 48, 0.92)',
+    borderColor: 'rgba(212, 175, 55, 0.34)',
+    backgroundColor: colors.surface.base,
   },
   walletMetric: {
     width: 78,

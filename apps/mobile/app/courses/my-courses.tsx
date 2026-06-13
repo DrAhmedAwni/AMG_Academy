@@ -32,8 +32,8 @@ export default function MyCoursesScreen() {
           <Badge
             label={item.course.category.name}
             foreground={colors.accent.primary}
-            background="rgba(84, 217, 232, 0.14)"
-            border="rgba(84, 217, 232, 0.34)"
+            background={colors.accent.goldMuted}
+            border="rgba(212, 175, 55, 0.36)"
           />
           <Text style={styles.courseTitle}>{item.course.title}</Text>
           <Text style={styles.meta}>

@@ -165,7 +165,7 @@ export default function EventDetailPage() {
           {/* Info cards grid */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card variant="elevated" className="space-y-2">
-              <CalendarDays className="h-5 w-5 text-cyan" />
+              <CalendarDays className="h-5 w-5 text-gold" />
               <p className="text-xs text-text-muted">Date</p>
               <p className="text-sm font-medium text-text-primary">
                 {new Date(event.startDate).toLocaleDateString('en-US', {
@@ -187,7 +187,7 @@ export default function EventDetailPage() {
             </Card>
 
             <Card variant="elevated" className="space-y-2">
-              <MapPin className="h-5 w-5 text-cyan" />
+              <MapPin className="h-5 w-5 text-gold" />
               <p className="text-xs text-text-muted">Location</p>
               <p className="text-sm font-medium text-text-primary">
                 {event.location}
@@ -195,7 +195,7 @@ export default function EventDetailPage() {
             </Card>
 
             <Card variant="elevated" className="space-y-2">
-              <Users className="h-5 w-5 text-cyan" />
+              <Users className="h-5 w-5 text-gold" />
               <p className="text-xs text-text-muted">Capacity</p>
               <p className="text-sm font-medium text-text-primary">
                 {spotsLeft > 0 ? (
@@ -224,7 +224,7 @@ export default function EventDetailPage() {
             </Card>
 
             <Card variant="elevated" className="space-y-2">
-              <DollarSign className="h-5 w-5 text-cyan" />
+              <DollarSign className="h-5 w-5 text-gold" />
               <p className="text-xs text-text-muted">Price</p>
               <p className="text-sm font-medium text-text-primary">
                 {event.isFree ? (
@@ -268,7 +268,7 @@ export default function EventDetailPage() {
                     <StatusBadge status={event.registrationStatus ?? 'registered'} />
                     {event.registrationStatus === 'pending' && !event.isFree && event.paymentId && (
                       <Link href={`/payment/${event.paymentId}`}>
-                        <Button variant="glow">
+                        <Button variant="gold">
                           <Ticket className="h-4 w-4" />
                           Continue to Payment
                         </Button>
@@ -287,7 +287,7 @@ export default function EventDetailPage() {
                   </Button>
                 ) : (
                   <Button
-                    variant="glow"
+                    variant="gold"
                     size="lg"
                     onClick={() => registerMutation.mutate()}
                     disabled={registerMutation.isPending || spotsLeft <= 0}

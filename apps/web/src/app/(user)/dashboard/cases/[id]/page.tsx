@@ -259,7 +259,7 @@ export default function CaseDetailPage() {
             onChange={(e) => setCommentBody(e.target.value)}
             placeholder="Share your thoughts on this case..."
             rows={3}
-            className="h-24 w-full rounded-xl border bg-surface-card/90 px-3 py-2 text-sm text-text-primary shadow-sm placeholder:text-text-muted/60 border-surface-border/70 focus:border-cyan/60 focus:outline-none focus:ring-2 focus:ring-cyan/20 transition-all duration-200 resize-none"
+            className="h-24 w-full rounded-xl border bg-surface-card/90 px-3 py-2 text-sm text-text-primary shadow-sm placeholder:text-text-muted/60 border-surface-border/70 focus:border-gold/60 focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all duration-200 resize-none"
           />
           <Button
             type="submit"

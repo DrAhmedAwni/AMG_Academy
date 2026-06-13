@@ -174,7 +174,7 @@ export default function AdminEventsPage() {
         description="Create, edit, archive, cancel, and monitor AMG Academy events from one operations surface."
         actions={
           <>
-          <Button variant="glass" size="sm" onClick={() => refetch()}>
+          <Button variant="secondary" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
@@ -183,7 +183,7 @@ export default function AdminEventsPage() {
             Export
           </Button>
           <Link href="/admin/events/new">
-            <Button variant="glow" size="sm">
+            <Button variant="gold" size="sm">
               <Plus className="h-4 w-4" />
               Create Event
             </Button>
@@ -214,7 +214,7 @@ export default function AdminEventsPage() {
           placeholder="Search by title, location, category..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-2xl border border-surface-border/70 bg-surface-card/90 py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted/50 focus:border-cyan/50 focus:outline-none focus:ring-2 focus:ring-cyan/15"
+          className="w-full rounded-2xl border border-surface-border/70 bg-surface-card/90 py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted/50 focus:border-gold/50 focus:outline-none focus:ring-2 focus:ring-gold/15"
         />
       </div>
 
@@ -229,7 +229,7 @@ export default function AdminEventsPage() {
           {filteredEvents.map((event, idx) => (
             <div
               key={event.id}
-              className="premium-ring animate-slide-up group rounded-3xl border border-surface-border/60 bg-surface-card/75 p-4 transition-all duration-200 hover:border-cyan/35 hover:bg-surface-card/90"
+              className="gold-ring animate-slide-up group rounded-3xl border border-surface-border/60 bg-surface-card/75 p-4 transition-all duration-200 hover:border-gold/35 hover:bg-surface-card/90"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

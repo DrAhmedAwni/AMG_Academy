@@ -105,15 +105,15 @@ export default function EventsPage() {
       />
 
       {/* Search + Filter */}
-      <div className="glass flex flex-col gap-4 rounded-3xl p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="surface-card flex flex-col gap-4 rounded-3xl p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search events..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-2xl border border-surface-border/70 bg-surface-card/90 py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted/50 focus:border-cyan/50 focus:outline-none focus:ring-2 focus:ring-cyan/15"
+            className="w-full rounded-2xl border border-surface-border bg-surface-main/60 py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/10"
           />
         </div>
       </div>

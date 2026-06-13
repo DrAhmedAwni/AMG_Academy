@@ -10,25 +10,24 @@ export function ToastViewport() {
       toastOptions={{
         duration: 4000,
         style: {
-          background: '#0D1117',
-          color: '#F8FAFC',
-          border: '1px solid rgba(42, 48, 58, 0.6)',
-          borderRadius: '12px',
-          padding: '12px 16px',
+          background: '#1D1D1D',
+          color: '#FFFFFF',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '16px',
+          padding: '14px 18px',
           fontSize: '14px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-          backdropFilter: 'blur(16px)',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.32)',
         },
         success: {
           iconTheme: {
             primary: '#22C55E',
-            secondary: '#0D1117',
+            secondary: '#1D1D1D',
           },
         },
         error: {
           iconTheme: {
             primary: '#EF4444',
-            secondary: '#0D1117',
+            secondary: '#1D1D1D',
           },
         },
       }}

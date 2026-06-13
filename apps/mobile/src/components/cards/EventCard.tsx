@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     textAlign: 'center',
     textAlignVertical: 'center',
-    backgroundColor: colors.interactive.pressed,
+    backgroundColor: colors.accent.goldMuted,
     color: colors.accent.primary,
     fontSize: typography.size.xxl,
     fontWeight: typography.weight.bold,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border.highlight,
-    backgroundColor: colors.background.overlay,
+    backgroundColor: colors.surface.base,
   },
   dateMonth: {
     ...textStyles.caption,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border.highlight,
-    backgroundColor: colors.background.overlay,
+    backgroundColor: colors.surface.base,
     paddingHorizontal: spacing.md,
   },
   priceText: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   kicker: {
     ...textStyles.caption,
-    color: colors.accent.primary,
+    color: colors.accent.gold,
     textTransform: 'uppercase',
   },
   title: {

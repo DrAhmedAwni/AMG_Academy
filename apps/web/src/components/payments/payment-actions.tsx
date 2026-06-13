@@ -16,7 +16,7 @@ export function PaymentActions({ status, onSuccess, onFail, onCancel, loading }:
     <div className="space-y-3">
       <p className="text-sm text-text-muted">This is a mock payment. Choose an action:</p>
       <div className="flex flex-wrap gap-3">
-        <Button variant="glow" size="lg" onClick={onSuccess} loading={loading}>
+        <Button variant="gold" size="lg" onClick={onSuccess} loading={loading}>
           <CheckCircle2 className="h-5 w-5" />
           Pay Now (Mock Success)
         </Button>

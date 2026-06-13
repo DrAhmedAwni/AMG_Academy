@@ -78,15 +78,12 @@ export function AdminLayout({
   return (
     <div className="min-h-screen bg-surface-main text-text-primary">
       {/* Mobile header */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-surface-border/50 bg-surface-card/85 px-4 py-3 shadow-card backdrop-blur-xl lg:hidden">
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-surface-border bg-surface-card/90 px-4 py-3 shadow-card backdrop-blur-xl lg:hidden">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
-            AMG Academy
-          </p>
           <p className="text-xs font-medium text-text-secondary">Admin Console</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full border border-cyan/25 bg-cyan/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-light">
+          <span className="rounded-full border border-gold/25 bg-gold/10 px-2.5 py-0.5 text-[11px] font-semibold text-gold-light">
             {activeUser?.role ?? 'guest'}
           </span>
           <button
@@ -101,17 +98,14 @@ export function AdminLayout({
 
       <div className="lg:grid lg:grid-cols-[280px_1fr]">
         {/* Sidebar */}
-        <aside className="sticky top-0 hidden h-screen border-r border-surface-border/45 bg-surface-card/70 shadow-card backdrop-blur-xl lg:flex lg:flex-col">
+        <aside className="sticky top-0 hidden h-screen border-r border-surface-border bg-surface-card/70 shadow-card backdrop-blur-xl lg:flex lg:flex-col">
           <div className="flex items-center justify-between border-b border-surface-border/35 px-5 py-5">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-text-muted">
-                AMG Academy
-              </p>
-              <h1 className="mt-1 font-heading text-xl font-semibold">
-                <span className="text-gradient">Admin</span> Console
+              <h1 className="font-heading text-xl font-semibold text-text-primary">
+                Admin<span className="text-gold"> Console</span>
               </h1>
             </div>
-            <span className="rounded-full border border-cyan/30 bg-cyan/10 px-2.5 py-0.5 text-[11px] font-bold text-cyan-light shadow-glow-sm">
+            <span className="rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-[11px] font-bold text-gold-light shadow-glow-sm">
               {activeUser?.role ?? 'guest'}
             </span>
           </div>
@@ -123,22 +117,23 @@ export function AdminLayout({
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     isActive
-                      ? 'bg-cyan/10 text-cyan-light shadow-glow-sm ring-1 ring-cyan/20'
+                      ? 'bg-gold/10 text-gold shadow-glow-sm ring-1 ring-gold/20'
                       : 'text-text-secondary hover:bg-surface-elevated/70 hover:text-text-primary',
                   )}
                 >
                   <item.icon
                     className={cn(
                       'h-4 w-4 shrink-0 transition-colors',
-                      isActive ? 'text-cyan' : 'text-text-muted group-hover:text-text-secondary',
+                      isActive ? 'text-gold' : 'text-text-muted group-hover:text-text-secondary',
                     )}
                   />
                   <span>{item.label}</span>
                   {isActive ? (
-                    <ChevronRight className="ml-auto h-3.5 w-3.5 text-cyan/60" />
+                    <ChevronRight className="ml-auto h-3.5 w-3.5 text-gold/60" />
                   ) : null}
                 </Link>
               );

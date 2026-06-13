@@ -191,8 +191,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    backgroundColor: 'rgba(84, 217, 232, 0.08)',
-    borderColor: 'rgba(84, 217, 232, 0.24)',
+    backgroundColor: colors.accent.goldMuted,
+    borderColor: 'rgba(212, 175, 55, 0.30)',
   },
   formPanel: {
     gap: spacing.md,

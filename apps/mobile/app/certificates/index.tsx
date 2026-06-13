@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.interactive.pressed,
     borderWidth: 1,
-    borderColor: 'rgba(84, 217, 232, 0.28)',
+    borderColor: 'rgba(212, 175, 55, 0.36)',
   },
   cardTitleWrap: {
     flex: 1,

@@ -179,7 +179,7 @@ export default function AdminEventDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="glass" size="sm" onClick={() => refetch()}>
+          <Button variant="secondary" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
@@ -199,7 +199,7 @@ export default function AdminEventDetailPage() {
             className={cn(
               'rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200',
               filter === f.value
-                ? 'border-cyan/40 bg-cyan/10 text-cyan-light shadow-glow-sm'
+                ? 'border-gold/40 bg-gold/10 text-gold-light shadow-glow-sm'
                 : 'border-surface-border/40 text-text-muted hover:border-surface-border/60 hover:text-text-secondary',
             )}
           >
@@ -216,7 +216,7 @@ export default function AdminEventDetailPage() {
           placeholder="Search by name, phone, email, clinic..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-surface-border/50 bg-surface-card py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted/50 focus:border-cyan/40 focus:outline-none focus:ring-2 focus:ring-cyan/15"
+          className="w-full rounded-xl border border-surface-border/50 bg-surface-card py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted/50 focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/15"
         />
       </div>
 
@@ -294,7 +294,7 @@ export default function AdminEventDetailPage() {
                 >
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan/10 text-cyan-light">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gold/10 text-gold-light">
                         <User className="h-4 w-4" />
                       </div>
                       <div>
@@ -349,7 +349,7 @@ export default function AdminEventDetailPage() {
                       {reg.status === 'pending' && (
                         <>
                           <Button
-                            variant="glow"
+                            variant="gold"
                             size="sm"
                             onClick={() => approveMutation.mutate(reg.id)}
                             loading={approveMutation.isPending}
@@ -382,7 +382,7 @@ export default function AdminEventDetailPage() {
                             </Button>
                           )}
                           <Button variant="ghost" size="sm" icon>
-                            <QrCode className="h-4 w-4 text-cyan" />
+                            <QrCode className="h-4 w-4 text-gold" />
                           </Button>
                         </>
                       )}

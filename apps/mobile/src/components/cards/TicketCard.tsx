@@ -88,8 +88,8 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
   },
   activeCard: {
-    borderColor: 'rgba(94, 234, 212, 0.42)',
-    backgroundColor: 'rgba(16, 40, 52, 0.92)',
+    borderColor: 'rgba(212, 175, 55, 0.42)',
+    backgroundColor: colors.surface.elevated,
   },
   inactiveCard: {
     opacity: 0.78,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   kicker: {
     ...textStyles.caption,
-    color: colors.accent.primary,
+    color: colors.accent.gold,
     textTransform: 'uppercase',
   },
   title: {

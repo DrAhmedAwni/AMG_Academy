@@ -92,7 +92,7 @@ export function GoogleProfileCompletionForm({
         });
       }}
     >
-      <div className="rounded-xl border border-cyan/30 bg-cyan/10 px-4 py-3 text-sm text-text-secondary">
+      <div className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-text-secondary">
         Google verified <span className="font-semibold text-text-primary">{profile.email}</span>.
         Complete your AMG Academy profile to continue.
       </div>
@@ -110,7 +110,7 @@ export function GoogleProfileCompletionForm({
           <select
             value={dialCode}
             onChange={(event) => setDialCode(event.target.value)}
-            className="h-10 w-full rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary shadow-sm transition-all duration-200 focus:border-cyan/60 focus:outline-none focus:ring-2 focus:ring-cyan/20"
+            className="h-10 w-full rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary shadow-sm transition-all duration-200 focus:border-gold/60 focus:outline-none focus:ring-2 focus:ring-gold/20"
           >
             {countryDialCodes.map((country) => (
               <option key={`${country.country}-${country.code}`} value={country.code}>

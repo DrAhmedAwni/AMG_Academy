@@ -158,9 +158,9 @@ export default function AdminLessonsPage() {
                   key={course.id}
                   type="button"
                   onClick={() => handleCourseChange(course.id)}
-                  className="flex items-center gap-3 rounded-xl border border-surface-border/60 bg-surface-card/70 p-4 text-left transition-all hover:border-cyan/40 hover:bg-surface-card"
+                  className="flex items-center gap-3 rounded-xl border border-surface-border/60 bg-surface-card/70 p-4 text-left transition-all hover:border-gold/40 hover:bg-surface-card"
                 >
-                  <BookOpen className="h-5 w-5 shrink-0 text-cyan" />
+                  <BookOpen className="h-5 w-5 shrink-0 text-gold" />
                   <span className="font-medium text-text-primary">{course.title}</span>
                 </button>
               ))}
@@ -208,7 +208,7 @@ export default function AdminLessonsPage() {
         <select
           value={courseId}
           onChange={(e) => handleCourseChange(e.target.value)}
-          className="h-10 rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary outline-none focus:border-cyan/60 focus:ring-2 focus:ring-cyan/20"
+          className="h-10 rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/20"
         >
           {coursesQuery.data?.map((course) => (
             <option key={course.id} value={course.id}>{course.title}</option>
@@ -386,7 +386,7 @@ function LessonFormModal({
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-text-secondary">Description</span>
           <textarea
-            className="w-full rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 py-2 text-sm text-text-primary outline-none focus:border-cyan/60 focus:ring-2 focus:ring-cyan/20"
+            className="w-full rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 py-2 text-sm text-text-primary outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/20"
             rows={3}
             placeholder="Description"
             value={form.description}
@@ -455,7 +455,7 @@ function LessonFormModal({
                 value={driveUrl}
                 onChange={(e) => setDriveUrl(e.target.value)}
                 placeholder="https://drive.google.com/file/d/..."
-                className="flex-1 rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 py-2 text-sm text-text-primary outline-none focus:border-cyan/60 focus:ring-2 focus:ring-cyan/20"
+                className="flex-1 rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 py-2 text-sm text-text-primary outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/20"
               />
               <Button size="sm" onClick={handleAttachDriveUrl} disabled={attaching || !driveUrl.trim()}>
                 {attaching ? 'Attaching...' : 'Attach'}
@@ -468,7 +468,7 @@ function LessonFormModal({
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime"
                 onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
-                className="w-full text-sm text-text-primary file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan/10 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-cyan hover:file:bg-cyan/20"
+                className="w-full text-sm text-text-primary file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gold/10 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gold hover:file:bg-gold/20"
               />
               <p className="text-xs text-text-muted">MP4, WebM, MOV up to 500MB</p>
               {uploadFile && (

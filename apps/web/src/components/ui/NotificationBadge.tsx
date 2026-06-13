@@ -24,12 +24,12 @@ export function NotificationBadge() {
   return (
     <Link
       href="/notifications"
-      className="relative rounded-md p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-action focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+      className="relative rounded-md p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-surface-main"
       aria-label={count > 0 ? `${count} unread notifications` : 'Open notifications'}
     >
       <Bell className="h-5 w-5 text-text-secondary transition-colors hover:text-text-primary" />
       {count > 0 && (
-        <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-action px-1 text-[10px] font-bold text-white">
+        <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-bold text-surface-main">
           {count > 99 ? '99+' : count}
         </span>
       )}

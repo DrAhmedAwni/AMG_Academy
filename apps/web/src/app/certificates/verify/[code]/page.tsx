@@ -69,8 +69,8 @@ export default function CertificateVerificationPage() {
     <main className="min-h-screen bg-surface-main px-4 py-10 text-text-primary">
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="space-y-2 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-cyan/30 bg-cyan/10">
-            <Award className="h-7 w-7 text-cyan" />
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-gold/30 bg-gold/10">
+            <Award className="h-7 w-7 text-gold" />
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
             AMG Academy

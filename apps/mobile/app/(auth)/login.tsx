@@ -55,10 +55,23 @@ export default function LoginScreen() {
     router.replace('/(tabs)/home' as never);
   };
 
+  const updateField = (field: keyof LoginFormValues, value: string) => {
+    if (loginMutation.error) {
+      loginMutation.reset();
+    }
+    setValues((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  };
+
   return (
     <Screen contentStyle={styles.screen}>
       <View style={styles.hero}>
-        <Image source={require('../../assets/logo-horizontal.png')} style={styles.logo} resizeMode="contain" />
+        <Image
+          source={require('../../assets/logo-horizontal.png')}
+          style={styles.logo}
+          resizeMode="contain"
+          accessibilityLabel="AMG Academy"
+        />
         <View style={styles.brandPill}>
           <Text style={styles.brandPillText}>Premium dental learning</Text>
         </View>
@@ -86,20 +99,22 @@ export default function LoginScreen() {
         <TextField
           label="Email"
           value={values.email}
-          onChangeText={(email) => setValues((current) => ({ ...current, email }))}
+          onChangeText={(email) => updateField('email', email)}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
           textContentType="emailAddress"
           error={errors.email}
+          required
         />
         <TextField
           label="Password"
           value={values.password}
-          onChangeText={(password) => setValues((current) => ({ ...current, password }))}
+          onChangeText={(password) => updateField('password', password)}
           secureTextEntry={!showPassword}
           textContentType="password"
           error={errors.password}
+          required
           rightAction={
             <PasswordToggle
               visible={showPassword}
@@ -192,10 +207,10 @@ const styles = StyleSheet.create({
     color: colors.text.muted,
   },
   actionRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: spacing.sm,
   },
   actionButton: {
-    flex: 1,
+    width: '100%',
   },
 });

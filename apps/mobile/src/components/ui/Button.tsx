@@ -56,7 +56,7 @@ export function Button({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'primary' || variant === 'google' ? colors.text.primary : colors.accent.primary}
+          color={variant === 'primary' || variant === 'google' ? colors.text.inverse : colors.accent.primary}
           size="small"
         />
       ) : null}
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
   },
   secondary: {
-    backgroundColor: colors.surface.raised,
+    backgroundColor: colors.surface.elevated,
     borderColor: colors.border.strong,
   },
   secondaryText: {
@@ -127,8 +127,8 @@ const styles = StyleSheet.create({
     color: colors.accent.primary,
   },
   danger: {
-    backgroundColor: 'rgba(251, 113, 133, 0.14)',
-    borderColor: 'rgba(251, 113, 133, 0.44)',
+    backgroundColor: 'rgba(255, 107, 122, 0.14)',
+    borderColor: 'rgba(255, 107, 122, 0.44)',
   },
   dangerText: {
     color: colors.status.error,
@@ -138,14 +138,14 @@ const styles = StyleSheet.create({
     borderColor: '#DB4437',
   },
   googleText: {
-    color: colors.text.primary,
+    color: colors.text.inverse,
   },
   pressed: {
     opacity: 0.86,
     transform: [{ scale: 0.99 }],
   },
   disabled: {
-    opacity: 0.72,
+    opacity: 0.62,
     backgroundColor: colors.surface.muted,
     borderColor: colors.border.default,
   },

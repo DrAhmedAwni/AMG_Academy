@@ -105,7 +105,7 @@ export default function CaseForumPage() {
         description="Explore clinical cases shared by the AMG community. Learn from peers and share your own experiences."
         actions={
           <Link href="/dashboard/cases/submit">
-            <Button variant="glow" size="sm">
+              <Button variant="gold" size="sm">
               <PlusCircle className="h-4 w-4" />
               Submit Case
             </Button>

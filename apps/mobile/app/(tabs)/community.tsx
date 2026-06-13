@@ -111,8 +111,8 @@ export default function CommunityTab() {
           <Badge
             label="AMG community"
             foreground={colors.accent.primary}
-            background="rgba(84, 217, 232, 0.14)"
-            border="rgba(84, 217, 232, 0.34)"
+            background={colors.accent.goldMuted}
+            border="rgba(212, 175, 55, 0.36)"
           />
           <Ionicons name="sparkles-outline" size={20} color={colors.accent.primary} />
         </View>
@@ -177,8 +177,8 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     gap: spacing.md,
-    borderColor: 'rgba(94, 234, 212, 0.28)',
-    backgroundColor: 'rgba(13, 34, 48, 0.92)',
+    borderColor: 'rgba(212, 175, 55, 0.34)',
+    backgroundColor: colors.surface.base,
     padding: spacing.xl,
   },
   heroTopRow: {
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(84, 217, 232, 0.34)',
+    borderColor: 'rgba(212, 175, 55, 0.36)',
     backgroundColor: colors.interactive.pressed,
   },
   featureCopy: {

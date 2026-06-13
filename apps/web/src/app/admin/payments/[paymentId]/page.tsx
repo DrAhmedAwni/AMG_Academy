@@ -181,7 +181,7 @@ export default function AdminPaymentDetailPage() {
                 />
                 <Button
                   className="w-full"
-                  variant="glow"
+                  variant="gold"
                   onClick={() => verifyMutation.mutate('manually_verified')}
                   loading={verifyMutation.isPending}
                 >

@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-13T00:00:00.000Z",
+  "title": "Design System: AMG Academy",
+  "extensions": {
+    "colorMeta": {
+      "clinical-bg": {
+        "role": "neutral",
+        "displayName": "Clinical Background",
+        "canonical": "#F4F8FB",
+        "tonalRamp": ["#121B26", "#2B4255", "#516173", "#8190A1", "#C4D4DD", "#D8E4EA", "#E7EEF3", "#F4F8FB"]
+      },
+      "aqua-wash": {
+        "role": "neutral",
+        "displayName": "Aqua Wash",
+        "canonical": "#E6F6F7",
+        "tonalRamp": ["#0F2A2E", "#19484E", "#287278", "#5EAEB4", "#A8D9DC", "#CBEDEF", "#E6F6F7", "#F4FBFC"]
+      },
+      "white-surface": {
+        "role": "neutral",
+        "displayName": "White Surface",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#102033", "#516173", "#8190A1", "#C4D4DD", "#D8E4EA", "#E7EEF3", "#F8FBFC", "#FFFFFF"]
+      },
+      "teal-primary": {
+        "role": "primary",
+        "displayName": "AMG Teal",
+        "canonical": "#12B8A6",
+        "tonalRamp": ["#042C29", "#07534B", "#0B766B", "#0F9F90", "#12B8A6", "#4ED5C8", "#98E8E0", "#DDF8F5"]
+      },
+      "gold-accent": {
+        "role": "secondary",
+        "displayName": "Clinical Gold",
+        "canonical": "#C58A18",
+        "tonalRamp": ["#2E1F05", "#5C3D07", "#875B0D", "#A87312", "#C58A18", "#E1AF4E", "#F1D18D", "#FBF0D2"]
+      },
+      "ink-primary": {
+        "role": "neutral",
+        "displayName": "Ink Primary",
+        "canonical": "#102033",
+        "tonalRamp": ["#02060A", "#102033", "#25374A", "#516173", "#8190A1", "#B4C0CC", "#D8E4EA", "#F4F8FB"]
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "Clinical Error",
+        "canonical": "#E24B5F",
+        "tonalRamp": ["#3A0810", "#6E1623", "#A52C3D", "#C73C50", "#E24B5F", "#EC7C8A", "#F7B5BE", "#FDE7EA"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Screen titles and auth headers only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headers and modal titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Readable product copy and instructions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels, button chrome, and metadata."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "shadowColor #1D3950, offset 0 12, opacity 0.09, radius 22, elevation 4",
+        "purpose": "Major task panels and cards."
+      },
+      {
+        "name": "soft",
+        "value": "shadowColor #1D3950, offset 0 6, opacity 0.08, radius 16, elevation 3",
+        "purpose": "Lightweight rows and subtle active surfaces."
+      },
+      {
+        "name": "teal-glow",
+        "value": "shadowColor #12B8A6, offset 0 10, opacity 0.18, radius 28, elevation 7",
+        "purpose": "Primary buttons only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-feedback",
+        "value": "150ms-250ms ease-out",
+        "purpose": "Pressed, focus, loading, and state changes only."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "primary"
+      },
+      {
+        "name": "max-content",
+        "value": "720px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main task action for registration, enrollment, profile completion, and scanner decisions.",
+      "html": "<button class=\"ds-btn-primary\">Complete profile</button>",
+      "css": ".ds-btn-primary { min-height: 52px; padding: 12px 20px; border: 1px solid #12B8A6; border-radius: 999px; background: #12B8A6; color: #FFFFFF; font-family: Montserrat, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 700; text-align: center; box-shadow: 0 10px 28px rgba(18,184,166,0.18); transition: opacity 180ms ease-out, transform 180ms ease-out; } .ds-btn-primary:hover { background: #0F9F90; border-color: #0F9F90; } .ds-btn-primary:focus-visible { outline: 3px solid rgba(18,184,166,0.32); outline-offset: 2px; } .ds-btn-primary:active { opacity: 0.86; transform: scale(0.99); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Back, alternate, and secondary actions that should not compete with the primary task.",
+      "html": "<button class=\"ds-btn-secondary\">Back</button>",
+      "css": ".ds-btn-secondary { min-height: 52px; padding: 12px 20px; border: 1px solid #C4D4DD; border-radius: 999px; background: #FFFFFF; color: #102033; font-family: Montserrat, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 700; text-align: center; transition: background 180ms ease-out, transform 180ms ease-out; } .ds-btn-secondary:hover { background: #F8FBFC; } .ds-btn-secondary:focus-visible { outline: 3px solid rgba(18,184,166,0.28); outline-offset: 2px; } .ds-btn-secondary:active { transform: scale(0.99); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-emphasis navigation or utility action.",
+      "html": "<button class=\"ds-btn-ghost\">Forgot password</button>",
+      "css": ".ds-btn-ghost { min-height: 52px; padding: 12px 20px; border: 1px solid #D8E4EA; border-radius: 999px; background: #F8FBFC; color: #12B8A6; font-family: Montserrat, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 700; text-align: center; transition: background 180ms ease-out, transform 180ms ease-out; } .ds-btn-ghost:hover { background: #EEF7F8; } .ds-btn-ghost:focus-visible { outline: 3px solid rgba(18,184,166,0.28); outline-offset: 2px; } .ds-btn-ghost:active { transform: scale(0.99); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Large mobile input with visible label, optional required mark, and clear error state.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Full name <strong>*</strong></span><input class=\"ds-input\" placeholder=\"Mohamed Mostafa\" /></label>",
+      "css": ".ds-field { display: grid; gap: 8px; font-family: Montserrat, Arial, sans-serif; color: #102033; } .ds-field-label { font-size: 14px; line-height: 20px; font-weight: 600; } .ds-field-label strong { color: #E24B5F; } .ds-input { min-height: 54px; border: 1px solid #D8E4EA; border-radius: 18px; background: #FFFFFF; color: #102033; padding: 12px 20px; font: 400 16px/24px Montserrat, Arial, sans-serif; } .ds-input::placeholder { color: #516173; } .ds-input:focus { outline: none; border-color: #12B8A6; box-shadow: 0 0 0 3px rgba(18,184,166,0.16); }"
+    },
+    {
+      "name": "Phone Field",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "International phone row with fixed country code and flexible phone number field.",
+      "html": "<div class=\"ds-phone\"><span class=\"ds-phone-label\">Phone <strong>*</strong></span><div class=\"ds-phone-row\"><button class=\"ds-country\">🇪🇬 +20</button><input class=\"ds-phone-input\" placeholder=\"Phone number\" /></div></div>",
+      "css": ".ds-phone { display: grid; gap: 8px; font-family: Montserrat, Arial, sans-serif; color: #102033; } .ds-phone-label { font-size: 14px; line-height: 20px; font-weight: 600; } .ds-phone-label strong { color: #E24B5F; } .ds-phone-row { display: flex; align-items: flex-start; gap: 12px; min-height: 58px; } .ds-country { width: 128px; min-height: 56px; border: 1px solid #D8E4EA; border-radius: 14px; background: #FFFFFF; color: #102033; font: 600 14px/20px Montserrat, Arial, sans-serif; } .ds-phone-input { flex: 1; min-width: 0; min-height: 54px; border: 1px solid #D8E4EA; border-radius: 18px; background: #FFFFFF; color: #102033; padding: 12px 20px; font: 400 16px/24px Montserrat, Arial, sans-serif; } .ds-phone-input:focus { outline: none; border-color: #12B8A6; box-shadow: 0 0 0 3px rgba(18,184,166,0.16); }"
+    },
+    {
+      "name": "Task Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Primary white panel for forms, tickets, event summaries, and grouped workflows.",
+      "html": "<section class=\"ds-card\"><h3>Workshop registration</h3><p>Confirm your attendance and ticket status.</p></section>",
+      "css": ".ds-card { border: 1px solid #D8E4EA; border-radius: 18px; background: #FFFFFF; color: #102033; padding: 20px; box-shadow: 0 12px 22px rgba(29,57,80,0.09); font-family: Montserrat, Arial, sans-serif; } .ds-card h3 { margin: 0 0 8px; font-size: 19px; line-height: 28px; font-weight: 700; } .ds-card p { margin: 0; color: #516173; font-size: 16px; line-height: 24px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-status",
+      "description": "Compact backend-owned state label for payment, ticket, certificate, scanner, and enrollment status.",
+      "html": "<span class=\"ds-status-badge\">Payment required</span>",
+      "css": ".ds-status-badge { display: inline-flex; align-items: center; min-height: 30px; padding: 4px 12px; border: 1px solid rgba(197,138,24,0.34); border-radius: 999px; background: rgba(197,138,24,0.12); color: #C58A18; font-family: Montserrat, Arial, sans-serif; font-size: 12px; line-height: 16px; font-weight: 700; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Clinical Event Passport",
+    "overview": "AMG Academy should feel like the trusted digital passport for a dentist's professional learning life: polished enough for a medical devices company, clear enough for event-day pressure, and energetic enough to support workshops, congresses, courses, tickets, and certificates.",
+    "keyCharacteristics": [
+      "Clinical light surfaces with teal action color and AMG brand restraint.",
+      "One-font product typography using Montserrat across headings, labels, inputs, and buttons.",
+      "Pill actions and badges paired with moderately rounded cards and inputs.",
+      "Status-first language for payment, tickets, certificates, scanning, and access.",
+      "Mobile-first spacing with safe keyboard behavior and clear required-field marks."
+    ],
+    "rules": [
+      {
+        "name": "The Teal Means Action Rule",
+        "body": "AMG Teal is for action, selection, focus, and confirmed status. Do not spend it on decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Gloom Rule",
+        "body": "Dark appearance may use slate surfaces, but heavy near-black screens are prohibited for form-heavy flows.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Do not add display fonts, script fonts, or decorative type. The product earns trust by making Montserrat work well.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Decorative Glass Rule",
+        "body": "Do not use blur or glassmorphism as a default surface treatment.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep AMG Teal scarce and meaningful: primary actions, selected state, focus, and validated success cues.",
+      "Do use the light clinical palette as the default experience for form-heavy flows.",
+      "Do mark required form fields with a visible asterisk and keep optional professional metadata visually optional.",
+      "Do write error messages that name the fix, especially for login, Google profile completion, payment, scanner, and certificate states.",
+      "Do preserve backend authority in UI copy: payment, eligibility, QR, course access, and certificates must read as server-confirmed."
+    ],
+    "donts": [
+      "Don't use heavy near-black interfaces that make forms and event flows feel gloomy or hard to read.",
+      "Don't make the product look like a generic SaaS dashboard.",
+      "Don't use decorative glassmorphism, blur panels, or glossy cards as a default visual system.",
+      "Don't over-round cards, sections, or inputs beyond the token scale.",
+      "Don't ship vague errors like \"Something went wrong\" when a form, session, or API state can be explained.",
+      "Don't use childish learning-app styling, cluttered promotional layouts, or flashy event visuals that make AMG feel less medical or less trustworthy."
+    ]
+  }
+}

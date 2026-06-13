@@ -15,20 +15,37 @@ export interface TextFieldProps extends TextInputProps {
   error?: string;
   helperText?: string;
   rightAction?: ReactNode;
+  required?: boolean;
+  labelVisible?: boolean;
 }
 
-export function TextField({ label, error, helperText, rightAction, style, onPress, ...inputProps }: TextFieldProps) {
-  const describedBy = error ? `${label}-error` : helperText ? `${label}-helper` : undefined;
+export function TextField({
+  label,
+  error,
+  helperText,
+  rightAction,
+  required,
+  labelVisible = true,
+  style,
+  onPress,
+  ...inputProps
+}: TextFieldProps) {
+  const accessibilityHint = error ?? helperText;
   const pressableInput = inputProps.editable === false && typeof onPress === 'function';
 
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      {labelVisible ? (
+        <Text style={styles.label}>
+          {label}
+          {required ? <Text style={styles.required}> *</Text> : null}
+        </Text>
+      ) : null}
       <View style={styles.inputWrapper}>
         <TextInput
           {...inputProps}
           accessibilityLabel={inputProps.accessibilityLabel ?? label}
-          accessibilityHint={describedBy}
+          accessibilityHint={accessibilityHint}
           placeholderTextColor={colors.text.muted}
           style={[
             styles.input,
@@ -79,6 +96,9 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.semibold,
   },
+  required: {
+    color: colors.status.error,
+  },
   inputWrapper: {
     position: 'relative',
     justifyContent: 'center',
@@ -96,7 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border.default,
-    backgroundColor: colors.surface.glass,
+    backgroundColor: colors.surface.elevated,
     color: colors.text.primary,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,

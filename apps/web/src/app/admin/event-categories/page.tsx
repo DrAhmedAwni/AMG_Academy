@@ -159,7 +159,7 @@ export default function AdminEventCategoriesPage() {
                     className="flex flex-1 items-center gap-3 text-left"
                     onClick={() => setExpandedId(isExpanded ? null : cat.id)}
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan/10 text-cyan">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10 text-gold">
                       <Tag className="h-4 w-4" />
                     </div>
                     <div className="flex-1">

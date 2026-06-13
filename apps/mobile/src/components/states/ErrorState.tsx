@@ -11,8 +11,8 @@ export interface ErrorStateProps {
 }
 
 export function ErrorState({
-  title = 'Something went wrong',
-  message = 'Please try again.',
+  title = 'Request not completed',
+  message = 'Check the details and try again.',
   retryLabel = 'Try again',
   onRetry,
 }: ErrorStateProps) {

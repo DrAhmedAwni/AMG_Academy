@@ -70,12 +70,10 @@ function SummaryCard({
 function QuickAction({
   icon,
   label,
-  helper,
   onPress,
 }: {
   icon: IconName;
   label: string;
-  helper: string;
   onPress: () => void;
 }) {
   return (
@@ -86,15 +84,9 @@ function QuickAction({
       style={({ pressed }) => [styles.quickAction, pressed ? styles.pressed : null]}
     >
       <View style={styles.quickIcon}>
-        <Ionicons name={icon} size={20} color={colors.accent.primary} />
+        <Ionicons name={icon} size={22} color={colors.accent.primary} />
       </View>
-      <View style={styles.quickCopy}>
-        <Text style={styles.quickLabel}>{label}</Text>
-        <Text numberOfLines={2} style={styles.quickHelper}>{helper}</Text>
-      </View>
-      <View style={styles.quickChevron}>
-        <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
-      </View>
+      <Text numberOfLines={2} style={styles.quickLabel}>{label}</Text>
     </Pressable>
   );
 }
@@ -136,41 +128,86 @@ export default function HomeTab() {
 
   return (
     <Screen contentStyle={styles.screen}>
-      <Header
-        title={`Welcome${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
-        subtitle="Continue learning where you left off."
-      />
+      <View style={styles.topBar}>
+        <Header
+          title={`Good evening${user?.name ? `, Dr. ${user.name.split(' ')[0]}` : ''}`}
+          subtitle="Your AMG Academy event, course, and ticket passport."
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Find events and courses"
+          onPress={() => goTo('/(tabs)/events')}
+          style={({ pressed }) => [styles.searchBar, pressed ? styles.pressed : null]}
+        >
+          <Ionicons name="search" size={18} color={colors.text.muted} />
+          <Text style={styles.searchText}>Find events, courses, tickets...</Text>
+        </Pressable>
+      </View>
 
       <GlassCard style={styles.heroCard}>
         <View style={styles.heroTopRow}>
           <View style={styles.heroIcon}>
-            <Ionicons name="school" size={24} color={colors.accent.primary} />
+            <Ionicons name="calendar" size={24} color={colors.accent.primary} />
           </View>
           <Badge
-            label={pendingReservations.length > 0 ? `${pendingReservations.length} needs attention` : 'Ready'}
+            label={pendingReservations.length > 0 ? `${pendingReservations.length} needs attention` : 'Event ready'}
             foreground={colors.accent.primary}
-            background="rgba(84, 217, 232, 0.14)"
-            border="rgba(84, 217, 232, 0.34)"
+            background={colors.accent.goldMuted}
+            border="rgba(212, 175, 55, 0.36)"
           />
         </View>
-        <Text style={styles.title}>Your learning today</Text>
+        <Text style={styles.kicker}>Next AMG moment</Text>
+        <Text style={styles.title}>{upcomingReservation?.event.title ?? 'Discover your next clinical event'}</Text>
         <Text style={styles.body}>
-          Track your courses, events, tickets, and certificates in one place.
+          {upcomingReservation
+            ? `Reserved for ${formatShortDate(upcomingReservation.event.startDate)}. Open the reservation for details.`
+            : 'Browse AMG workshops, congress activities, and dental education courses.'}
         </Text>
         <View style={styles.heroActions}>
           <Button
-            label={firstEnrollment ? 'Continue learning' : 'Browse courses'}
-            onPress={() => goTo(firstEnrollment ? '/courses/my-courses' : '/(tabs)/courses')}
+            label={upcomingReservation ? 'Open reservation' : 'Browse events'}
+            onPress={() => goTo(upcomingReservation ? '/events/reservations' : '/(tabs)/events')}
             style={styles.heroAction}
           />
           <Button
-            label="My tickets"
+            label={activeTickets.length > 0 ? 'Show QR tickets' : firstEnrollment ? 'Continue course' : 'Courses'}
             variant="secondary"
-            onPress={() => goTo('/(tabs)/tickets')}
+            onPress={() => goTo(activeTickets.length > 0 ? '/(tabs)/tickets' : firstEnrollment ? '/courses/my-courses' : '/(tabs)/courses')}
             style={styles.heroAction}
           />
         </View>
       </GlassCard>
+
+      <View style={styles.section}>
+        <SectionHeader title="Quick access" subtitle="Go straight to the task you need." />
+        <View style={styles.quickGrid}>
+          <QuickAction
+            icon="calendar"
+            label="Events"
+            onPress={() => goTo('/(tabs)/events')}
+          />
+          <QuickAction
+            icon="school"
+            label="Courses"
+            onPress={() => goTo('/courses/my-courses')}
+          />
+          <QuickAction
+            icon="qr-code"
+            label="Tickets"
+            onPress={() => goTo('/(tabs)/tickets')}
+          />
+          <QuickAction
+            icon="ribbon"
+            label="Certificates"
+            onPress={() => goTo('/certificates')}
+          />
+          <QuickAction
+            icon="chatbubbles"
+            label="Cases"
+            onPress={() => goTo('/(tabs)/cases')}
+          />
+        </View>
+      </View>
 
       <View style={styles.summaryGrid}>
         <SummaryCard
@@ -208,42 +245,6 @@ export default function HomeTab() {
           tone="success"
         />
       </View>
-
-      <View style={styles.section}>
-        <SectionHeader title="Quick actions" subtitle="Open the areas you use most." />
-        <View style={styles.quickGrid}>
-          <QuickAction
-            icon="school"
-            label="Continue Learning"
-            helper="Open your courses"
-            onPress={() => goTo('/courses/my-courses')}
-          />
-          <QuickAction
-            icon="qr-code"
-            label="My Tickets"
-            helper="Open your event wallet"
-            onPress={() => goTo('/(tabs)/tickets')}
-          />
-          <QuickAction
-            icon="calendar"
-            label="Upcoming Events"
-            helper="Browse and register"
-            onPress={() => goTo('/(tabs)/events')}
-          />
-          <QuickAction
-            icon="chatbubbles"
-            label="Case Discussions"
-            helper="Browse community cases"
-            onPress={() => goTo('/(tabs)/cases')}
-          />
-          <QuickAction
-            icon="ribbon"
-            label="Certificates"
-            helper="View achievements"
-            onPress={() => goTo('/certificates')}
-          />
-        </View>
-      </View>
     </Screen>
   );
 }
@@ -252,10 +253,28 @@ const styles = StyleSheet.create({
   screen: {
     gap: spacing.lg,
   },
+  topBar: {
+    gap: spacing.sm,
+  },
+  searchBar: {
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.elevated,
+    paddingHorizontal: spacing.md,
+  },
+  searchText: {
+    ...textStyles.caption,
+    color: colors.text.muted,
+  },
   heroCard: {
     gap: spacing.md,
-    borderColor: 'rgba(94, 234, 212, 0.32)',
-    backgroundColor: 'rgba(13, 34, 48, 0.94)',
+    borderColor: 'rgba(212, 175, 55, 0.38)',
+    backgroundColor: colors.surface.base,
     padding: spacing.xl,
   },
   heroTopRow: {
@@ -271,13 +290,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(84, 217, 232, 0.34)',
+    borderColor: 'rgba(212, 175, 55, 0.36)',
     backgroundColor: colors.interactive.pressed,
+  },
+  kicker: {
+    ...textStyles.caption,
+    color: colors.accent.gold,
+    textTransform: 'uppercase',
+    fontWeight: typography.weight.bold,
   },
   title: {
     ...textStyles.title,
-    fontSize: 32,
-    lineHeight: 40,
+    fontSize: typography.size.xxl,
+    lineHeight: typography.lineHeight.xxl,
   },
   body: {
     ...textStyles.body,
@@ -338,45 +363,29 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   quickAction: {
-    position: 'relative',
-    width: '48%',
-    minHeight: 132,
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border.strong,
-    backgroundColor: colors.surface.glass,
-    padding: spacing.lg,
+    width: 76,
+    minHeight: 92,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: spacing.xs,
   },
   pressed: {
     opacity: 0.88,
     transform: [{ scale: 0.995 }],
   },
   quickIcon: {
-    width: 44,
-    height: 44,
+    width: 58,
+    height: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.interactive.pressed,
-  },
-  quickCopy: {
-    width: '100%',
-    minWidth: 0,
-    gap: spacing.xxs,
-  },
-  quickChevron: {
-    position: 'absolute',
-    top: spacing.md,
-    right: spacing.md,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.48)',
+    backgroundColor: colors.surface.elevated,
   },
   quickLabel: {
+    ...textStyles.caption,
     color: colors.text.primary,
-    fontSize: typography.size.md,
-    lineHeight: typography.lineHeight.md,
-    fontWeight: typography.weight.bold,
+    textAlign: 'center',
   },
-  quickHelper: textStyles.caption,
 });

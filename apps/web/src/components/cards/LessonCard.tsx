@@ -23,15 +23,15 @@ export function LessonCard({ lesson, onClick, isActive }: LessonCardProps) {
       className={cn(
         'flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-all duration-200',
         isActive
-          ? 'border-cyan/40 bg-cyan/5 shadow-glow-sm'
-          : 'border-surface-border/30 bg-surface-card/60 hover:border-cyan/20 hover:bg-surface-card',
+          ? 'border-gold/30 bg-gold/5 shadow-glow-sm'
+          : 'border-surface-border bg-surface-card/80 hover:border-gold/15 hover:bg-surface-card',
       )}
     >
       <div className="mt-0.5 shrink-0">
         {lesson.isCompleted ? (
           <CheckCircle2 className="h-5 w-5 text-success" />
         ) : (
-          <Circle className="h-5 w-5 text-text-muted/40" />
+          <Circle className="h-5 w-5 text-text-muted/30" />
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -39,7 +39,7 @@ export function LessonCard({ lesson, onClick, isActive }: LessonCardProps) {
           <span
             className={cn(
               'text-sm font-medium',
-              isActive ? 'text-cyan-light' : 'text-text-primary',
+              isActive ? 'text-gold-light' : 'text-text-primary',
             )}
           >
             {lesson.orderIndex}. {lesson.title}
@@ -61,7 +61,7 @@ export function LessonCard({ lesson, onClick, isActive }: LessonCardProps) {
         <PlayCircle
           className={cn(
             'h-5 w-5',
-            isActive ? 'text-cyan' : 'text-text-muted/50',
+            isActive ? 'text-gold' : 'text-text-muted/40',
           )}
         />
       </div>

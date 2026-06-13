@@ -151,7 +151,7 @@ export function DataTable<T>({
                   <tr
                     key={key}
                     className={cn(
-                      'transition-colors hover:bg-cyan/[0.035]',
+                      'transition-colors hover:bg-gold/[0.035]',
                       idx % 2 === 0 ? 'bg-transparent' : 'bg-surface-main/25',
                     )}
                   >

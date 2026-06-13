@@ -148,7 +148,7 @@ export default function SubmitCasePage() {
               placeholder="Describe the case presentation, diagnosis, treatment plan, and outcome..."
               rows={8}
               required
-              className="h-48 w-full rounded-xl border bg-surface-card/90 px-3 py-2 text-sm text-text-primary shadow-sm placeholder:text-text-muted/60 border-surface-border/70 focus:border-cyan/60 focus:outline-none focus:ring-2 focus:ring-cyan/20 transition-all duration-200 resize-none"
+              className="h-48 w-full rounded-xl border bg-surface-card/90 px-3 py-2 text-sm text-text-primary shadow-sm placeholder:text-text-muted/60 border-surface-border/70 focus:border-gold/60 focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all duration-200 resize-none"
             />
             {fieldErrors.description ? (
               <span className="text-xs text-status-error">{fieldErrors.description}</span>
@@ -164,7 +164,7 @@ export default function SubmitCasePage() {
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               required
-              className="h-10 w-full rounded-xl border bg-surface-card/90 px-3 text-sm text-text-primary shadow-sm border-surface-border/70 focus:border-cyan/60 focus:outline-none focus:ring-2 focus:ring-cyan/20 transition-all duration-200"
+              className="h-10 w-full rounded-xl border bg-surface-card/90 px-3 text-sm text-text-primary shadow-sm border-surface-border/70 focus:border-gold/60 focus:outline-none focus:ring-2 focus:ring-gold/20 transition-all duration-200"
             >
               <option value="">Select a category...</option>
               {categories.map((cat) => (
@@ -189,7 +189,7 @@ export default function SubmitCasePage() {
           <div className="flex items-center gap-3 pt-2">
             <Button
               type="submit"
-              variant="glow"
+              variant="gold"
               loading={submitMutation.isPending}
               disabled={submitMutation.isPending}
             >

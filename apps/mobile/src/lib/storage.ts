@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import type { MobileAuthTokens } from '../types/api';
 
 const namespace = 'amg.mobile.v2';
@@ -22,16 +23,37 @@ export function resolveStorageKey(key: StorageKey | string) {
   return `${namespace}.${rawKey}`;
 }
 
+function canUseWebStorage() {
+  return Platform.OS === 'web' && typeof window !== 'undefined' && Boolean(window.localStorage);
+}
+
 export async function getSecureItem(key: StorageKey | string) {
-  return SecureStore.getItemAsync(resolveStorageKey(key), secureStoreOptions);
+  const resolvedKey = resolveStorageKey(key);
+  if (canUseWebStorage()) {
+    return window.localStorage.getItem(resolvedKey);
+  }
+
+  return SecureStore.getItemAsync(resolvedKey, secureStoreOptions);
 }
 
 export async function setSecureItem(key: StorageKey | string, value: string) {
-  await SecureStore.setItemAsync(resolveStorageKey(key), value, secureStoreOptions);
+  const resolvedKey = resolveStorageKey(key);
+  if (canUseWebStorage()) {
+    window.localStorage.setItem(resolvedKey, value);
+    return;
+  }
+
+  await SecureStore.setItemAsync(resolvedKey, value, secureStoreOptions);
 }
 
 export async function deleteSecureItem(key: StorageKey | string) {
-  await SecureStore.deleteItemAsync(resolveStorageKey(key), secureStoreOptions);
+  const resolvedKey = resolveStorageKey(key);
+  if (canUseWebStorage()) {
+    window.localStorage.removeItem(resolvedKey);
+    return;
+  }
+
+  await SecureStore.deleteItemAsync(resolvedKey, secureStoreOptions);
 }
 
 export function secondsFromNowToIso(seconds: number | undefined) {

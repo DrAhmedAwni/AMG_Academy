@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { countryDialCodes, type CountryDialCode } from '@amg/shared';
+import { StyleSheet, Text, View } from 'react-native';
 import { Button, TextField } from '../../components/ui';
 import { ErrorState } from '../../components/states/ErrorState';
+import { PhoneField } from '../../components/forms/PhoneField';
 import type {
   AuthFormErrors,
   GoogleProfileCompletionValues,
@@ -16,35 +16,21 @@ const requiredFields: Array<keyof Pick<
   'name' | 'phone' | 'specialty' | 'clinic' | 'city'
 >> = ['name', 'phone', 'specialty', 'clinic', 'city'];
 
-const defaultCountry = countryDialCodes[0] ?? { country: 'Egypt', code: '+20', flag: 'EG' };
+const requiredMessages: Record<(typeof requiredFields)[number], string> = {
+  name: 'Enter your full name.',
+  phone: 'Enter a phone number for AMG event updates.',
+  specialty: 'Enter your dental specialty.',
+  clinic: 'Enter your clinic, hospital, or institution.',
+  city: 'Enter your city.',
+};
 
-function findCountryForPhone(phone?: string) {
-  const trimmed = phone?.trim() ?? '';
-  if (!trimmed.startsWith('+')) {
-    return defaultCountry;
-  }
-
-  return [...countryDialCodes]
-    .sort((a, b) => b.code.length - a.code.length)
-    .find((country) => trimmed.startsWith(country.code)) ?? defaultCountry;
+function cleanProfileText(value: string | null | undefined) {
+  return value && value !== 'null' ? value : '';
 }
 
-function stripDialCode(phone: string | undefined, country: CountryDialCode) {
-  const trimmed = phone?.trim() ?? '';
-  if (!trimmed.startsWith(country.code)) {
-    return trimmed;
-  }
-
-  return trimmed.slice(country.code.length);
-}
-
-function formatPhone(country: CountryDialCode, phone: string) {
-  const trimmedPhone = phone.trim();
-  if (!trimmedPhone || trimmedPhone.startsWith('+')) {
-    return trimmedPhone;
-  }
-
-  return `${country.code}${trimmedPhone.replace(/^0+/, '')}`;
+function cleanOptionalProfileText(value: string) {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : undefined;
 }
 
 export function GoogleProfileCompletion({
@@ -62,21 +48,20 @@ export function GoogleProfileCompletion({
   onSubmit: (values: GoogleProfileCompletionValues) => Promise<void> | void;
   onCancel: () => void;
 }) {
-  const initialCountry = findCountryForPhone(profile.phone);
-  const [country, setCountry] = useState<CountryDialCode>(initialCountry);
-  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
   const [values, setValues] = useState<Omit<GoogleProfileCompletionValues, 'idToken'>>({
-    name: profile.name ?? '',
-    phone: stripDialCode(profile.phone, initialCountry),
-    specialty: profile.specialty ?? '',
-    clinic: profile.clinic ?? '',
-    city: profile.city ?? '',
-    professionalTitle: profile.professionalTitle ?? '',
-    practiceType: profile.practiceType ?? '',
+    name: cleanProfileText(profile.name),
+    phone: cleanProfileText(profile.phone),
+    specialty: cleanProfileText(profile.specialty),
+    clinic: cleanProfileText(profile.clinic),
+    city: cleanProfileText(profile.city),
+    professionalTitle: cleanProfileText(profile.professionalTitle),
+    practiceType: cleanProfileText(profile.practiceType),
     yearsOfExperience: profile.yearsOfExperience,
   });
   const [yearsText, setYearsText] = useState(
-    profile.yearsOfExperience === undefined ? '' : String(profile.yearsOfExperience),
+    profile.yearsOfExperience === undefined || profile.yearsOfExperience === null
+      ? ''
+      : String(profile.yearsOfExperience),
   );
   const [errors, setErrors] = useState<AuthFormErrors>({});
 
@@ -88,7 +73,7 @@ export function GoogleProfileCompletion({
   const submit = async () => {
     const nextErrors = requiredFields.reduce<AuthFormErrors>((fieldErrors, field) => {
       if (!String(values[field] ?? '').trim()) {
-        fieldErrors[field] = 'Required';
+        fieldErrors[field] = requiredMessages[field];
       }
       return fieldErrors;
     }, {});
@@ -98,88 +83,105 @@ export function GoogleProfileCompletion({
       return;
     }
 
+    const parsedYears = yearsText.trim() ? Number(yearsText.trim()) : undefined;
+    if (parsedYears !== undefined && (!Number.isInteger(parsedYears) || parsedYears < 0 || parsedYears > 80)) {
+      setErrors({ yearsOfExperience: 'Enter a number from 0 to 80' });
+      return;
+    }
+
     await onSubmit({
-      ...values,
+      name: values.name.trim(),
+      specialty: values.specialty.trim(),
+      clinic: values.clinic.trim(),
+      city: values.city.trim(),
+      professionalTitle: cleanOptionalProfileText(values.professionalTitle ?? ''),
+      practiceType: cleanOptionalProfileText(values.practiceType ?? ''),
       idToken,
-      phone: formatPhone(country, values.phone),
-      yearsOfExperience: yearsText.trim() ? Number(yearsText.trim()) : undefined,
+      phone: values.phone.trim(),
+      yearsOfExperience: parsedYears,
     });
   };
 
   return (
     <View style={styles.wrapper}>
       <View style={styles.notice}>
+        <Text style={styles.noticeTitle}>Verified with Google</Text>
         <Text style={styles.noticeText}>
-          Google verified {profile.email}. Complete your AMG Academy profile to continue.
+          {profile.email}
+        </Text>
+        <Text style={styles.noticeHint}>
+          Complete the required professional details so AMG can prepare event, course, and certificate records correctly.
         </Text>
       </View>
-      <TextField
-        label="Full name"
-        value={values.name}
-        onChangeText={(name) => updateField('name', name)}
-        error={errors.name}
-      />
-      <View style={styles.phoneGroup}>
-        <Text style={styles.phoneLabel}>Phone</Text>
-        <View style={styles.phoneRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Select country code"
-            onPress={() => setCountryPickerOpen(true)}
-            style={styles.countryButton}
-          >
-            <Text style={styles.countryFlag}>{country.flag}</Text>
-            <Text style={styles.countryCode}>{country.code}</Text>
-          </Pressable>
-          <View style={styles.phoneInput}>
-            <TextField
-              label="Phone number"
-              accessibilityLabel="Phone number"
-              value={values.phone}
-              onChangeText={(phone) => updateField('phone', phone)}
-              keyboardType="phone-pad"
-              error={errors.phone}
-            />
-          </View>
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Required profile</Text>
+          <Text style={styles.sectionHint}>Used for registrations, tickets, and certificates.</Text>
         </View>
+        <TextField
+          label="Full name"
+          value={values.name}
+          onChangeText={(name) => updateField('name', name)}
+          error={errors.name}
+          required
+        />
+        <PhoneField
+          value={values.phone}
+          onChangeText={(phone) => updateField('phone', phone)}
+          error={errors.phone}
+          required
+        />
+        <TextField
+          label="Specialty"
+          value={values.specialty}
+          onChangeText={(specialty) => updateField('specialty', specialty)}
+          error={errors.specialty}
+          required
+        />
+        <TextField
+          label="Clinic"
+          value={values.clinic}
+          onChangeText={(clinic) => updateField('clinic', clinic)}
+          error={errors.clinic}
+          required
+        />
+        <TextField
+          label="City"
+          value={values.city}
+          onChangeText={(city) => updateField('city', city)}
+          error={errors.city}
+          required
+        />
       </View>
-      <TextField
-        label="Specialty"
-        value={values.specialty}
-        onChangeText={(specialty) => updateField('specialty', specialty)}
-        error={errors.specialty}
-      />
-      <TextField
-        label="Clinic"
-        value={values.clinic}
-        onChangeText={(clinic) => updateField('clinic', clinic)}
-        error={errors.clinic}
-      />
-      <TextField
-        label="City"
-        value={values.city}
-        onChangeText={(city) => updateField('city', city)}
-        error={errors.city}
-      />
-      <TextField
-        label="Professional title"
-        value={values.professionalTitle}
-        onChangeText={(professionalTitle) => updateField('professionalTitle', professionalTitle)}
-        placeholder="Consultant, Resident, GP dentist"
-      />
-      <TextField
-        label="Practice type"
-        value={values.practiceType}
-        onChangeText={(practiceType) => updateField('practiceType', practiceType)}
-        placeholder="Private clinic, hospital, university"
-      />
-      <TextField
-        label="Years of experience"
-        value={yearsText}
-        onChangeText={setYearsText}
-        keyboardType="number-pad"
-        placeholder="5"
-      />
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Optional practice details</Text>
+          <Text style={styles.sectionHint}>Add these now if you want AMG records to be more complete.</Text>
+        </View>
+        <TextField
+          label="Professional title"
+          value={values.professionalTitle}
+          onChangeText={(professionalTitle) => updateField('professionalTitle', professionalTitle)}
+          placeholder="Consultant, Resident, GP dentist"
+        />
+        <TextField
+          label="Practice type"
+          value={values.practiceType}
+          onChangeText={(practiceType) => updateField('practiceType', practiceType)}
+          placeholder="Private clinic, hospital, university"
+        />
+        <TextField
+          label="Years of experience"
+          value={yearsText}
+          onChangeText={(nextValue) => {
+            setYearsText(nextValue);
+            setErrors((current) => ({ ...current, yearsOfExperience: undefined }));
+          }}
+          keyboardType="number-pad"
+          placeholder="5"
+          error={errors.yearsOfExperience}
+        />
+      </View>
       {error ? <ErrorState title={error.title} message={error.message} /> : null}
       <Button
         label="Complete profile"
@@ -189,45 +191,6 @@ export function GoogleProfileCompletion({
         }}
       />
       <Button label="Back" variant="ghost" onPress={onCancel} />
-
-      <Modal
-        visible={countryPickerOpen}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setCountryPickerOpen(false)}
-      >
-        <View style={styles.countryModalBackdrop}>
-          <View style={styles.countryModal}>
-            <View style={styles.countryModalHeader}>
-              <Text style={styles.countryModalTitle}>Country code</Text>
-              <Button label="Close" variant="ghost" size="sm" onPress={() => setCountryPickerOpen(false)} />
-            </View>
-            <ScrollView contentContainerStyle={styles.countryList}>
-              {countryDialCodes.map((option) => (
-                <Pressable
-                  key={`${option.country}-${option.code}`}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${option.country} ${option.code}`}
-                  onPress={() => {
-                    setCountry(option);
-                    setCountryPickerOpen(false);
-                  }}
-                  style={[
-                    styles.countryOption,
-                    option.country === country.country && option.code === country.code
-                      ? styles.countryOptionSelected
-                      : null,
-                  ]}
-                >
-                  <Text style={styles.countryFlag}>{option.flag}</Text>
-                  <Text style={styles.countryOptionText}>{option.country}</Text>
-                  <Text style={styles.countryOptionCode}>{option.code}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -242,92 +205,36 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent.primary + '16',
     borderRadius: 18,
     padding: spacing.md,
+    gap: spacing.xxs,
+  },
+  noticeTitle: {
+    ...textStyles.label,
+    color: colors.accent.primary,
   },
   noticeText: {
+    ...textStyles.body,
+    color: colors.text.primary,
+  },
+  noticeHint: {
     ...textStyles.caption,
     color: colors.text.secondary,
   },
-  phoneGroup: {
-    gap: spacing.xs,
-  },
-  phoneLabel: {
-    ...textStyles.label,
-    color: colors.text.primary,
-  },
-  phoneRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-  },
-  countryButton: {
-    minHeight: 54,
-    minWidth: 112,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
+  section: {
+    gap: spacing.md,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.border.default,
-    backgroundColor: colors.surface.glass,
-    paddingHorizontal: spacing.sm,
-  },
-  countryFlag: {
-    fontSize: 20,
-  },
-  countryCode: {
-    ...textStyles.label,
-    color: colors.text.primary,
-  },
-  phoneInput: {
-    flex: 1,
-  },
-  countryModalBackdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(2, 6, 23, 0.72)',
-  },
-  countryModal: {
-    maxHeight: '78%',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    backgroundColor: colors.background.raised,
+    backgroundColor: colors.surface.raised,
     padding: spacing.md,
   },
-  countryModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
+  sectionHeader: {
+    gap: spacing.xxs,
   },
-  countryModalTitle: {
-    ...textStyles.heading,
-    color: colors.text.primary,
-  },
-  countryList: {
-    gap: spacing.xs,
-    paddingVertical: spacing.md,
-  },
-  countryOption: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    borderRadius: 14,
-    paddingHorizontal: spacing.md,
-  },
-  countryOptionSelected: {
-    backgroundColor: colors.accent.primary + '22',
-  },
-  countryOptionText: {
-    ...textStyles.body,
-    flex: 1,
-    color: colors.text.primary,
-  },
-  countryOptionCode: {
+  sectionTitle: {
     ...textStyles.label,
+  },
+  sectionHint: {
+    ...textStyles.caption,
     color: colors.text.secondary,
   },
 });

@@ -205,7 +205,7 @@ export default function AdminCertificatesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-start gap-2">
-                      <Award className="mt-0.5 h-4 w-4 text-cyan" />
+                      <Award className="mt-0.5 h-4 w-4 text-gold" />
                       <div>
                         <p className="font-medium text-text-primary">{certificate.sourceTitle}</p>
                         <p className="text-xs capitalize text-text-muted">{certificate.sourceType}</p>

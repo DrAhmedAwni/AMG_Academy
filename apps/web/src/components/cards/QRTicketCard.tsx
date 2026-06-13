@@ -28,22 +28,22 @@ export function QRTicketCard({
   const qrValue = ticket.qrPayload ?? `${ticket.id}:${ticket.fallbackCode}`;
 
   return (
-    <Card variant="glass" className="overflow-hidden">
+    <Card variant="default" className="overflow-hidden">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-        <div className="flex h-[174px] w-[174px] shrink-0 items-center justify-center rounded-3xl border border-cyan/20 bg-white p-3 shadow-glow-sm">
+        <div className="flex h-[174px] w-[174px] shrink-0 items-center justify-center rounded-3xl border border-gold/15 bg-white p-3 shadow-glow-sm">
           {canDisplayQr ? (
             <QRCodeSVG value={qrValue} size={148} level="M" />
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl bg-surface-main text-center">
-              <Lock className="h-7 w-7 text-text-muted" />
-              <span className="px-3 text-xs font-semibold text-text-muted">QR unavailable</span>
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl bg-[#f5f5f5] text-center">
+              <Lock className="h-7 w-7 text-gray-400" />
+              <span className="px-3 text-xs font-semibold text-gray-500">QR unavailable</span>
             </div>
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-cyan/10 text-cyan">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-gold/10 text-gold">
                 <QrCode className="h-5 w-5" />
               </span>
               <StatusBadge status={ticket.status} />
@@ -65,14 +65,14 @@ export function QRTicketCard({
             {ticket.event.title}
           </h3>
           <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-text-secondary">
-            <CalendarDays className="h-4 w-4 text-cyan" />
+            <CalendarDays className="h-4 w-4 text-gold" />
             {new Date(ticket.event.startDate).toLocaleDateString()}
           </p>
           <p className="mt-4 text-xs leading-relaxed text-text-muted">
             Present this QR ticket at event check-in. If scanning fails, staff can
             use the fallback code below.
           </p>
-          <p className="mt-3 rounded-2xl border border-surface-border/50 bg-surface-main/50 px-3 py-2 text-xs text-text-muted">
+          <p className="mt-3 rounded-2xl border border-surface-border bg-surface-main/60 px-3 py-2 text-xs text-text-muted">
             Fallback code: <span className="font-mono text-text-primary">{ticket.fallbackCode}</span>
           </p>
         </div>

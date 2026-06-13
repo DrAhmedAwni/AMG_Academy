@@ -6,6 +6,7 @@ import { Screen } from '../../src/components/layout/Screen';
 import { Button, GlassCard, PasswordToggle, TextField } from '../../src/components/ui';
 import { ErrorState } from '../../src/components/states/ErrorState';
 import { SuccessState } from '../../src/components/states/SuccessState';
+import { PhoneField } from '../../src/components/forms/PhoneField';
 import { useRegisterMutation } from '../../src/features/auth/auth.hooks';
 import type { AuthFormErrors, RegisterFormValues } from '../../src/features/auth/auth.types';
 import { useGoogleAuth } from '../../src/features/auth/googleAuth';
@@ -54,7 +55,15 @@ export default function RegisterScreen() {
 
   const submit = async () => {
     const payload: RegisterFormValues = {
-      ...values,
+      name: values.name.trim(),
+      email: values.email.trim(),
+      password: values.password,
+      phone: values.phone?.trim() || undefined,
+      specialty: values.specialty?.trim() || undefined,
+      clinic: values.clinic?.trim() || undefined,
+      city: values.city?.trim() || undefined,
+      professionalTitle: values.professionalTitle?.trim() || undefined,
+      practiceType: values.practiceType?.trim() || undefined,
       yearsOfExperience: yearsText.trim() ? Number(yearsText.trim()) : undefined,
     };
     const nextErrors = getRegisterErrors(payload);
@@ -64,6 +73,14 @@ export default function RegisterScreen() {
     }
 
     await registerMutation.mutateAsync(payload);
+  };
+
+  const updateField = (field: keyof RegisterFormValues, value: string) => {
+    if (registerMutation.error) {
+      registerMutation.reset();
+    }
+    setValues((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
   if (registerMutation.isSuccess) {
@@ -84,10 +101,15 @@ export default function RegisterScreen() {
   return (
     <Screen contentStyle={styles.screen}>
       <View style={styles.hero}>
-        <Image source={require('../../assets/logo-horizontal.png')} style={styles.logo} resizeMode="contain" />
+        <Image
+          source={require('../../assets/logo-horizontal.png')}
+          style={styles.logo}
+          resizeMode="contain"
+          accessibilityLabel="AMG Academy"
+        />
         <Text style={styles.title}>Create account</Text>
         <Text style={styles.subtitle}>
-          Join AMG Academy with your professional profile.
+          Start with your sign-in details. Professional information can help AMG prepare event and course records.
         </Text>
       </View>
 
@@ -109,28 +131,31 @@ export default function RegisterScreen() {
         <TextField
           label="Full name"
           value={values.name}
-          onChangeText={(name) => setValues((current) => ({ ...current, name }))}
+          onChangeText={(name) => updateField('name', name)}
           textContentType="name"
           error={errors.name}
+          required
         />
         <TextField
           label="Email"
           value={values.email}
-          onChangeText={(email) => setValues((current) => ({ ...current, email }))}
+          onChangeText={(email) => updateField('email', email)}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
           textContentType="emailAddress"
           error={errors.email}
+          required
         />
         <TextField
           label="Password"
           value={values.password}
-          onChangeText={(password) => setValues((current) => ({ ...current, password }))}
+          onChangeText={(password) => updateField('password', password)}
           secureTextEntry={!showPassword}
           textContentType="newPassword"
           error={errors.password}
           helperText="Use at least 8 characters with uppercase, lowercase, and a number."
+          required
           rightAction={
             <PasswordToggle
               visible={showPassword}
@@ -138,37 +163,42 @@ export default function RegisterScreen() {
             />
           }
         />
-        <TextField
-          label="Phone"
-          value={values.phone}
-          onChangeText={(phone) => setValues((current) => ({ ...current, phone }))}
-          keyboardType="phone-pad"
+        <PhoneField
+          value={values.phone ?? ''}
+          onChangeText={(phone) => updateField('phone', phone)}
           error={errors.phone}
         />
+        <View style={styles.optionalSection}>
+          <Text style={styles.sectionTitle}>Professional details</Text>
+          <Text style={styles.sectionHint}>Optional now. Add them when you want AMG event and course records to be more complete.</Text>
+        </View>
         <TextField
           label="Specialty"
           value={values.specialty}
-          onChangeText={(specialty) => setValues((current) => ({ ...current, specialty }))}
+          onChangeText={(specialty) => updateField('specialty', specialty)}
           error={errors.specialty}
         />
         <TextField
           label="Professional title"
           value={values.professionalTitle}
-          onChangeText={(professionalTitle) => setValues((current) => ({ ...current, professionalTitle }))}
+          onChangeText={(professionalTitle) => updateField('professionalTitle', professionalTitle)}
           placeholder="e.g., Consultant, Resident, GP dentist"
           error={errors.professionalTitle}
         />
         <TextField
           label="Practice type"
           value={values.practiceType}
-          onChangeText={(practiceType) => setValues((current) => ({ ...current, practiceType }))}
+          onChangeText={(practiceType) => updateField('practiceType', practiceType)}
           placeholder="e.g., Private clinic, hospital, university"
           error={errors.practiceType}
         />
         <TextField
           label="Years of experience"
           value={yearsText}
-          onChangeText={setYearsText}
+          onChangeText={(nextValue) => {
+            setYearsText(nextValue);
+            setErrors((current) => ({ ...current, yearsOfExperience: undefined }));
+          }}
           keyboardType="number-pad"
           placeholder="e.g., 5"
           error={errors.yearsOfExperience}
@@ -176,13 +206,13 @@ export default function RegisterScreen() {
         <TextField
           label="Clinic"
           value={values.clinic}
-          onChangeText={(clinic) => setValues((current) => ({ ...current, clinic }))}
+          onChangeText={(clinic) => updateField('clinic', clinic)}
           error={errors.clinic}
         />
         <TextField
           label="City"
           value={values.city}
-          onChangeText={(city) => setValues((current) => ({ ...current, city }))}
+          onChangeText={(city) => updateField('city', city)}
           error={errors.city}
         />
         {uiError ? <ErrorState title={uiError.title} message={uiError.message} /> : null}
@@ -225,6 +255,21 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     borderColor: colors.border.strong,
     padding: spacing.lg,
+  },
+  optionalSection: {
+    gap: spacing.xxs,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.surface.raised,
+    padding: spacing.md,
+  },
+  sectionTitle: {
+    ...textStyles.label,
+  },
+  sectionHint: {
+    ...textStyles.caption,
+    color: colors.text.secondary,
   },
   dividerRow: {
     flexDirection: 'row',

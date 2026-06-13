@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent.primary,
     shadowColor: colors.accent.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.26,
     shadowRadius: 12,
     elevation: 4,
   },

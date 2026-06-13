@@ -105,7 +105,7 @@ export default function AdminPaymentsPage() {
                   <td className="px-4 py-3 text-text-primary">
                     <Link
                       href={`/admin/payments/${payment.id}`}
-                      className="inline-flex items-center gap-1.5 text-cyan hover:underline"
+                      className="inline-flex items-center gap-1.5 text-gold hover:underline"
                     >
                       {payment.registration?.event?.title ?? 'N/A'}
                       <ExternalLink className="h-3 w-3" />

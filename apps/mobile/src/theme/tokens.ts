@@ -60,16 +60,16 @@ export const shadows = {
   } satisfies ViewStyle,
   card: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.24,
-    shadowRadius: 26,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.36,
+    shadowRadius: 18,
+    elevation: 4,
   } satisfies ViewStyle,
   soft: {
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 16,
+    shadowOpacity: 0.24,
+    shadowRadius: 12,
     elevation: 3,
   } satisfies ViewStyle,
 } as const;

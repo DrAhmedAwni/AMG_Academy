@@ -46,6 +46,14 @@ export default function ForgotPasswordScreen() {
     await forgotPasswordMutation.mutateAsync(values);
   };
 
+  const updateEmail = (email: string) => {
+    if (forgotPasswordMutation.error) {
+      forgotPasswordMutation.reset();
+    }
+    setValues({ email });
+    setErrors((current) => ({ ...current, email: undefined }));
+  };
+
   if (forgotPasswordMutation.isSuccess) {
     return (
       <Screen scroll={false}>
@@ -66,19 +74,20 @@ export default function ForgotPasswordScreen() {
       <View style={styles.hero}>
         <Text style={styles.eyebrow}>AMG Academy</Text>
         <Text style={styles.title}>Reset password</Text>
-        <Text style={styles.subtitle}>Enter your account email to request a reset link.</Text>
+        <Text style={styles.subtitle}>Enter the email connected to your AMG Academy account. If it matches, we will send a reset link.</Text>
       </View>
 
       <GlassCard style={styles.card}>
         <TextField
           label="Email"
           value={values.email}
-          onChangeText={(email) => setValues({ email })}
+          onChangeText={updateEmail}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
           textContentType="emailAddress"
           error={errors.email}
+          required
         />
         {uiError ? <ErrorState title={uiError.title} message={uiError.message} /> : null}
         <Button

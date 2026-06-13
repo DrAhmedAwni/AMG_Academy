@@ -18,12 +18,40 @@ export interface UiErrorState {
   retryable: boolean;
 }
 
+function getValidationIssues(error: unknown): Array<{ path?: unknown[]; message?: unknown }> | undefined {
+  if (typeof error !== 'object' || error === null || !('issues' in error)) {
+    return undefined;
+  }
+
+  const issues = (error as { issues?: unknown }).issues;
+  if (!Array.isArray(issues)) {
+    return undefined;
+  }
+
+  return issues.filter((issue): issue is { path?: unknown[]; message?: unknown } => (
+    typeof issue === 'object' &&
+    issue !== null &&
+    typeof (issue as { message?: unknown }).message === 'string'
+  ));
+}
+
 export function mapApiErrorToUi(error: unknown): UiErrorState {
   if (!(error instanceof ApiClientError)) {
+    const validationIssues = getValidationIssues(error);
+    if (validationIssues?.length) {
+      const firstIssue = validationIssues[0];
+      return {
+        kind: 'validation',
+        title: 'Check the form',
+        message: String(firstIssue?.message ?? 'Please check your details.'),
+        retryable: false,
+      };
+    }
+
     return {
       kind: 'unknown',
-      title: 'Something went wrong',
-      message: 'Please try again.',
+      title: 'Request not completed',
+      message: error instanceof Error ? error.message : 'Please try again or contact AMG Academy support if it keeps happening.',
       retryable: true,
     };
   }
@@ -111,8 +139,8 @@ export function mapApiErrorToUi(error: unknown): UiErrorState {
 
   return {
     kind: 'unknown',
-    title: 'Something went wrong',
-    message: error.message,
+    title: 'Request not completed',
+    message: error.message || 'Please try again or contact AMG Academy support if it keeps happening.',
     retryable: true,
   };
 }

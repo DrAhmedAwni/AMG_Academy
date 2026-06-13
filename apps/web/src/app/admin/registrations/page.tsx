@@ -113,14 +113,14 @@ export default function AdminRegistrationsPage() {
         title="Registrations"
         description="Review attendee requests, payment status, and QR generation workflow."
         actions={
-          <Button variant="glass" size="sm" onClick={() => refetch()}>
+          <Button variant="secondary" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
         }
       />
 
-      <Card variant="glass" className="space-y-4">
+      <Card variant="default" className="space-y-4">
         <Input
           label="Search registrations"
           placeholder="Name, email, or event"
@@ -163,7 +163,7 @@ export default function AdminRegistrationsPage() {
             </thead>
             <tbody className="divide-y divide-surface-border/25">
               {filteredRegistrations.map((reg) => (
-                <tr key={reg.id} className="transition-colors hover:bg-cyan/[0.035]">
+                <tr key={reg.id} className="transition-colors hover:bg-gold/[0.035]">
                   <td className="px-4 py-3 text-text-primary">{reg.user?.name ?? 'Unknown user'}</td>
                   <td className="px-4 py-3">{reg.event?.title ?? 'Unknown event'}</td>
                   <td className="px-4 py-3">

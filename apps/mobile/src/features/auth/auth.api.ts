@@ -6,7 +6,7 @@ import {
   googleCompleteProfileSchema,
   registerSchema,
 } from '@amg/shared';
-import { apiRequest } from '../../lib/api';
+import { ApiClientError, apiRequest } from '../../lib/api';
 import type { MobileAuthResponse, MobileAuthTokens } from '../../types/api';
 import type {
   ForgotPasswordFormValues,
@@ -56,9 +56,23 @@ export async function loginWithGoogle(idToken: string) {
 }
 
 export async function completeGoogleProfile(values: GoogleProfileCompletionValues) {
+  const payload = googleCompleteProfileSchema.safeParse({ ...values, client: mobileClient });
+
+  if (!payload.success) {
+    throw new ApiClientError({
+      code: 'VALIDATION_ERROR',
+      message: payload.error.issues[0]?.message ?? 'Please check your profile details.',
+      status: 400,
+      details: payload.error.issues.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      })),
+    });
+  }
+
   return apiRequest<MobileAuthResponse>('/auth/google/complete-profile', {
     method: 'POST',
-    body: googleCompleteProfileSchema.parse({ ...values, client: mobileClient }),
+    body: payload.data,
     authFailureMode: 'ignore',
   });
 }

@@ -66,7 +66,7 @@ export default function MyCoursesPage() {
             <Link
               key={enrollment.id}
               href={`/courses/${enrollment.course.slug}`}
-              className="premium-ring group flex flex-col gap-3 rounded-3xl border border-surface-border/60 bg-surface-card/85 p-4 transition-all duration-300 hover:border-cyan/40 hover:shadow-glow-sm"
+              className="gold-ring group flex flex-col gap-3 rounded-3xl border border-surface-border/60 bg-surface-card/85 p-4 transition-all duration-300 hover:border-gold/40 hover:shadow-glow-sm"
             >
               <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-surface-elevated">
                 {enrollment.course.thumbnailUrl ? (
@@ -85,7 +85,7 @@ export default function MyCoursesPage() {
                   </div>
                 )}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-cyan text-surface-main shadow-glow">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gold text-surface-main shadow-glow">
                     <Play className="h-7 w-7" />
                   </span>
                 </div>
@@ -98,7 +98,7 @@ export default function MyCoursesPage() {
                   <StatusBadge status={enrollment.paymentStatus} />
                   {enrollment.paymentStatus === 'pending' && enrollment.paymentId && (
                     <Button
-                      variant="glow"
+                      variant="gold"
                       size="sm"
                       onClick={(e) => {
                         e.preventDefault();
@@ -130,7 +130,7 @@ export default function MyCoursesPage() {
 
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
                   <div
-                    className="h-full rounded-full bg-cyan transition-all"
+                    className="h-full rounded-full bg-gold transition-all"
                     style={{ width: `${enrollment.progressPercent}%` }}
                   />
                 </div>

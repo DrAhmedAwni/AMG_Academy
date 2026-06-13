@@ -234,7 +234,7 @@ export default function CourseDetailPage() {
                   <span className="font-medium text-text-primary">0%</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-surface-elevated">
-                  <div className="h-full w-0 rounded-full bg-cyan transition-all" />
+                  <div className="h-full w-0 rounded-full bg-gold transition-all" />
                 </div>
               </div>
             )}
@@ -243,7 +243,7 @@ export default function CourseDetailPage() {
             {course.isEnrolled && course.paymentStatus === 'pending' ? (
               <Button
                 className="w-full"
-                variant="glow"
+                variant="gold"
                 size="lg"
                 onClick={() => router.push(`/payment/${course.paymentId}`)}
               >
@@ -252,7 +252,7 @@ export default function CourseDetailPage() {
             ) : course.isEnrolled ? (
               <Button
                 className="w-full"
-                variant="glow"
+                variant="gold"
                 size="lg"
                 onClick={() => {
                   if (course.lessons.length > 0) {
@@ -269,7 +269,7 @@ export default function CourseDetailPage() {
             ) : (
               <Button
                 className="w-full"
-                variant="glow"
+                variant="gold"
                 size="lg"
                 onClick={() => enrollMutation.mutate(course.id)}
                 disabled={enrollMutation.isPending}

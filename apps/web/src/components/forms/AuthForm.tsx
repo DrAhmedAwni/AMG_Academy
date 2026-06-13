@@ -9,6 +9,7 @@ type AuthField<TFieldValues extends FieldValues> = {
   type?: React.InputHTMLAttributes<HTMLInputElement>['type'];
   placeholder?: string;
   autoComplete?: string;
+  required?: boolean;
 };
 
 function getErrorMessage(error: unknown) {
@@ -46,6 +47,7 @@ export function AuthForm<TFieldValues extends FieldValues>({
           label={field.label}
           placeholder={field.placeholder}
           autoComplete={field.autoComplete}
+          required={field.required}
           error={getErrorMessage(form.formState.errors[field.name])}
           {...form.register(field.name)}
         />

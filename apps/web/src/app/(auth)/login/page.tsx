@@ -120,12 +120,13 @@ export default function LoginPage({
       <AuthForm
         form={form}
         fields={[
-          { name: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
+          { name: 'email', label: 'Email', type: 'email', autoComplete: 'email', required: true },
           {
             name: 'password',
             label: 'Password',
             type: 'password',
             autoComplete: 'current-password',
+            required: true,
           },
         ]}
         submitLabel="Sign in"

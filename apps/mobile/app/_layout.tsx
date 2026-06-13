@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatusBar, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { StatusBar, StyleSheet, View, ActivityIndicator, useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import * as WebBrowser from 'expo-web-browser';
@@ -24,6 +24,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
     Montserrat_500Medium,
@@ -46,7 +47,10 @@ export default function RootLayout() {
           <AuthProvider>
             <GoogleAuthProvider>
               <View style={styles.root}>
-                <StatusBar barStyle="light-content" backgroundColor={colors.background.main} />
+                <StatusBar
+                  barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+                  backgroundColor={colors.background.main}
+                />
                 <Stack
                   screenOptions={{
                     headerShown: false,

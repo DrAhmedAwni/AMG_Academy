@@ -10,7 +10,6 @@ export interface GlassCardProps {
 export function GlassCard({ children, style }: GlassCardProps) {
   return (
     <View style={[styles.card, style]}>
-      <View pointerEvents="none" style={styles.highlight} />
       {children}
     </View>
   );
@@ -26,13 +25,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface.glass,
     padding: spacing.lg,
     ...shadows.card,
-  },
-  highlight: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    left: 0,
-    height: 1,
-    backgroundColor: colors.border.highlight,
   },
 });

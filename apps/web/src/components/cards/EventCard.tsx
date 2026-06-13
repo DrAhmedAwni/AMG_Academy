@@ -47,7 +47,7 @@ export function EventCard({ event }: EventCardProps) {
       href={`/events/${event.slug}`}
       className="group block"
     >
-      <div className="premium-ring overflow-hidden rounded-3xl border border-surface-border/60 bg-surface-card/85 transition-all duration-300 hover:border-cyan/35 hover:shadow-glow-sm">
+      <div className="gold-ring overflow-hidden rounded-3xl border border-surface-border bg-surface-card transition-all duration-300 hover:border-gold/20 hover:shadow-glow-sm">
         {/* Thumbnail */}
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-elevated">
           {event.thumbnailUrl ? (
@@ -56,13 +56,14 @@ export function EventCard({ event }: EventCardProps) {
               alt={event.title}
               fill
               loading="lazy"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               placeholder="blur"
               blurDataURL={getBlurDataUrl(640, 360)}
               className="object-contain transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-elevated to-surface-main">
-              <CalendarDays className="h-12 w-12 text-text-muted/30" />
+              <CalendarDays className="h-12 w-12 text-text-muted/20" />
             </div>
           )}
           {/* Top badges */}
@@ -89,7 +90,7 @@ export function EventCard({ event }: EventCardProps) {
 
         {/* Content */}
         <div className="space-y-3 p-4">
-          <h3 className="font-heading text-base font-semibold text-text-primary line-clamp-1 group-hover:text-cyan-light transition-colors">
+          <h3 className="font-heading text-base font-semibold text-text-primary line-clamp-1 group-hover:text-gold-light transition-colors">
             {event.title}
           </h3>
 
@@ -113,7 +114,7 @@ export function EventCard({ event }: EventCardProps) {
           </div>
 
           {/* Spots + CTA */}
-          <div className="flex items-center justify-between border-t border-surface-border/20 pt-3">
+          <div className="flex items-center justify-between border-t border-surface-border pt-3">
             <div className="flex items-center gap-2">
               <Users className="h-3.5 w-3.5 text-text-muted" />
               <span className="text-xs text-text-muted">
@@ -141,7 +142,7 @@ export function EventCard({ event }: EventCardProps) {
                 </div>
               )}
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full border border-cyan/25 bg-cyan/10 px-2.5 py-1 text-xs font-bold text-cyan-light transition-all group-hover:border-cyan/50 group-hover:shadow-glow-sm">
+            <span className="inline-flex items-center gap-1 rounded-full border border-gold/20 bg-gold/10 px-2.5 py-1 text-xs font-bold text-gold-light transition-all group-hover:border-gold/40 group-hover:shadow-glow-sm">
               {ctaLabel}
               <ArrowRight className="h-3 w-3" />
             </span>

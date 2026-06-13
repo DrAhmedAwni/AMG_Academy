@@ -15,10 +15,10 @@ export function FilterPill({
     <button
       type="button"
       className={cn(
-        'inline-flex min-h-9 items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all duration-200',
+        'inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-200',
         active
-          ? 'border-cyan/50 bg-cyan/10 text-cyan-light shadow-glow-sm'
-          : 'border-surface-border/60 bg-surface-card/60 text-text-muted hover:border-surface-strong hover:text-text-secondary',
+          ? 'border-gold/40 bg-gold/10 text-gold-light shadow-glow-sm'
+          : 'border-surface-border bg-surface-card text-text-muted hover:border-surface-strong hover:text-text-secondary',
         className,
       )}
       {...props}
@@ -28,7 +28,7 @@ export function FilterPill({
         <span
           className={cn(
             'rounded-full px-1.5 py-0.5 text-[10px]',
-            active ? 'bg-cyan/20 text-cyan-light' : 'bg-surface-elevated text-text-muted',
+            active ? 'bg-gold/20 text-gold-light' : 'bg-surface-elevated text-text-muted',
           )}
         >
           {count}

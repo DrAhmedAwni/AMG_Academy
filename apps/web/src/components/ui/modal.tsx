@@ -81,7 +81,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -95,12 +95,12 @@ export function Modal({
         aria-describedby={description ? 'modal-description' : undefined}
         tabIndex={-1}
         className={cn(
-          'glass-strong w-full rounded-3xl animate-fade-in',
+          'surface-elevated w-full rounded-3xl animate-fade-in',
           'focus-visible:outline-none',
           maxWidthClasses[maxWidth],
         )}
       >
-        <div className="flex items-start justify-between border-b border-surface-border/50 px-6 py-4">
+        <div className="flex items-start justify-between border-b border-surface-border px-6 py-4">
           <div>
             <h2 id="modal-title" className="font-heading text-lg font-semibold text-text-primary">
               {title}

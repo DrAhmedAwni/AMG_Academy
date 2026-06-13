@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(84, 217, 232, 0.28)',
+    borderColor: 'rgba(212, 175, 55, 0.36)',
     backgroundColor: colors.interactive.pressed,
   },
   title: {

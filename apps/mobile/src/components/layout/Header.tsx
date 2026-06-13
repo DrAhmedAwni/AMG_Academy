@@ -43,8 +43,8 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   brandMark: {
-    width: 18,
-    height: 3,
+    width: 22,
+    height: 4,
     borderRadius: radius.pill,
     backgroundColor: colors.accent.gold,
   },
@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
   subtitle: {
     ...textStyles.body,
     maxWidth: 520,
+    color: colors.text.secondary,
   },
   action: {
     flexShrink: 0,

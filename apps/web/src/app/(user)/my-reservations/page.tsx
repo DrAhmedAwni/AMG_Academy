@@ -50,14 +50,14 @@ export default function MyReservationsPage() {
       ) : (
         <div className="grid gap-4">
           {registrations.map((reg) => (
-            <Card key={reg.id} variant="glass">
+            <Card key={reg.id} variant="default">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h3 className="font-heading text-lg font-semibold text-text-primary">
                     {reg.event.title}
                   </h3>
                   <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-text-secondary">
-                    <CalendarDays className="h-4 w-4 text-cyan" />
+                    <CalendarDays className="h-4 w-4 text-gold" />
                     {new Date(reg.event.startDate).toLocaleDateString()}
                   </p>
                 </div>
@@ -66,7 +66,7 @@ export default function MyReservationsPage() {
                   <StatusBadge status={reg.paymentStatus} />
                   <StatusBadge status={reg.qrTicketStatus} />
                   {reg.paymentStatus === 'pending' && reg.paymentId && (
-                    <Button variant="glow" size="sm" onClick={() => router.push(`/payment/${reg.paymentId}`)}>
+                    <Button variant="gold" size="sm" onClick={() => router.push(`/payment/${reg.paymentId}`)}>
                       <CreditCard className="h-4 w-4" />
                       Pay Now
                     </Button>

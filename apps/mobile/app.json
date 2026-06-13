@@ -9,7 +9,7 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -18,14 +18,15 @@
       "bundleIdentifier": "com.amgacademy.mobile",
       "infoPlist": {
         "NSCameraUsageDescription": "AMG Academy uses the camera so authorized scanner staff can validate event QR tickets.",
-        "NSUserNotificationsUsageDescription": "AMG Academy can send event, course, ticket, and announcement updates."
+        "NSUserNotificationsUsageDescription": "AMG Academy can send event, course, ticket, and announcement updates.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.amgacademy.mobile",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#020617"
+        "backgroundColor": "#050505"
       },
       "permissions": [
         "CAMERA",
@@ -47,7 +48,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#54D9E8"
+          "color": "#D4AF37"
         }
       ]
     ],
@@ -60,7 +61,7 @@
       "webUrl": "$EXPO_PUBLIC_WEB_URL",
       "router": {},
       "eas": {
-        "projectId": "7d5bed48-7356-4242-9c82-6221a11038d3"
+        "projectId": "9d40f591-7a2f-4bbf-b343-d503f447abb9"
       }
     }
   }

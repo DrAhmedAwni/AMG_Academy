@@ -45,20 +45,13 @@ export function UserLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-main text-text-primary">
-      {/* Desktop header */}
-      <header className="sticky top-0 z-20 hidden border-b border-surface-border/45 bg-surface-card/80 shadow-card backdrop-blur-xl md:block">
+      {/* Desktop & tablet header */}
+      <header className="sticky top-0 z-20 hidden border-b border-surface-border bg-surface-card/95 shadow-card backdrop-blur-xl sm:block">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <div className="flex items-center gap-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
-                AMG Academy
-              </p>
-              <h1 className="font-heading text-lg font-semibold">
-                {title ? (
-                  <span className="text-gradient">{title}</span>
-                ) : (
-                  <span className="text-gradient">Dashboard</span>
-                )}
+              <h1 className="font-heading text-lg font-semibold text-text-primary">
+                {title ?? 'Dashboard'}
               </h1>
             </div>
           </div>
@@ -71,9 +64,9 @@ export function UserLayout({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200',
+                      'flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-all duration-200',
                       isActive
-                        ? 'bg-cyan/10 text-cyan-light shadow-glow-sm ring-1 ring-cyan/15'
+                        ? 'bg-gold/10 text-gold shadow-glow-sm ring-1 ring-gold/15'
                         : 'text-text-secondary hover:bg-surface-elevated/70 hover:text-text-primary',
                     )}
                   >
@@ -83,7 +76,7 @@ export function UserLayout({
                 );
               })}
             </nav>
-            <div className="ml-2 flex items-center gap-1.5 pl-2 border-l border-surface-border/30">
+            <div className="ml-2 flex items-center gap-1.5 pl-2 border-l border-surface-border">
               <NotificationBadgeSlot />
               <button
                 onClick={() => logout()}
@@ -98,12 +91,9 @@ export function UserLayout({
       </header>
 
       {/* Mobile header */}
-      <header className="sticky top-0 z-20 border-b border-surface-border/45 bg-surface-card/85 px-4 py-3 shadow-card backdrop-blur-xl md:hidden">
+      <header className="sticky top-0 z-20 border-b border-surface-border bg-surface-card/90 px-4 py-3 shadow-card backdrop-blur-xl sm:hidden">
         <div className="flex min-w-0 items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
-              AMG Academy
-            </p>
             <p className="truncate text-sm font-semibold text-text-primary">
               {title ?? 'Dashboard'}
             </p>
@@ -122,12 +112,12 @@ export function UserLayout({
       </header>
 
       {/* Main content */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28 md:pb-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28 sm:pb-6">
         {children}
       </main>
 
-      {/* Desktop footer */}
-      <footer className="hidden border-t border-surface-border/30 bg-surface-card/55 px-6 py-4 md:block">
+      {/* Desktop & tablet footer */}
+      <footer className="hidden border-t border-surface-border bg-surface-card/55 px-6 py-4 sm:block">
         <div className="mx-auto flex max-w-6xl items-center justify-between text-xs text-text-muted">
           <span>AMG Academy. All rights reserved.</span>
           <div className="flex gap-6">
@@ -140,18 +130,18 @@ export function UserLayout({
         </div>
       </footer>
 
-      {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-surface-border/45 bg-surface-card/95 px-2 pt-2 shadow-elevated backdrop-blur-xl md:hidden">
-        <div className="grid grid-cols-5 items-stretch gap-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
-          {navItems.slice(0, 5).map((item) => {
-            const isActive = pathname === item.href;
+      {/* Mobile & tablet bottom nav */}
+      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-surface-border bg-surface-card/95 px-2 pt-2 shadow-elevated backdrop-blur-xl sm:hidden">
+        <div className="flex items-stretch gap-0.5 overflow-x-auto pb-[calc(0.5rem+env(safe-area-inset-bottom))] scrollbar-hide">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-center transition-all duration-200',
-                  isActive ? 'bg-cyan/10 text-cyan-light' : 'text-text-muted',
+                  'flex min-h-14 min-w-[52px] flex-shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 text-center transition-all duration-200',
+                  isActive ? 'bg-gold/10 text-gold' : 'text-text-muted',
                 )}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
@@ -159,7 +149,7 @@ export function UserLayout({
                   {item.mobileLabel}
                 </span>
                 {isActive ? (
-                  <span className="h-0.5 w-4 rounded-full bg-cyan" />
+                  <span className="h-0.5 w-4 rounded-full bg-gold" />
                 ) : null}
               </Link>
             );

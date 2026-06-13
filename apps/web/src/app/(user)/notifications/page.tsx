@@ -82,29 +82,42 @@ export default function NotificationsPage() {
           {notifications.map((notification) => (
             <Card
               key={notification.id}
-              variant={notification.read ? 'default' : 'glass'}
-              className={`flex items-start gap-4 p-4 transition-colors ${
-                notification.read ? 'opacity-70' : 'border-l-4 border-l-cyan'
-              }`}
+              variant={notification.read ? 'default' : 'elevated'}
+              className={notification.read ? 'opacity-70' : ''}
             >
-              <div className="mt-1 flex-shrink-0">
-                <Bell className={`h-5 w-5 ${notification.read ? 'text-text-muted' : 'text-cyan'}`} />
+              <div className="flex items-start gap-4">
+                <div className="mt-1 flex-shrink-0">
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                      notification.read
+                        ? 'bg-surface-elevated text-text-muted'
+                        : 'bg-gold/10 text-gold'
+                    }`}
+                  >
+                    <Bell className="h-4 w-4" />
+                  </span>
+                </div>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-text-primary">{notification.title}</h3>
+                    {!notification.read && (
+                      <span className="h-2 w-2 rounded-full bg-gold" />
+                    )}
+                  </div>
+                  <p className="text-sm text-text-secondary">{notification.message}</p>
+                  <span className="text-xs text-text-muted">{new Date(notification.createdAt).toLocaleString()}</span>
+                </div>
+                {!notification.read && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => markAsRead.mutate(notification.id)}
+                    className="flex-shrink-0"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-              <div className="flex-1 space-y-1">
-                <h3 className="font-medium text-text-primary">{notification.title}</h3>
-                <p className="text-sm text-text-secondary">{notification.message}</p>
-                <span className="text-xs text-text-muted">{new Date(notification.createdAt).toLocaleString()}</span>
-              </div>
-              {!notification.read && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => markAsRead.mutate(notification.id)}
-                  className="flex-shrink-0"
-                >
-                  <Check className="h-4 w-4" />
-                </Button>
-              )}
             </Card>
           ))}
         </div>

@@ -5,10 +5,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string;
   error?: string;
   icon?: React.ReactNode;
+  required?: boolean;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, icon, id, ...props }, ref) => {
+  ({ className, label, error, icon, required, id, ...props }, ref) => {
     const fallbackId = React.useId();
     const inputId = id ?? fallbackId;
     const descriptionId = error ? `${inputId}-error` : undefined;
@@ -16,11 +17,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <label className="flex w-full flex-col gap-1.5" htmlFor={inputId}>
         {label ? (
-          <span className="text-sm font-medium text-text-secondary">{label}</span>
+          <span className="text-sm font-medium text-text-secondary">
+            {label}
+            {required ? <span className="ml-0.5 text-status-error">*</span> : null}
+          </span>
         ) : null}
         <div className="relative">
           {icon ? (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-text-muted">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-text-muted">
               {icon}
             </div>
           ) : null}
@@ -28,14 +32,15 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             aria-describedby={descriptionId}
+            aria-required={required}
             className={cn(
-              'h-10 w-full rounded-xl border bg-surface-card/90 px-3 text-sm text-text-primary shadow-sm',
-              'placeholder:text-text-muted/60',
-              'border-surface-border/70 focus:border-cyan/60 focus:outline-none focus:ring-2 focus:ring-cyan/20',
+              'h-[54px] w-full rounded-[18px] border bg-surface-card px-5 text-base text-text-primary shadow-sm',
+              'placeholder:text-text-muted',
+              'border-surface-border focus:border-gold/50 focus:outline-none focus:ring-2 focus:ring-gold/15',
               'transition-all duration-200',
               error &&
-                'border-status-error/50 focus:border-status-error/60 focus:ring-status-error/20',
-              icon && 'pl-10',
+                'border-status-error/50 focus:border-status-error/60 focus:ring-status-error/15',
+              icon && 'pl-12',
               className,
             )}
             {...props}

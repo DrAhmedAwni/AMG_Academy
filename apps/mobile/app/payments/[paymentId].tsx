@@ -82,8 +82,8 @@ export default function PaymentScreen() {
           <Badge
             label={payment.mockMode ? 'Checkout' : payment.provider}
             foreground={colors.accent.primary}
-            background="rgba(84, 217, 232, 0.14)"
-            border="rgba(84, 217, 232, 0.34)"
+            background={colors.accent.goldMuted}
+            border="rgba(212, 175, 55, 0.36)"
           />
         </View>
 

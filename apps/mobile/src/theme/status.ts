@@ -21,33 +21,33 @@ export interface StatusBadgeConfig {
 const toneColors: Record<StatusTone, Omit<StatusBadgeConfig, 'label' | 'tone'>> = {
   success: {
     foreground: colors.status.success,
-    background: 'rgba(34, 197, 94, 0.14)',
-    border: 'rgba(34, 197, 94, 0.34)',
+    background: 'rgba(94, 211, 138, 0.14)',
+    border: 'rgba(94, 211, 138, 0.34)',
   },
   warning: {
     foreground: colors.status.warning,
-    background: 'rgba(245, 158, 11, 0.14)',
-    border: 'rgba(245, 158, 11, 0.34)',
+    background: colors.accent.goldMuted,
+    border: 'rgba(212, 175, 55, 0.36)',
   },
   error: {
     foreground: colors.status.error,
-    background: 'rgba(239, 68, 68, 0.14)',
-    border: 'rgba(239, 68, 68, 0.34)',
+    background: 'rgba(255, 107, 122, 0.14)',
+    border: 'rgba(255, 107, 122, 0.34)',
   },
   info: {
     foreground: colors.status.info,
-    background: 'rgba(56, 189, 248, 0.14)',
-    border: 'rgba(56, 189, 248, 0.34)',
+    background: 'rgba(11, 58, 83, 0.58)',
+    border: 'rgba(121, 184, 216, 0.28)',
   },
   neutral: {
     foreground: colors.status.neutral,
-    background: 'rgba(148, 163, 184, 0.14)',
-    border: 'rgba(148, 163, 184, 0.3)',
+    background: 'rgba(209, 213, 219, 0.10)',
+    border: 'rgba(209, 213, 219, 0.20)',
   },
   accent: {
     foreground: colors.accent.primary,
-    background: 'rgba(84, 217, 232, 0.14)',
-    border: 'rgba(84, 217, 232, 0.34)',
+    background: colors.accent.goldMuted,
+    border: 'rgba(212, 175, 55, 0.36)',
   },
 };
 

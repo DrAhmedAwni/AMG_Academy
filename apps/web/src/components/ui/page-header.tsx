@@ -24,7 +24,7 @@ export function PageHeader({
       <div className="min-w-0">
         <h1 className="font-heading text-2xl font-bold tracking-normal text-text-primary sm:text-3xl">
           {title}
-          {accent ? <span className="text-gradient"> {accent}</span> : null}
+          {accent ? <span className="text-gold"> {accent}</span> : null}
         </h1>
         {description ? (
           <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-text-secondary">

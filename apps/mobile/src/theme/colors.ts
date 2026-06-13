@@ -1,49 +1,101 @@
-export const colors = {
+import { Appearance } from 'react-native';
+
+export const lightColors = {
   background: {
-    main: '#030712',
-    secondary: '#07131F',
-    raised: '#0B1628',
-    overlay: 'rgba(2, 6, 23, 0.86)',
+    main: '#050505',
+    secondary: '#0B0B0B',
+    raised: '#111111',
+    overlay: 'rgba(0, 0, 0, 0.78)',
   },
   surface: {
-    base: '#0D1829',
-    elevated: '#111D31',
-    raised: '#16243A',
-    glass: 'rgba(16, 29, 49, 0.86)',
-    muted: '#09111F',
-    soft: 'rgba(255,255,255,0.045)',
+    base: '#111111',
+    elevated: '#1B1B1B',
+    raised: '#171717',
+    glass: '#111111',
+    muted: '#242424',
+    soft: '#191919',
   },
   accent: {
-    primary: '#5EEAD4',
-    primaryHover: '#99F6E4',
-    glow: 'rgba(94, 234, 212, 0.22)',
-    gold: '#F8C66D',
-    goldMuted: 'rgba(248, 198, 109, 0.16)',
-    purple: '#A78BFA',
+    primary: '#D4AF37',
+    primaryHover: '#F1CF67',
+    glow: 'rgba(212, 175, 55, 0.22)',
+    gold: '#D4AF37',
+    goldMuted: 'rgba(212, 175, 55, 0.14)',
+    purple: '#0B3A53',
   },
   text: {
-    primary: '#F8FAFC',
-    secondary: '#B6C2D1',
-    muted: '#7B8AA0',
-    inverse: '#020617',
+    primary: '#FFFFFF',
+    secondary: '#D1D5DB',
+    muted: '#8F949D',
+    inverse: '#050505',
   },
   border: {
-    default: 'rgba(148, 163, 184, 0.18)',
-    strong: 'rgba(184, 203, 225, 0.28)',
-    focus: '#5EEAD4',
-    highlight: 'rgba(255, 255, 255, 0.12)',
+    default: '#2B2B2B',
+    strong: '#3B3B3B',
+    focus: '#D4AF37',
+    highlight: 'rgba(212, 175, 55, 0.28)',
   },
   status: {
-    success: '#34D399',
-    warning: '#F8C66D',
-    error: '#FB7185',
-    info: '#38BDF8',
-    neutral: '#A8B3C4',
+    success: '#5ED38A',
+    warning: '#D4AF37',
+    error: '#FF6B7A',
+    info: '#79B8D8',
+    neutral: '#D1D5DB',
   },
   interactive: {
-    pressed: 'rgba(94, 234, 212, 0.14)',
-    disabled: 'rgba(148, 163, 184, 0.28)',
+    pressed: 'rgba(212, 175, 55, 0.16)',
+    disabled: 'rgba(143, 148, 157, 0.24)',
   },
 } as const;
+
+export const darkColors = {
+  background: {
+    main: '#050505',
+    secondary: '#0B0B0B',
+    raised: '#111111',
+    overlay: 'rgba(0, 0, 0, 0.78)',
+  },
+  surface: {
+    base: '#111111',
+    elevated: '#1B1B1B',
+    raised: '#171717',
+    glass: '#111111',
+    muted: '#242424',
+    soft: '#191919',
+  },
+  accent: {
+    primary: '#D4AF37',
+    primaryHover: '#F1CF67',
+    glow: 'rgba(212, 175, 55, 0.22)',
+    gold: '#D4AF37',
+    goldMuted: 'rgba(212, 175, 55, 0.14)',
+    purple: '#0B3A53',
+  },
+  text: {
+    primary: '#FFFFFF',
+    secondary: '#D1D5DB',
+    muted: '#8F949D',
+    inverse: '#050505',
+  },
+  border: {
+    default: '#2B2B2B',
+    strong: '#3B3B3B',
+    focus: '#D4AF37',
+    highlight: 'rgba(212, 175, 55, 0.28)',
+  },
+  status: {
+    success: '#5ED38A',
+    warning: '#D4AF37',
+    error: '#FF6B7A',
+    info: '#79B8D8',
+    neutral: '#D1D5DB',
+  },
+  interactive: {
+    pressed: 'rgba(212, 175, 55, 0.16)',
+    disabled: 'rgba(143, 148, 157, 0.24)',
+  },
+} as const;
+
+export const colors = Appearance.getColorScheme() === 'dark' ? darkColors : lightColors;
 
 export type MobileColors = typeof colors;

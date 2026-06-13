@@ -58,15 +58,15 @@ export function CourseCard({ course, onPress }: CourseCardProps) {
             <Badge
               label={course.isFree ? 'Free' : 'Paid'}
               foreground={course.isFree ? colors.status.success : colors.accent.primary}
-              background={course.isFree ? 'rgba(34, 197, 94, 0.14)' : 'rgba(84, 217, 232, 0.14)'}
-              border={course.isFree ? 'rgba(34, 197, 94, 0.34)' : 'rgba(84, 217, 232, 0.34)'}
+              background={course.isFree ? 'rgba(94, 211, 138, 0.14)' : colors.accent.goldMuted}
+              border={course.isFree ? 'rgba(94, 211, 138, 0.34)' : 'rgba(212, 175, 55, 0.36)'}
             />
             {course.isEnrolled ? (
               <Badge
                 label="Enrolled"
                 foreground={colors.accent.primary}
-                background="rgba(84, 217, 232, 0.14)"
-                border="rgba(84, 217, 232, 0.34)"
+                background={colors.accent.goldMuted}
+                border="rgba(212, 175, 55, 0.36)"
               />
             ) : null}
             {course.paymentStatus ? (
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   kicker: {
     ...textStyles.caption,
-    color: colors.accent.primary,
+    color: colors.accent.gold,
     textTransform: 'uppercase',
   },
   title: {

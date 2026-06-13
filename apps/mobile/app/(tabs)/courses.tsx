@@ -210,8 +210,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    borderColor: 'rgba(248, 198, 109, 0.26)',
-    backgroundColor: 'rgba(31, 32, 43, 0.92)',
+    borderColor: 'rgba(212, 175, 55, 0.30)',
+    backgroundColor: colors.surface.base,
   },
   continueCopy: {
     flex: 1,

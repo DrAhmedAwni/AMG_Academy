@@ -152,6 +152,7 @@ export default function RegisterPage() {
         <Input
           label="Full name"
           autoComplete="name"
+          required
           error={getErrorMessage(form.formState.errors.name)}
           {...form.register('name')}
         />
@@ -159,6 +160,7 @@ export default function RegisterPage() {
           label="Email"
           type="email"
           autoComplete="email"
+          required
           error={getErrorMessage(form.formState.errors.email)}
           {...form.register('email')}
         />
@@ -166,6 +168,7 @@ export default function RegisterPage() {
           label="Password"
           type="password"
           autoComplete="new-password"
+          required
           error={getErrorMessage(form.formState.errors.password)}
           {...form.register('password')}
         />
@@ -180,7 +183,7 @@ export default function RegisterPage() {
               id="register-country-code"
               value={dialCode}
               onChange={(event) => setDialCode(event.target.value)}
-              className="h-10 w-full rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary shadow-sm transition-all duration-200 focus:border-cyan/60 focus:outline-none focus:ring-2 focus:ring-cyan/20"
+              className="h-10 w-full rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary shadow-sm transition-all duration-200 focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/15"
             >
               {countryDialCodes.map((country) => (
                 <option key={`${country.country}-${country.code}`} value={country.code}>

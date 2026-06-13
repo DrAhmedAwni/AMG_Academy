@@ -11,7 +11,7 @@ export interface SuccessStateProps {
 
 export function SuccessState({ title, message, action }: SuccessStateProps) {
   return (
-    <View accessibilityRole="summary" style={styles.container}>
+    <View accessible accessibilityLabel={`${title}. ${message}`} style={styles.container}>
       <Text style={styles.kicker}>Success</Text>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>

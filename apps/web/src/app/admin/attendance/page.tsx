@@ -41,14 +41,14 @@ export default function AdminAttendancePage() {
         accent="Logs"
         description="Review scanner activity, attendee check-ins, and event validation results."
         actions={
-          <Button variant="glass" size="sm" onClick={() => refetch()}>
+          <Button variant="secondary" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
         }
       />
 
-      <Card variant="glass">
+      <Card variant="default">
         <Input
           label="Event ID filter"
           placeholder="Optional event ID"
@@ -78,7 +78,7 @@ export default function AdminAttendancePage() {
             </thead>
             <tbody className="divide-y divide-surface-border/25">
               {records.map((record) => (
-                <tr key={record.id} className="transition-colors hover:bg-cyan/[0.035]">
+                <tr key={record.id} className="transition-colors hover:bg-gold/[0.035]">
                   <td className="px-4 py-3 text-text-primary">{record.event.title}</td>
                   <td className="px-4 py-3">{record.attendee?.name ?? 'N/A'}</td>
                   <td className="px-4 py-3">{record.scanner?.name ?? 'N/A'}</td>

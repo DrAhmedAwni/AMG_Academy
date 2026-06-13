@@ -85,8 +85,8 @@ export default function ProfileTab() {
             <Badge
               label={scannerAccess ? 'Scanner tools' : 'Learner account'}
               foreground={scannerAccess ? colors.accent.primary : colors.text.secondary}
-              background={scannerAccess ? 'rgba(84, 217, 232, 0.14)' : undefined}
-              border={scannerAccess ? 'rgba(84, 217, 232, 0.34)' : undefined}
+              background={scannerAccess ? colors.accent.goldMuted : undefined}
+              border={scannerAccess ? 'rgba(212, 175, 55, 0.36)' : undefined}
             />
           </View>
 
@@ -213,8 +213,8 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     gap: spacing.lg,
-    borderColor: 'rgba(248, 198, 109, 0.28)',
-    backgroundColor: 'rgba(28, 30, 43, 0.92)',
+    borderColor: 'rgba(212, 175, 55, 0.30)',
+    backgroundColor: colors.surface.base,
     padding: spacing.xl,
   },
   headerRow: {
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 34,
     borderWidth: 1,
-    borderColor: 'rgba(84, 217, 232, 0.34)',
+    borderColor: 'rgba(212, 175, 55, 0.36)',
     backgroundColor: colors.accent.goldMuted,
   },
   avatarText: {

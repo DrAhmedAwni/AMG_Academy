@@ -96,8 +96,8 @@ export default function AdminDashboardOverviewPage() {
       value: totalUsers,
       icon: Users,
       href: '/admin/users',
-      color: 'text-cyan',
-      bg: 'bg-cyan/10',
+      color: 'text-gold',
+      bg: 'bg-gold/10',
     },
     {
       label: 'Total Events',
@@ -130,7 +130,7 @@ export default function AdminDashboardOverviewPage() {
       {/* Header */}
       <div>
         <h1 className="font-heading text-2xl font-bold text-text-primary">
-          Admin <span className="text-gradient">Dashboard</span>
+          Admin <span className="text-gold">Dashboard</span>
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
           Operational overview across all AMG Academy workflows
@@ -141,7 +141,7 @@ export default function AdminDashboardOverviewPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
           <Link key={card.label} href={card.href} className="group block">
-            <Card variant="stat" className="group transition-all duration-200 hover:border-cyan/30 hover:shadow-glow-sm">
+            <Card variant="stat" className="group transition-all duration-200 hover:border-gold/30 hover:shadow-glow-sm">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm text-text-secondary">{card.label}</p>
@@ -153,7 +153,7 @@ export default function AdminDashboardOverviewPage() {
                   <card.icon className={cn('h-6 w-6', card.color)} />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-1 text-xs font-medium text-cyan-light opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="mt-4 flex items-center gap-1 text-xs font-medium text-gold-light opacity-0 transition-opacity group-hover:opacity-100">
                 View details
                 <ArrowRight className="h-3 w-3" />
               </div>
@@ -170,7 +170,7 @@ export default function AdminDashboardOverviewPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Link href="/admin/events/new">
             <Card variant="action" className="flex items-center gap-3 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan/10 text-cyan-light">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 text-gold-light">
                 <CalendarDays className="h-5 w-5" />
               </div>
               <div>
@@ -239,7 +239,7 @@ export default function AdminDashboardOverviewPage() {
                 key={item.id}
                 className={cn(
                   'flex items-start gap-3 rounded-lg border border-surface-border/20 p-3.5 transition-colors hover:bg-surface-elevated/30',
-                  idx === 0 && 'border-cyan/20 bg-cyan/[0.02]',
+                  idx === 0 && 'border-gold/20 bg-gold/[0.02]',
                 )}
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-elevated/60">

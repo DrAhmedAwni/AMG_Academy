@@ -53,7 +53,7 @@ export function FilterBar({
               <select
                 value={filter.value}
                 onChange={(event) => filter.onChange(event.target.value)}
-                className="h-9 rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary focus:border-cyan/50 focus:outline-none focus:ring-2 focus:ring-cyan/20"
+                className="h-9 rounded-xl border border-surface-border/70 bg-surface-card/90 px-3 text-sm text-text-primary focus:border-gold/50 focus:outline-none focus:ring-2 focus:ring-gold/20"
               >
                 {filter.options.map((option) => (
                   <option key={option.value} value={option.value}>
