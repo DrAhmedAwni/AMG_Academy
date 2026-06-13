@@ -21,6 +21,7 @@ module.exports = ({ config }) => {
     ...config,
     android: {
       ...config.android,
+       versionCode: 5,
       ...(hasGoogleServicesFile ? { googleServicesFile } : {}),
     },
     plugins: [
