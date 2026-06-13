@@ -39,6 +39,19 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#111111",
+          "dark": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#111111"
+          }
+        }
+      ],
+      [
         "expo-camera",
         {
           "cameraPermission": "AMG Academy uses the camera so authorized scanner staff can validate event QR tickets."

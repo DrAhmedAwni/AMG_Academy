@@ -12,6 +12,8 @@ ARG NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID
 ARG GOOGLE_OAUTH_WEB_CLIENT_ID
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/config/node_modules ./packages/config/node_modules
 COPY . .
 RUN NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID="${NEXT_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID:-$GOOGLE_OAUTH_WEB_CLIENT_ID}" npm run build:web
 

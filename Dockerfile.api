@@ -16,6 +16,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/config/node_modules ./packages/config/node_modules
 COPY . .
 
 RUN npm run prisma:generate -w @amg/api
