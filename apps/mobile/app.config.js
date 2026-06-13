@@ -24,18 +24,22 @@ module.exports = ({ config }) => {
       ...(hasGoogleServicesFile ? { googleServicesFile } : {}),
     },
     plugins: [
-      ...(config.plugins ?? []),
-      [
-        'expo-splash-screen',
-        {
-          backgroundColor: '#050505',
-          dark: {
-            backgroundColor: '#050505',
-          },
-        },
-      ],
-      ['./plugins/withAndroidCleartextTraffic', { enabled: allowLocalHttp }],
-    ],
+  ...(config.plugins ?? []),
+
+  'expo-font',
+  'expo-video',
+
+  [
+    'expo-splash-screen',
+    {
+      backgroundColor: '#050505',
+      dark: {
+        backgroundColor: '#050505',
+      },
+    },
+  ],
+  ['./plugins/withAndroidCleartextTraffic', { enabled: allowLocalHttp }],
+],
     extra: {
       ...config.extra,
       appEnv,
